@@ -51,3 +51,9 @@ Result: Provided the documented VS Code Publish to GitHub workflow, including br
 > check one more time
 
 Result: Checked the assignment repository again. No Git remote is configured; the local main branch is clean. No GitHub repository tools are exposed in this session. Remote access and publication remain unverified.
+
+## 7. Repository supplied
+
+> [https://github.com/ashish3542/Assignment-1-Game](https://github.com/ashish3542/Assignment-1-Game)
+
+The student also supplied a screenshot showing the empty private GitHub repository. Linked this local project to that repository using the origin remote. Upload verification follows separately.
