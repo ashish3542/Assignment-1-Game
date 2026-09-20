@@ -33,3 +33,9 @@ Result: Created this prompt record, a clearly marked run-instructions draft, and
 ## Continuing this record
 
 Append each future game-development prompt verbatim, excluding secrets, before implementing it. Record observed results and actual verification separately. Do not invent past prompts, testing, student reflections, or model identity. Keep this file in Git alongside the game so its history is retained.
+
+## 4. GitHub status and learning goals
+
+> do you have acess to my git hub now or not and what to understand from my project what its trying to teach me so even if you do the job whatever it is trying to teach me i need to learn
+
+Result: Confirmed the GitHub plugin is installed. This session exposes no GitHub repository tools, and the local project has no remote configured, so account access and push capability remain unverified. Explained the assignment's focus on directing AI, evaluating results, iterative refinement, reproducibility, and documenting genuine learning. The student explicitly wants to understand the work, even when AI implements it.
