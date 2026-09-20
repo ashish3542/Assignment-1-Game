@@ -57,3 +57,5 @@ Result: Checked the assignment repository again. No Git remote is configured; th
 > [https://github.com/ashish3542/Assignment-1-Game](https://github.com/ashish3542/Assignment-1-Game)
 
 The student also supplied a screenshot showing the empty private GitHub repository. Linked this local project to that repository using the origin remote. Upload verification follows separately.
+
+Upload result: The push could not connect to github.com on port 443 from this session. The remote is configured, but no successful upload or authentication has been verified. The student can run `git push -u origin main` from the project terminal in VS Code.
