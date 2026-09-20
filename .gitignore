@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.godot/
+dist/
+build/
+*.log
+*.mp4
+*.mov
+*.mkv
+Thumbs.db
+.DS_Store
