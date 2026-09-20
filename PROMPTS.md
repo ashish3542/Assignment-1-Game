@@ -45,3 +45,9 @@ Result: Confirmed the GitHub plugin is installed. This session exposes no GitHub
 > so how to connect to the github thrn
 
 Result: Provided the documented VS Code Publish to GitHub workflow, including browser sign-in, repository naming and visibility, and verifying publication. Publication and command-line push access are not yet confirmed.
+
+## 6. Recheck GitHub connection
+
+> check one more time
+
+Result: Checked the assignment repository again. No Git remote is configured; the local main branch is clean. No GitHub repository tools are exposed in this session. Remote access and publication remain unverified.
