@@ -20,4 +20,5 @@ VS Code was detected. The official OpenAI Codex extension was installed successf
 - [Run instructions — draft](RUN_GAME.md)
 - [Submission checklist and video outline](SUBMISSION_CHECKLIST.md)
 
-GitHub connection and remote publication are pending. No playable game or demo video exists yet.
+Repository: https://github.com/ashish3542/Assignment-1-Game. Local Git tracking shows the initial commits synchronized with origin/main. Direct GitHub access from the assistant session remains unavailable; subsequent updates may require a push from the user terminal. No playable game or demo video exists yet.
+

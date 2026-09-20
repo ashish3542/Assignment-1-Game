@@ -59,3 +59,13 @@ Result: Checked the assignment repository again. No Git remote is configured; th
 The student also supplied a screenshot showing the empty private GitHub repository. Linked this local project to that repository using the origin remote. Upload verification follows separately.
 
 Upload result: The push could not connect to github.com on port 443 from this session. The remote is configured, but no successful upload or authentication has been verified. The student can run `git push -u origin main` from the project terminal in VS Code.
+
+## 8. Sign-in troubleshooting screenshots
+
+The student supplied three screenshots without additional request text: a PowerShell module trust prompt, Git's repository ownership warning, and a GitHub authentication failure. Guidance covered skipping the optional module, trusting only the assignment directory, and refreshing Git Credential Manager authentication through browser sign-in. Screenshots are summarized here; no credentials are recorded.
+
+## 9. Verify changes after sign-in
+
+> see the changes
+
+Observed: Local main and origin/main both point to commit 0ade77c, with upstream tracking configured and no pending file changes before this record update. This indicates the earlier commits were synchronized with GitHub. A fresh remote query from the assistant session still failed to connect to github.com on port 443, so direct assistant network access remains unavailable. Updated the README to reflect the observed tracking state. This documentation update will need another push from the user's terminal.
