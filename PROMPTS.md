@@ -69,3 +69,37 @@ The student supplied three screenshots without additional request text: a PowerS
 > see the changes
 
 Observed: Local main and origin/main both point to commit 0ade77c, with upstream tracking configured and no pending file changes before this record update. This indicates the earlier commits were synchronized with GitHub. A fresh remote query from the assistant session still failed to connect to github.com on port 443, so direct assistant network access remains unavailable. Updated the README to reflect the observed tracking state. This documentation update will need another push from the user's terminal.
+
+## 10. Follow-up questions about workflow and project planning
+
+The following prompts are transcribed from the available conversation in their original order. Added retrospectively on 2026-09-26; they were not logged at the time of each exchange.
+
+> so why cant you push by yourself
+
+> so you cant do it directly?
+
+> so if i say you to make changes here then can you make in ide or not
+
+> so after i close this vs code how can i come to exact this file
+
+> so right now is it saved or not
+
+> so are you using my system resources to compute or connecting to server and how actually you are  excuectiing command
+
+> so do light version is enough or you need overpower to make the game first let me know what game we are going to do what you think of
+
+> i mean right now i am running gpt 6 astra light so ultra high one and what kind of language you will be using how you will be doing give me exact model
+
+> so what kind of language is gd script so why you are choosing that language why not anyother langauge
+
+> so explain me everything in detail we will be doing full project planing and why you choose the beacon and all and is it inspired from somewhere or what
+
+> so do i need to install something on my computer or not in order to run the game
+
+Summary of responses: Explained local editing versus remote publication, reopening the project, cloud model computation versus local command execution, and proposed Godot 4 with GDScript. Proposed Last Light: Island Rescue and a staged development plan. Revised the proposed third NPC from medic to logistics coordinator to avoid unnecessary injury mechanics. The game remains unimplemented; a model recommendation does not verify the actual model setting used. Earlier network failures describe the tested session, not a permanent inability to push under all permission configurations.
+
+## 11. Godot installation and prompt-record check
+
+> so how can i install gdot and in my computer and what was the reason to choose gdot game and are your recording the prompt of miine as we progress cause we gotta submit that as well
+
+Action: Checked the official Windows download instructions and backfilled the recent prompts above. Explained standard Godot versus .NET, extracting and launching the editor, and why Godot suits this scoped 3D NPC assignment. Installation has not been performed or verified. Prompt recording is maintained by editing this document; it is not an automatic complete transcript export.
