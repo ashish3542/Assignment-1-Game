@@ -1,0 +1,233 @@
+extends Control
+var game
+var buttons: Array[Button] = []
+var font = SystemFont.new()
+var title_font = SystemFont.new()
+var ink = Color("10272d")
+var cream = Color("f1ead7")
+var gold = Color("efbd71")
+var muted = Color("a3bab5")
+
+func setup(g):
+	game = g
+	font.font_names = PackedStringArray(["Segoe UI","Arial"])
+	title_font.font_names = PackedStringArray(["Georgia","Times New Roman"])
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _process(_delta): queue_redraw()
+
+func text(at: Vector2, value: String, size: int = 18, color: Color = cream, fancy: bool = false):
+	draw_string(title_font if fancy else font,at,value,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
+
+func panel(rect: Rect2, alpha: float = 0.88):
+	draw_style_box(style(Color(0.035,0.09,0.105,alpha)),rect)
+
+func style(color: Color, border: bool = false) -> StyleBoxFlat:
+	var s = StyleBoxFlat.new()
+	s.bg_color = color
+	s.corner_radius_top_left=8
+	s.corner_radius_top_right=8
+	s.corner_radius_bottom_left=8
+	s.corner_radius_bottom_right=8
+	if border:
+		s.set_border_width_all(1)
+		s.border_color=Color("657a70")
+	return s
+
+func clear_buttons():
+	for b in buttons: b.queue_free()
+	buttons.clear()
+
+func button(label: String, pos: Vector2, action: Callable, width: float = 340):
+	var b = Button.new()
+	b.text=label
+	b.position=pos
+	b.size=Vector2(width,43)
+	b.add_theme_font_override("font",font)
+	b.add_theme_font_size_override("font_size",17)
+	b.add_theme_stylebox_override("normal",style(Color("183a3e"),true))
+	b.add_theme_stylebox_override("hover",style(Color("345b57"),true))
+	b.add_theme_stylebox_override("pressed",style(Color("967749")))
+	b.add_theme_color_override("font_color",cream)
+	b.pressed.connect(func(): game.sound.play("click"); action.call())
+	add_child(b)
+	buttons.append(b)
+
+func show_menu():
+	clear_buttons()
+	button("BEGIN THE STORY    →",Vector2(78,434),game.start_intro)
+	button("CONTINUE SAVED JOURNEY",Vector2(78,486),game.load_game)
+	button("HOW TO PLAY",Vector2(78,538),game.show_help)
+	button("QUIT",Vector2(78,590),func(): get_tree().quit())
+
+func show_pause():
+	clear_buttons()
+	button("RESUME",Vector2(470,242),game.resume_game)
+	button("SAVE JOURNEY",Vector2(470,294),game.save_game)
+	button("LOAD SAVED JOURNEY",Vector2(470,346),game.load_game)
+	button("MUSIC ON / OFF",Vector2(470,398),game.sound.toggle_music)
+	button("HOW TO PLAY",Vector2(470,450),game.show_help)
+	button("RESTART / TITLE",Vector2(470,502),game.restart)
+
+func show_dialogue(npc):
+	clear_buttons()
+	var options = []
+	match npc.person:
+		"Maya": options = [["What happened to our flight?","story"],["Repair the transmitter · ask Finn for help","repair"],["Collect wood for camp","wood"]]
+		"Finn": options = [["How do we survive here?","story"],["Catch fish and deliver it to Rowan","fish"],["Bring the radio module to Maya","parts"]]
+		"Rowan": options = [["How is everyone doing?","story"],["Cook a fish for the camp","cook"],["Collect wood for camp","wood"]]
+	options.append(["Follow me","follow"])
+	options.append(["Wait here / cancel task","wait"])
+	options.append(["Return to camp","camp"])
+	for i in range(options.size()):
+		var action: String = options[i][1]
+		button(options[i][0],Vector2(380,267+i*48),func(): game.choose_dialogue(npc,action),520)
+	button("BACK TO ISLAND  ·  Esc",Vector2(380,567),game.resume_game,520)
+
+func show_end():
+	clear_buttons()
+	button("KEEP EXPLORING",Vector2(470,442),game.resume_game)
+	button("SAVE JOURNEY",Vector2(470,494),game.save_game)
+	button("START AGAIN",Vector2(470,546),game.restart)
+
+func _draw():
+	if not game: return
+	match game.mode:
+		"menu": draw_title()
+		"intro": draw_intro()
+		"dialogue":
+			draw_rect(Rect2(0,0,1280,720),Color(0.01,0.035,0.04,0.52))
+			panel(Rect2(345,90,590,545),0.97)
+			text(Vector2(380,130),"SURVIVOR / "+game.active_npc.role.to_upper(),13,gold)
+			text(Vector2(380,180),game.active_npc.person,38,cream,true)
+			wrapped(game.dialogue_line,Vector2(380,216),65,18)
+		"pause":
+			draw_rect(Rect2(0,0,1280,720),Color(0.02,0.05,0.06,0.72))
+			panel(Rect2(430,120,420,455),0.95)
+			text(Vector2(478,183),"Take a breath.",36,cream,true)
+			text(Vector2(478,214),"KESTREL ISLAND / PAUSED",13,gold)
+		"help": draw_help()
+		"ending":
+			draw_rect(Rect2(0,0,1280,720),Color(0.02,0.07,0.08,0.73))
+			text(Vector2(472,182),"CHAPTER ONE / COMPLETE",15,gold)
+			text(Vector2(398,260),"You are not alone.",52,cream,true)
+			text(Vector2(395,310),"Your signal has been received. Rescue is on its way.",20)
+			text(Vector2(395,345),"Four survivors. One camp. A second chance.",20,muted)
+			text(Vector2(475,388),"Crew handoffs witnessed: "+str(game.team_events),18,gold)
+		_: draw_hud()
+	if game.toast_time>0 and game.mode!="intro":
+		panel(Rect2(335,645,610,42),0.94)
+		text(Vector2(352,672),game.toast.left(80),16,gold)
+	if game.demo_active:
+		panel(Rect2(360,112,650,40),0.96)
+		text(Vector2(378,139),game.demo_caption,16,gold)
+
+func draw_title():
+	draw_rect(Rect2(0,0,580,720),Color(0.025,0.08,0.10,0.82))
+	text(Vector2(78,97),"AN ISLAND SURVIVAL STORY",14,gold)
+	draw_line(Vector2(78,117),Vector2(158,117),gold,2)
+	text(Vector2(74,211),"LOST",86,cream,true)
+	text(Vector2(74,296),"SIGNAL",86,cream,true)
+	text(Vector2(80,339),"K E S T R E L   I S L A N D",19,gold)
+	text(Vector2(80,384),"Find your people. Build a camp.",20)
+	text(Vector2(80,411),"Give the world a reason to find you.",20,muted)
+	text(Vector2(78,687),"CHAPTER 01     /     FOUR SURVIVORS",12,muted)
+	text(Vector2(955,681),"ORIGINAL PROCEDURAL WORLD",12,cream)
+
+func draw_intro():
+	draw_rect(Rect2(0,0,1280,86),Color("07171d"))
+	draw_rect(Rect2(0,592,1280,128),Color("07171d"))
+	text(Vector2(52,52),"LOST SIGNAL  /  FLIGHT 408",15,gold)
+	text(Vector2(1060,52),"ENTER · SKIP",14,muted)
+	text(Vector2(175,643),game.intro_caption,22)
+	text(Vector2(175,679),"KESTREL ISLAND  ·  SOMEWHERE IN THE SOUTH PACIFIC",12,gold)
+	if game.intro_time>10 and game.intro_time<11.5:
+		draw_rect(Rect2(0,0,1280,720),Color(0.02,0.025,0.025,1))
+
+func draw_hud():
+	panel(Rect2(28,26,332,86),0.83)
+	text(Vector2(48,52),"LOST SIGNAL",13,gold)
+	text(Vector2(48,83),game.location_name(),25,cream,true)
+	panel(Rect2(28,130,332,164),0.84)
+	text(Vector2(48,157),"01 / SURVIVE. THEN SIGNAL.",13,gold)
+	var goals = [[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Ask Maya to repair the radio"],[game.won,"Send the rescue signal"]]
+	for i in range(goals.size()):
+		text(Vector2(48,186+i*27),("✓  " if goals[i][0] else "○  ")+goals[i][1],16,muted if goals[i][0] else cream)
+	draw_map()
+	panel(Rect2(28,571,275,116),0.85)
+	text(Vector2(48,598),"CONDITION",12,gold)
+	bar(Vector2(48,614),game.health,Color("dca680"),"HEALTH")
+	bar(Vector2(48,649),game.hunger,Color("b3bf7c"),"FOOD")
+	panel(Rect2(968,475,284,212),0.87)
+	text(Vector2(990,503),"SHARED CAMP SUPPLIES",12,gold)
+	var names = ["Wood","Stone","Scrap","Fish","Meal","Ration"]
+	for i in range(names.size()):
+		var x = 990+(i%2)*125
+		var y = 534+(i/2)*32
+		text(Vector2(x,y),names[i]+"  "+str(game.inventory[names[i]]),16)
+	text(Vector2(990,650),"1 Eat    R Craft spear    G Throw",12,muted)
+	text(Vector2(990,673),"Spear: "+("crafted" if game.spear else "2 wood + 1 scrap"),12,gold)
+	if not game.prompt.is_empty():
+		panel(Rect2(373,571,534,53),0.92)
+		text(Vector2(396,603),game.prompt,18)
+	panel(Rect2(360,689,578,27),0.88)
+	text(Vector2(376,707),"WASD Move   Mouse Look   E Interact   Tab Journal   Esc Pause",13,cream)
+	if game.fishing>0:
+		panel(Rect2(415,435,450,92),0.95)
+		text(Vector2(442,469),"FISHING / "+("BITE! PRESS E NOW" if game.fishing>=3 else "Wait for a bite..."),20,gold)
+		draw_rect(Rect2(442,490,390,8),Color("315356"))
+		draw_rect(Rect2(442,490,390*minf(game.fishing/5,1),8),gold)
+	if not game.events.is_empty(): panel(Rect2(377,23,636,78),0.78)
+	for i in range(mini(3,game.events.size())):
+		text(Vector2(385,40+i*23),str(game.events[game.events.size()-1-i]).left(76),13,cream)
+
+func bar(p: Vector2, value: float, color: Color, label: String):
+	text(p,label,10,muted)
+	draw_rect(Rect2(p+Vector2(66,-9),Vector2(151,7)),Color("355055"))
+	draw_rect(Rect2(p+Vector2(66,-9),Vector2(151*value/100,7)),color)
+	text(p+Vector2(222,0),str(int(value)),12,cream)
+
+func draw_map():
+	panel(Rect2(1036,26,216,215),0.9)
+	var center = Vector2(1144,124)
+	draw_circle(center,76,Color("1d494d"))
+	island_outline(center,Vector2(58,65),Color("526347"))
+	for entry in [[game.world.camp,"C"],[game.world.tower,"R"],[game.world.fish_spot,"F"],[game.world.salvage,"X"]]:
+		var pos = center+Vector2(entry[0].x,entry[0].z)*0.78
+		text(pos,str(entry[1]),12,gold)
+	for npc in game.npcs:
+		draw_circle(center+Vector2(npc.position.x,npc.position.z)*0.78,2.8,Color("b8d7b9"))
+	var p = center+Vector2(game.player.position.x,game.player.position.z)*0.78
+	draw_circle(p,4,cream)
+	draw_line(p,p+Vector2(-sin(game.player.yaw),-cos(game.player.yaw))*11,cream,2)
+	text(Vector2(1138,49),"N",12,gold)
+	text(Vector2(1054,221),"C Camp   F Fish   R Radio",12,muted)
+
+func island_outline(center: Vector2, radius: Vector2, color: Color):
+	var points = PackedVector2Array()
+	for i in range(40):
+		var a=i*TAU/40
+		points.append(center+Vector2(cos(a)*radius.x,sin(a)*radius.y))
+	draw_colored_polygon(points,color)
+
+func wrapped(value: String, pos: Vector2, length: int, size: int):
+	var line=""
+	var y=pos.y
+	for word in value.split(" "):
+		if line.length()+word.length()>length:
+			text(Vector2(pos.x,y),line,size)
+			y+=size+6
+			line=""
+		line+=word+" "
+	text(Vector2(pos.x,y),line,size)
+
+func draw_help():
+	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
+	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
+	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
+	var lines = ["WASD / arrows — Move     Mouse — Look     Shift — Run     Space — Jump", "E — Talk / collect / use     1 — Eat meal or ration     R — Craft spear", "G — Throw stone     M — Mute all     N — Voice on/off     Tab / Esc — Close", "F6 — Save journey     F9 — Load journey     E near buggy — Repair / drive / exit", "", "FIRST: collect 4 wood west of camp and 3 stones east of camp. Use E at the fire.", "NEXT: fish at the pier (F on map). Press E to cast, then E when BITE appears.", "Cook at the fire, then press 1 to eat. Finn can catch fish; Rowan can cook it.", "THEN: ask Maya to repair the radio. She requests Finn's help. Watch the handoff.", "Walk to the ridge transmitter (R) and press E after fire, food and repairs are ready.", "", "EXTRA: collect 3 scrap near the aircraft (X), then repair and drive the buggy.", "Shared supplies are available to everyone. NPC deliveries add to that inventory.", "Direct commands override NPC requests. Ask a busy Finn to wait to free him for Maya."]
+	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
+	text(Vector2(88,658),"CREW LOG",12,gold)
+	if not game.events.is_empty(): text(Vector2(88,688),str(game.events.back()).left(115),15,muted)
+

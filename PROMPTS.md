@@ -103,3 +103,37 @@ Summary of responses: Explained local editing versus remote publication, reopeni
 > so how can i install gdot and in my computer and what was the reason to choose gdot game and are your recording the prompt of miine as we progress cause we gotta submit that as well
 
 Action: Checked the official Windows download instructions and backfilled the recent prompts above. Explained standard Godot versus .NET, extracting and launching the editor, and why Godot suits this scoped 3D NPC assignment. Installation has not been performed or verified. Prompt recording is maintained by editing this document; it is not an automatic complete transcript export.
+
+## 12. Shared editor workflow
+
+> so we we will be  coding in vs code and running in gdot ?
+
+Response summary: VS Code and Godot can use the same project files; edit scripts in VS Code and run with F5 in Godot.
+
+## 13. Detailed feature planning
+
+> ok so what are the features and all we are planing to make like everything in detail
+
+Response summary: Proposed exploration, dialogue, NPC commands/cooperation, inventory, camp, objectives, audio, staged milestones and explicit scope limits.
+
+## 14. Student expands the story and survival direction
+
+> so we will have it like a video kind you know like story how they got in the island and for that they were on plane which got crash in that island the island name you can pick  and it is middle of nowhere so three or 4 people only survived and for first part its like basically surviving like collecting food maybe fishing and eating and then after we will creeate slowly i want it to be like a open world game like gta vice city and that kind and for interaction picking stone maybe weapons and many more and maybe  and maybe some kind of vehcinle for now just planing we are doing here so dont excute yet
+
+Response summary: Proposed Lost Signal: Kestrel Island, a third-person island chapter with a flight/crash opening, player plus three survivors, gathering, fishing/cooking and later vehicle/rescue progression. No execution was performed during that planning turn, as requested.
+
+## 15. Art direction and model preference
+
+> A realistic colorful one so just let me know which intelligent will work here to make game dont make it yet
+
+Response summary: Proposed colorful tropical lighting and realistic proportions, with GPT-6 Astra High as a development recommendation. This is not evidence of the actual selected model setting. No implementation occurred during that planning turn.
+
+## 16. Authorization to build
+
+> Ok now with everything in mind we have discussed till now make the game with audio and everything
+
+Implemented on 2026-09-26: a playable Godot 4.7.2 first chapter with third-person exploration, a skippable voiced flight/crash intro, original procedural scenery and models, resource collection, fire, player/NPC fishing, cooking/eating, hunger/health, dialogue choices and commands, two NPC handoff chains, radio repairs and rescue ending, buggy repair/driving, throwable stones, visible craftable spear, local save/load, synthesized sound/music and 18 spoken clips. Added a learning guide, updated run instructions and recorded an explicitly automated gameplay walkthrough.
+
+Validation: integrated gameplay tests passed after fixing pier walkability, canceled module state and carried-resource save preservation. Inspected actual rendered screenshots and adjusted lighting/materials. A 2 minute 51 second automated walkthrough was recorded from the actual game. It is not a claim of manual student playtesting. Full implementation and verification details are in README.md and VALIDATION.md.
+
+Scope: a compact procedural prototype, not a GTA-scale or photorealistic game. No wildlife, spear combat, swimming, passengers or live AI NPC API calls. Prompt entries 12–16 were added together during this implementation session from the available conversation, rather than automatically logged at their original timestamps.

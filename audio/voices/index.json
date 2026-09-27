@@ -1,0 +1,20 @@
+{
+  "Finn: Got one! Rowan, I'll bring dinner.": "res://audio/voices/caught.wav",
+  "MAYA: The left engine is gone. Everyone, brace!": "res://audio/voices/brace.wav",
+  "Rowan: Build the fire first: four wood and three stones.": "res://audio/voices/needfire.wav",
+  "We have a fishing line from the wreck. Try the pier. I can bring fish to Rowan while you gather firewood.": "res://audio/voices/finn_story.wav",
+  "Maya: Finn, I need the aircraft radio module. Can you bring it?": "res://audio/voices/request.wav",
+  "PILOT: Flight 408. We are diverting around the storm. Stay seated.": "res://audio/voices/pilot.wav",
+  "Finn: Maya, here's the module from the aircraft.": "res://audio/voices/delivered.wav",
+  "Maya: Thanks, Finn. This module will work. Starting repairs.": "res://audio/voices/thanks.wav",
+  "A storm took the engine. The ridge radio needs an aircraft module. Finn can bring it while I make repairs.": "res://audio/voices/maya_story.wav",
+  "Rowan: Dinner is ready. Press 1 to eat from our shared supplies.": "res://audio/voices/dinner.wav",
+  "Finn: Found the module. Bringing it to Maya.": "res://audio/voices/found.wav",
+  "Finn: Rowan, here's a fresh fish for the camp.": "res://audio/voices/fish_delivery.wav",
+  "ROWAN: You're awake. Four of us made it. We need a fire, and something to eat.": "res://audio/voices/awake.wav",
+  "Rowan: Finn, can you catch something for dinner?": "res://audio/voices/needfish.wav",
+  "Maya: Rowan, power is restored. Tell our friend to send the signal!": "res://audio/voices/repaired.wav",
+  "Four of us survived. Make a fire, then eat a cooked fish. I can cook what Finn brings. We share all supplies.": "res://audio/voices/rowan_story.wav",
+  "Rowan: Once we have fire and food, we can call for rescue.": "res://audio/voices/ready.wav",
+  "COAST GUARD: Kestrel station, we read you. Hold your position. Help is coming.": "res://audio/voices/rescue.wav"
+}
