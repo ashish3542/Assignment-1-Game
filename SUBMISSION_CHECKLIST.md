@@ -4,7 +4,7 @@
 - [x] Demonstrate talking to NPCs in the automated walkthrough.
 - [x] Demonstrate directing NPCs in the automated walkthrough.
 - [x] Demonstrate NPCs interacting with one another in tests and the walkthrough.
-- [ ] Connect GitHub, create a repository, and push the source and documentation.
+- [x] Connect GitHub, create a repository, and push the source and documentation.
 - [ ] Verify the instructor can access the repository link.
 - [ ] Upload PROMPTS.md as the prompt record (Markdown or TXT required).
 - [x] Write run instructions; verify the game/test runner works from a fresh source copy.
@@ -22,3 +22,4 @@ Show the game starting, move through the world, talk to an NPC, assign a task, s
 The supplied video is an explicitly labeled automated walkthrough, not a recording of the student's manual play. Canvas uploads and instructor repository access have not been completed by the assistant.
 
 Record the student's own observations as development proceeds: what was requested, what worked, what failed, how it was refined, and what was learned. These notes must reflect actual experience.
+
