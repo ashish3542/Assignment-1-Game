@@ -612,6 +612,7 @@ func run_tests():
 	for kind in ["pickup","step","success","crash"]:
 		if sound.clips[kind].data.is_empty(): failures.append("Missing audio "+kind)
 	if sound.voice_index.size()<35: failures.append("Missing spoken dialogue")
+	check_voice_assets(failures)
 	await run_revision_tests(failures)
 	load("res://scripts/polish_tests.gd").new().run(self,failures)
 	# Free queued menu controls before the runner exits.
@@ -628,6 +629,13 @@ func run_tests():
 	else:
 		for failure in failures: push_error("TEST FAILED: "+failure)
 		get_tree().quit(1)
+
+func check_voice_assets(failures: Array):
+	# Keep temporary WAV references outside the async test runner's lifetime.
+	for line in sound.voice_index:
+		var recorded_voice=AudioStreamWAV.load_from_file(sound.voice_index[line])
+		if not recorded_voice or recorded_voice.get_length()<0.5:
+			failures.append("Missing or empty voice recording: "+line)
 
 func run_revision_tests(failures: Array):
 	# Test the actual seekable scene rather than duplicating its visibility rules.

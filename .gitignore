@@ -2,6 +2,8 @@
 .env.*
 !.env.example
 node_modules/
+tools/voices/.cache/
+tools/voices/model-cache/
 .godot/
 dist/
 build/

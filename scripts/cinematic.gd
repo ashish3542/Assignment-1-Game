@@ -85,7 +85,8 @@ func sample(playback_time: float):
 		for i in range(actors.size()):
 			actors[i].position=slot(i)
 			face(actors[i],meeting)
-			var talking=(i==1 and t<35) or (i==0 and t>=35 and t<40) or (i==3 and t>=40 and t<45) or (i==0 and t>=45 and t<50) or (i==1 and t>=50)
+			# A voice can finish before its shot; don't keep the mouth moving in silence.
+			var talking=i!=2 and game.sound.is_speaking(["Finn","Rowan","","Maya"][i])
 			game.M.animate_human(actors[i].body,t+i,false,false,"idle",talking)
 		if t<35:
 			shot(meeting+Vector3(7,3.0,8).lerp(Vector3(6,2.7,7), (t-29)/6),meeting+Vector3(0,0.9,0))

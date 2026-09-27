@@ -48,6 +48,22 @@ The sound system already had one voice player, but each NPC independently starte
 
 Try sprinting toward the tent side, then entering through the open front. Next, speak to Maya while crew are working: her conversation should take focus, other chatter should clear, and only her mouth should animate for her response. These are observations for you to verify, not a reflection written on your behalf.
 
+## Voice-quality lesson: the recording and the game are separate
+
+The earlier voices came from Windows desktop speech. Adjusting pauses and speed did
+not satisfy the requested naturalness. We replaced their source with Kokoro neural
+speech, generated once on this computer and saved as ordinary WAVs. The game still
+uses the same audio player and dialogue queue in `scripts/sound.gd`; it does not
+need to run a neural model while you play. `tools/voices/generate.mjs` is the separate
+development tool, and `audio/voices/generation.json` records each voice and line.
+
+Listen to the previous/new greeting previews in order: Maya, Finn, Rowan. Describe
+which sounds more conversational and whether any pronunciation or emotion still
+needs work. Then talk to Maya in the game and press N: the subtitle should retain
+its timing even with speech disabled. This tests the distinction between an audio
+asset's quality and the game's timing/interaction logic. These are prompts for your
+own observations, not a claim that synthetic speech matches a human actor.
+
 ## Try these small changes
 
 - Change walking speed from 5 to 4; predict and test the difference.

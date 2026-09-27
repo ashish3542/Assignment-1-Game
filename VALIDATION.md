@@ -2,6 +2,16 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Neural voice replacement — 2026-09-27
+
+Replaced all 41 Windows desktop-speech WAVs with full-precision Kokoro neural synthesis, using five distinct stock voices. Generation ran on the local CPU; the final 41-clip batch ran with remote-model access disabled after the initial model download. Model, cast, speed, text, duration and output hashes are preserved in `audio/voices/generation.json`. The development script and dependency lockfile are in `tools/voices`; model weights and package caches are not part of the game.
+
+All 41 assets passed format, non-silence, hash and replacement checks: mono 24 kHz PCM16, 128.83 seconds total, individual durations 1.71–7.08 seconds. RMS ranged from -24.64 to -20.00 dBFS and maximum peak was -2.00 dBFS. These are file and level checks, not a claim that human listening or emotional-performance quality has been verified.
+
+The Godot integrated runner passed with the new files, including every cinematic clip fitting its shot, single-speaker ordering, pause/resume, direct dialogue, collisions and the existing chapter progression tests. Cinematic talking gestures now consult the active speaker so they stop when a shorter recording finishes. Generated before/after greeting previews (Maya, Finn, Rowan) are saved alongside the project for the student's listening comparison.
+
+Recorded a 29.46-second automated in-game preview with the replacement voices and inspected a rendered direct-dialogue frame. The MP4 audio measured mean -27.0 dB and peak -7.5 dB. No script errors appeared in the recording. Moving temporary WAV checks into a separate function removed the initial test-run shutdown reference warning; the final integrated run passed without ObjectDB leak warnings. The known restricted-environment certificate-store warning remains unrelated to offline playback. Verified the developer tool's frozen dependency installation and JavaScript syntax; its optional package-manager dependency checks required network access even when packages were already cached.
+
 ## Collision and conversation polish — 2026-09-27
 
 The integrated runner passed again from a fresh source directory without `.godot` or Git metadata. New regression scenarios in `scripts/polish_tests.gd` exercised player sprinting into a tent side with long simulation steps; walking through the entrance; stopping at the rear wall; an NPC following a complete route around the tent without entering solids; camera obstruction; and three same-frame speech requests taking ordered turns. Duplicate speech and incidental interruptions were rejected. Pausing froze the conversation. Direct dialogue cleared unrelated speech and identified the correct speaker. Subtitle timing was tested with voices disabled.
@@ -10,7 +20,7 @@ The original report of everyone talking at once had a visual synchronization cau
 
 Recorded a 33.8-second staged automated polish preview with audio and inspected rendered frames. It shows the actual movement solver stopping at the tent wall, entry through the open front, serialized speech, and the closer conversation camera. The final review also corrected oversized foreground labels and added visible cloth to the blocked tent rear. No script errors appeared during the recording. The standard restricted-environment certificate warning remains.
 
-`Lost-Signal-Polish-Preview.mp4` is alongside the project, not committed as a large Git asset. Earlier videos document earlier revisions. The current source still uses original procedural animation and Microsoft synthetic voice clips; no motion-capture pack, human actor performance or new neural voice service is claimed.
+`Lost-Signal-Polish-Preview.mp4` is alongside the project, not committed as a large Git asset. Earlier videos document earlier revisions. At this checkpoint the source still used original procedural animation and Microsoft synthetic voice clips; the neural replacement is documented above. No motion-capture pack or human actor performance is claimed.
 
 ## Revision verification — 2026-09-27
 

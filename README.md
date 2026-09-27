@@ -23,7 +23,7 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 - **Maya → Finn → Maya:** request, retrieve and hand over a radio module, then repair the transmitter.
 - Repairable/drivable buggy, recoverable thrown stones, visible craftable spear.
 - Objectives, island map, journal, pause, save/load and rescue ending.
-- Softer changing music that lowers during speech; ocean/birds, footsteps, interaction sounds, fire, engine and crash audio; 41 recorded synthetic voice clips, including 23 new scene/greeting lines.
+- Softer changing music that lowers during speech; ocean/birds, footsteps, interaction sounds, fire, engine and crash audio; 41 locally generated neural voice recordings with distinct voices for Maya, Finn, Rowan, the pilot and the coast guard. Playback is offline.
 
 ## Scope
 
@@ -51,3 +51,5 @@ Run `godot --headless --path . -- --test` (substitute your Godot executable path
 `--revision-demo` records the updated opening, automatic greetings and duties, player gathering/fire, autonomous food preparation and command overrides. Both demonstrations are automated, not student playtests.
 
 `--polish-demo` stages a short review of solid tent walls, its open entrance, three simultaneous speech requests playing in order, and the direct-conversation camera. The integrated runner includes the regression scenarios in `scripts/polish_tests.gd`.
+
+The [optional voice-generation tool](tools/voices/README.md) documents how the neural WAVs were produced. The game does not run a speech model or need Node; only developers rebuilding the audio need that tool. Voice settings and asset hashes are recorded in `audio/voices/generation.json`.

@@ -1,0 +1,442 @@
+{
+  "model": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "modelSha256": "8fbea51ea711f2af382e88c833d9e288c6dc82ce5e98421ea61c058ce21a34cb",
+  "dtype": "fp32",
+  "generator": "kokoro-js@1.2.1",
+  "transformers": "3.8.1",
+  "format": "mono 24000 Hz PCM16 WAV",
+  "cast": {
+    "Maya": {
+      "voice": "af_bella",
+      "speed": 1
+    },
+    "Rowan": {
+      "voice": "af_heart",
+      "speed": 0.98
+    },
+    "Finn": {
+      "voice": "am_puck",
+      "speed": 1.02
+    },
+    "Pilot": {
+      "voice": "am_michael",
+      "speed": 1.02
+    },
+    "Coast guard": {
+      "voice": "bm_george",
+      "speed": 1
+    }
+  },
+  "clips": [
+    {
+      "file": "pilot.wav",
+      "speaker": "Pilot",
+      "text": "Flight 408. We are diverting around the storm. Stay seated.",
+      "voice": "am_michael",
+      "speed": 1.02,
+      "duration": 4.793916666666667,
+      "gain": 0.9002268005150882,
+      "sha256": "0424509751c693747db77b7b9c1a1ff7dbfca383b9943007d210729441c86e7c"
+    },
+    {
+      "file": "hello_maya.wav",
+      "speaker": "Maya",
+      "text": "Hey. Good to see you on your feet. I'll handle the radio.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.4831666666666665,
+      "gain": 1.0338882087631411,
+      "sha256": "59f4f9b1efbc8bb6352e9da2fa922750bc5fc95049f2b0d4851f166d86f3ecfa"
+    },
+    {
+      "file": "plan_maya.wav",
+      "speaker": "Maya",
+      "text": "There's an old radio tower on the ridge. I'll check it.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.242,
+      "gain": 1.263888956221185,
+      "sha256": "0494aa26025601eb4db32f0301503444cec912126db26f6af6125aa4102b73fb"
+    },
+    {
+      "file": "needfish.wav",
+      "speaker": "Rowan",
+      "text": "Finn, can you catch something for dinner?",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 2.1984583333333334,
+      "gain": 1.2611569944944112,
+      "sha256": "e1d5fc143dcdb6e403fd6d194c55cb780d015614beb455d9655654650ab3915d"
+    },
+    {
+      "file": "plan_finn.wav",
+      "speaker": "Finn",
+      "text": "I'll look for food. If you need parts, Maya, call me.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 3.0233333333333334,
+      "gain": 0.8440910788768636,
+      "sha256": "2a588068d90e49e69f88954e57a34605a941e5009ab572b31d931f0d3178c161"
+    },
+    {
+      "file": "plan_rowan.wav",
+      "speaker": "Rowan",
+      "text": "I'll gather firewood and look after camp. We do this together.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.61825,
+      "gain": 1.3460083778013405,
+      "sha256": "038df92b280a31e2bf24708aade6f4d22f9815f9e56e0dd6e6f1927677293a29"
+    },
+    {
+      "file": "hello_rowan.wav",
+      "speaker": "Rowan",
+      "text": "There you are. Take a breath. We're in this together.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 2.831875,
+      "gain": 1.2920431325814759,
+      "sha256": "96255426666a5e6cd7e1244d703678a75934f3389988ffb37e70b4e2183352b3"
+    },
+    {
+      "file": "repaired.wav",
+      "speaker": "Maya",
+      "text": "Rowan, power is restored. Tell our friend to send the signal!",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.9165833333333335,
+      "gain": 1.2225453644987132,
+      "sha256": "1923627306fa90607be41db3610266eda86bd8db5a9fba3dab8f57c68e8be43c"
+    },
+    {
+      "file": "rescue.wav",
+      "speaker": "Coast guard",
+      "text": "Kestrel station, we read you. Hold your position. Help is coming.",
+      "voice": "bm_george",
+      "speed": 1,
+      "duration": 4.575,
+      "gain": 1.126587110586488,
+      "sha256": "f2a069d29dc55d69ff814af7faf1774875fab696b74c0c3860d478c4ef2d638e"
+    },
+    {
+      "file": "ready.wav",
+      "speaker": "Rowan",
+      "text": "Once we have fire and food, we can call for rescue.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.2969583333333334,
+      "gain": 1.3008828194936206,
+      "sha256": "6c8264a206bd6795a43b3622c5a55c516b57eac3bc32efc8847b51fd64d6b0be"
+    },
+    {
+      "file": "breathe.wav",
+      "speaker": "Rowan",
+      "text": "Can you hear me? Breathe. You're safe with us now.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 2.9860416666666665,
+      "gain": 1.2882053707677719,
+      "sha256": "85474eb97fc8816f23a673469c955935759ca2a78a04e6d421055c5ccb04606a"
+    },
+    {
+      "file": "thanks.wav",
+      "speaker": "Maya",
+      "text": "Thanks, Finn. This module will work. Starting repairs.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.31075,
+      "gain": 1.1944877892534613,
+      "sha256": "740195675a1c009e0a5590d27179d25219f4a50909a7a31afc2a49e16f2b6fa1"
+    },
+    {
+      "file": "easy.wav",
+      "speaker": "Rowan",
+      "text": "Easy. One step at a time. I've got you.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 2.77675,
+      "gain": 1.3382566784669194,
+      "sha256": "8d184b746add13a7fccec9d8e011ee9bff517fde1845db1ecf949fefddc113da"
+    },
+    {
+      "file": "home.wav",
+      "speaker": "Rowan",
+      "text": "That old shelter will do. Come on. Let's make it home.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.37525,
+      "gain": 1.328209096742323,
+      "sha256": "913a838ca8e7f7182b20bd855254c4a438e37f0ec8969f10e375d301ffb1b37b"
+    },
+    {
+      "file": "wing.wav",
+      "speaker": "Finn",
+      "text": "Keep moving. Get clear of the wing.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.0195416666666666,
+      "gain": 0.804386315208936,
+      "sha256": "c297702538f71933f23716bdc41d9f6d00e0bd0ae6b67303d63210883fccb1c9"
+    },
+    {
+      "file": "wood_rowan.wav",
+      "speaker": "Rowan",
+      "text": "More firewood. That's one less thing to worry about.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.0399583333333333,
+      "gain": 1.3291801259515303,
+      "sha256": "6b1c39ed958fd3aa02e784b0ae8f0f15d777952cbb7fb66569a73de50128a68b"
+    },
+    {
+      "file": "wait_rowan.wav",
+      "speaker": "Rowan",
+      "text": "I'll stay here. Take your time.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 1.9935833333333333,
+      "gain": 0.9071524408404454,
+      "sha256": "465621d45fb37c47f4adb1cb1f7121ae50ec5e9e56ea329f4d08bf05c6af2cbd"
+    },
+    {
+      "file": "resume_maya.wav",
+      "speaker": "Maya",
+      "text": "Of course. I'll get back to it.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 1.88775,
+      "gain": 1.2161665613779589,
+      "sha256": "87ee416ff74dd74712966c27558af8c38db6e9f8fa9931db4dd85df197e6dc01"
+    },
+    {
+      "file": "request.wav",
+      "speaker": "Maya",
+      "text": "Finn, I need the aircraft radio module. Can you bring it?",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.850625,
+      "gain": 1.1912330016900718,
+      "sha256": "4f06bd8d4e5124570d5ca2c8c48b37a497c09fbb311492f49129659cdb0fa41c"
+    },
+    {
+      "file": "found.wav",
+      "speaker": "Finn",
+      "text": "Found the module. Bringing it to Maya.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.2564583333333332,
+      "gain": 0.840882987005977,
+      "sha256": "77fc0fcaec1b6a2a4a40514e2ebc958e4181a14c579803af87c919e2d5b388a5"
+    },
+    {
+      "file": "wait_finn.wav",
+      "speaker": "Finn",
+      "text": "I'll stay here. Take your time.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 1.8465833333333332,
+      "gain": 0.7821081941113778,
+      "sha256": "3c6368da33b83434d0e8f69ee17d7eee9b4d6c9d98be3f044a5bc89c6d5fb0a9"
+    },
+    {
+      "file": "rowan_story.wav",
+      "speaker": "Rowan",
+      "text": "Four of us survived. Make a fire, then eat a cooked fish. I can cook what Finn brings. We share all supplies.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 7.075625,
+      "gain": 1.2608166479200347,
+      "sha256": "ec8626aee1fc80ea5ee698a1eb2771e757c4c242778b6e24cd3303282392fbc0"
+    },
+    {
+      "file": "resume_finn.wav",
+      "speaker": "Finn",
+      "text": "Of course. I'll get back to it.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 1.708375,
+      "gain": 0.7648982519336732,
+      "sha256": "0a60abdd004834bd7212c3c00a982324ef536ab2d4cb33fb9f55242a5aa344b0"
+    },
+    {
+      "file": "door.wav",
+      "speaker": "Finn",
+      "text": "This way! The emergency door is open.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.292708333333333,
+      "gain": 0.8171920314993568,
+      "sha256": "3d55aaef14d7615487d1b57d7148905825307ef024cb6d6ea60882e4de51c44e"
+    },
+    {
+      "file": "dinner.wav",
+      "speaker": "Rowan",
+      "text": "Dinner is ready. Press 1 to eat from our shared supplies.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.6479583333333334,
+      "gain": 1.3162833718564553,
+      "sha256": "baa6ab4e8179af597235bbb9185732b83cd01d28b5049fb1347674892d64e4f7"
+    },
+    {
+      "file": "maya_story.wav",
+      "speaker": "Maya",
+      "text": "A storm took the engine. The ridge radio needs an aircraft module. Finn can bring it while I make repairs.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 6.9755416666666665,
+      "gain": 1.1564352613942508,
+      "sha256": "ccd3838dd2278dde00b6d215d0deb5171d9ccc12e559577f8659f2467167d8f7"
+    },
+    {
+      "file": "delivered.wav",
+      "speaker": "Finn",
+      "text": "Maya, here's the module from the aircraft.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.3972083333333334,
+      "gain": 0.8590802097793473,
+      "sha256": "395fbaf665cefaaf5b504ea8957715331e76051794a976b387aa778e5ab68188"
+    },
+    {
+      "file": "hello_finn.wav",
+      "speaker": "Finn",
+      "text": "Hey, you doing okay? I'll keep an eye on the food.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.917875,
+      "gain": 0.8961972066056068,
+      "sha256": "995d2be2b3c38859197496d5e9ab0695f907f05ce596114a86c336a849e25d0f"
+    },
+    {
+      "file": "scrap_maya.wav",
+      "speaker": "Maya",
+      "text": "I've put the spare parts by the shelter.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.089583333333333,
+      "gain": 1.2927524496478233,
+      "sha256": "0a605cb318608cd58f3e817ac7cd12a89022de0b5a876cacfa444ae9845cf6e4"
+    },
+    {
+      "file": "brace_new.wav",
+      "speaker": "Maya",
+      "text": "Heads down. Stay together. Brace!",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.2524166666666665,
+      "gain": 1.2927384114112668,
+      "sha256": "e12e9f5807cd81ac3556e53bb25fcfa51822434cd3162cec8bb512c140f2aee6"
+    },
+    {
+      "file": "four.wav",
+      "speaker": "Finn",
+      "text": "I checked the cabin. No one else made it. Just the four of us.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 3.4964583333333334,
+      "gain": 0.8066617743515556,
+      "sha256": "b9a7d602464ee358f83f1c877cffbf0077f6a9de3b34969c9e22372a5f38a25c"
+    },
+    {
+      "file": "needfire.wav",
+      "speaker": "Rowan",
+      "text": "Build the fire first: four wood and three stones.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.0092083333333335,
+      "gain": 1.31462889385818,
+      "sha256": "95c17af763476254b402066f68aa6d642a5d935e1d9dd659e259f175f3342077"
+    },
+    {
+      "file": "brace.wav",
+      "speaker": "Maya",
+      "text": "The left engine is gone. Everyone, brace!",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.844,
+      "gain": 1.1460614082718115,
+      "sha256": "f5db2c27ae6d8df741668c416f2a46b33eb47057e8113b7c8ef99fdde5f8c458"
+    },
+    {
+      "file": "awake.wav",
+      "speaker": "Rowan",
+      "text": "You're awake. Four of us made it. We need a fire, and something to eat.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 4.05375,
+      "gain": 1.255125052317231,
+      "sha256": "6749d1d545a5182ffba307c8815ddc9f8fd537ad2a8b336dac8b9e8d821b92ae"
+    },
+    {
+      "file": "caught.wav",
+      "speaker": "Finn",
+      "text": "Got one! Rowan, I'll bring dinner.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 1.890375,
+      "gain": 0.8351212591272507,
+      "sha256": "33e4acab0889b4c8296e67c08f3dde397eb2052c79ff9e00b4d36ceaf34b3801"
+    },
+    {
+      "file": "finn_story.wav",
+      "speaker": "Finn",
+      "text": "We have a fishing line from the wreck. Try the pier. I can bring fish to Rowan while you gather firewood.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 5.894458333333334,
+      "gain": 0.8964452031048251,
+      "sha256": "686825523bd5f1087e22c2ee05eb54575e4816109e31ee0b0c5a572d98b63638"
+    },
+    {
+      "file": "approach.wav",
+      "speaker": "Pilot",
+      "text": "We've lost an engine. There's a beach ahead. Hold on!",
+      "voice": "am_michael",
+      "speed": 1.02,
+      "duration": 3.47425,
+      "gain": 1.404127515018704,
+      "sha256": "1dd29052fc8cf10bd5014f2cba49d70381e9fe4c464dd05e3b10f4fd9ff6e281"
+    },
+    {
+      "file": "wait_maya.wav",
+      "speaker": "Maya",
+      "text": "I'll stay here. Take your time.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.0677083333333335,
+      "gain": 1.0702938657528367,
+      "sha256": "88deb6de09d793e50b4eadb10f023abaff57b2473080cb1e137d596d3435aa39"
+    },
+    {
+      "file": "escaped.wav",
+      "speaker": "Maya",
+      "text": "I'm out. Let's get away from the smoke.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.433375,
+      "gain": 1.2096847438273228,
+      "sha256": "3c340b2cedaf0a7d19584b3d770cf24f62082bfff0b67216f72f3f8e81e78f5b"
+    },
+    {
+      "file": "resume_rowan.wav",
+      "speaker": "Rowan",
+      "text": "Of course. I'll get back to it.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 1.8620833333333333,
+      "gain": 1.3272073288556483,
+      "sha256": "874d30f939e6e9581850a5126080b63d3dd741fb311b6e8f994dfdfdc809442b"
+    },
+    {
+      "file": "fish_delivery.wav",
+      "speaker": "Finn",
+      "text": "Rowan, here's a fresh fish for the camp.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.1198333333333332,
+      "gain": 0.7937530330911099,
+      "sha256": "66e8f58970562ff4dd209b6c19f758e0ccd88e79715cd643482906581bcf93f4"
+    }
+  ]
+}

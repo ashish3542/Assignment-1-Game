@@ -35,6 +35,8 @@ Tent sides and the rear, the bench, crates and workbench block movement. Enter t
 
 Only the current speaker gets a subtitle and talking gesture. Voices take turns with a short gap. Ordinary crew speech is heard within 22 meters; recent job messages remain in the Tab journal. Opening a direct conversation clears unrelated speech and pauses other jobs. Turning voices off with N retains timed subtitles. Pause/Journal also pauses the conversation.
 
+The current version includes 41 Kokoro neural voice recordings, replacing the old Windows speech voices. Close an already running game and launch this updated project to hear them. No extra voice software or download is needed for playback. Earlier demo videos still contain the previous voices.
+
 ## Complete the chapter
 
 1. Start at camp (C on map). The three survivors begin their own duties after a short pause. Approach them for a spoken greeting; press E to talk or give directions.

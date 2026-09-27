@@ -173,3 +173,11 @@ Implemented: tent and camp-furniture boundaries, a usable entrance, NPC routes a
 > ok so resume the work wherever it was stuck due to usage limit
 
 The implementation, clean-copy regression tests and 33.8-second automated polish preview were complete before the interruption. The usage limit prevented automatic approval review of the final GitHub fetch; that command was not executed. Resumed by checking the saved working tree and preparing the tested changes and submission documents for publication.
+
+## 22. Replace robotic-sounding voices
+
+> the voices are still like a machine talking robot can we make natural like that
+
+Implementation direction: replace the old Windows speech recordings with locally generated Kokoro neural speech, give the cast distinct stock voices, preserve offline playback and coordinated speaking turns, and verify that the new recordings fit the cinematic. These are synthetic voices, not real actors or cloned people. Final results and verification are recorded in VALIDATION.md.
+
+Completed: replaced all 41 voice files, recorded the cast/generation settings and hashes, saved a reproducible optional generation tool, updated cinematic gestures to stop with speech, and added checks for all indexed voice files. The gameplay regressions and cinematic timing checks passed. Created before/after greeting audio and a 29-second automated in-game preview for the student's own listening review. No student listening judgment is claimed.
