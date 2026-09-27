@@ -2,7 +2,7 @@ extends Node3D
 ## Coordinates the chapter; individual movement, world, UI and audio live separately.
 const Island = preload("res://scripts/island.gd")
 const Player = preload("res://scripts/player.gd")
-const Survivor = preload("res://scripts/survivor.gd")
+const Survivor = preload("res://scripts/crew.gd")
 const Interface = preload("res://scripts/interface.gd")
 const Sound = preload("res://scripts/sound.gd")
 const M = preload("res://scripts/models.gd")
@@ -13,6 +13,11 @@ var sound
 var npcs: Array = []
 var cine_camera: Camera3D
 var flight: Node3D
+var cinematic
+var intro_fade=0.0
+var intro_phase=""
+var autonomy_enabled=true
+var nearby_voice_cooldown=0.0
 var mode = "menu"
 var previous_mode = "play"
 var inventory = {"Wood":0,"Stone":0,"Scrap":0,"Fish":0,"Meal":0,"Ration":1}
@@ -98,6 +103,7 @@ func _ready():
 
 func _process(delta):
 	run_time+=delta
+	if mode=="play": nearby_voice_cooldown=maxf(0,nearby_voice_cooldown-delta)
 	for npc in npcs:
 		npc.tag.visible=mode=="play" and npc.position.distance_to(player.camera.position)<25
 		if mode!="play": npc.chat.visible=false
@@ -157,40 +163,28 @@ func start_intro():
 	ui.clear_buttons()
 	mode="intro"
 	intro_time=0
+	crash_played=false
+	last_intro_caption=""
 	flight=M.plane(self)
-	player.visible=false
+	cinematic=load("res://scripts/cinematic.gd").new(self)
+	cine_camera.current=true
+	cinematic.sample(0)
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 
 func update_intro(delta):
 	intro_time+=delta
-	var t=intro_time
-	if t<10:
-		flight.position=Vector3(-5+t*1.7,40-t*2.5,105-t*5)
-		flight.rotation=Vector3(-0.1-t*0.025,0,sin(t*2)*0.07+t*0.018)
-		cine_camera.position=flight.position+Vector3(16,5,18)
-		cine_camera.look_at(flight.position)
-		intro_caption="PILOT: Flight 408. We are diverting around the storm. Stay seated." if t<4 else "MAYA: The left engine is gone. Everyone, brace!"
-	elif t<11.5:
-		flight.visible=false
-		if not crash_played:
-			sound.play("crash")
-			crash_played=true
-	else:
-		cine_camera.position=Vector3(-17,12,61).lerp(Vector3(-15,7,44),clampf((t-11.5)/6,0,1))
-		cine_camera.look_at(world.plane.position)
-		intro_caption="ROWAN: You're awake. Four of us made it. We need a fire, and something to eat."
-	if intro_caption!=last_intro_caption:
-		sound.speak(intro_caption)
-		last_intro_caption=intro_caption
-	if t>=18: begin_play()
+	cinematic.sample(intro_time)
+	if intro_time>=cinematic.DURATION: begin_play()
 
 func begin_play():
+	if cinematic: cinematic.finish()
+	else: world.set_crash_visible(true)
 	if is_instance_valid(flight): flight.queue_free()
 	player.visible=true
 	player.camera.current=true
 	player.update_camera(1)
 	resume_game()
-	report("Find Maya, Finn and Rowan at camp. Press E to talk. Tab opens your journal.")
+	report("The crew have their own duties. Gather stones for the fire. E to talk; Tab for your journal.")
 
 func resume_game():
 	ui.clear_buttons()
@@ -386,7 +380,7 @@ func update_projectiles(delta):
 
 func open_dialogue(npc):
 	active_npc=npc
-	dialogue_line="We have a second chance. What should we do next?"
+	dialogue_line="I am here. "+npc.state+". Need a hand with something?"
 	mode="dialogue"
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	ui.show_dialogue(npc)
@@ -475,7 +469,12 @@ func load_game():
 	if not world.walkable(player.position): player.position=world.ground(world.camp+Vector3(0,0,6))
 	var bp=data.get("buggy_pos",[24,3])
 	world.buggy.position=world.ground(Vector3(float(bp[0]),0,float(bp[1])))
-	for i in range(npcs.size()): npcs[i].position=world.ground(world.camp+Vector3(-3+i*3,0,-3))
+	world.set_crash_visible(true)
+	for i in range(npcs.size()):
+		npcs[i].position=world.ground(world.camp+Vector3(-3+i*3,0,-3))
+		npcs[i].visible=true
+		npcs[i].routine_enabled=true
+		npcs[i].idle_time=0
 	player.driving=false
 	player.visible=true
 	player.body.visible=true
@@ -484,7 +483,7 @@ func load_game():
 	fishing=0
 	player.update_camera(1)
 	resume_game()
-	report("Journey restored. Crew are at camp; assign fresh jobs when ready.")
+	report("Journey restored. The crew will resume their duties from camp.")
 
 func capture(filename: String):
 	if "--camp" in OS.get_cmdline_user_args():
@@ -496,6 +495,10 @@ func capture(filename: String):
 	if "--intro-shot" in OS.get_cmdline_user_args():
 		start_intro()
 		intro_time=2
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shot-time="):
+			if mode!="intro": start_intro()
+			intro_time=float(arg.trim_prefix("--shot-time="))
 	for i in range(12): await get_tree().process_frame
 	var image=get_viewport().get_texture().get_image()
 	image.save_png(filename)
@@ -503,6 +506,7 @@ func capture(filename: String):
 
 func run_tests():
 	var failures=[]
+	autonomy_enabled=false
 	mode="play"
 	# Run the actual gameplay methods and NPC updates, without waiting in real time.
 	use_fire()
@@ -579,7 +583,8 @@ func run_tests():
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	for kind in ["pickup","step","success","crash"]:
 		if sound.clips[kind].data.is_empty(): failures.append("Missing audio "+kind)
-	if sound.voice_index.size()<18: failures.append("Missing spoken dialogue")
+	if sound.voice_index.size()<35: failures.append("Missing spoken dialogue")
+	await run_revision_tests(failures)
 	# Free queued menu controls before the runner exits.
 	mode="pause"
 	sound.stop_all()
@@ -589,9 +594,98 @@ func run_tests():
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if failures.is_empty():
-		print("KESTREL TESTS PASSED: resource gates, player/NPC fishing, cooking, meal, pathfinding, NPC requests, handoffs, repairs, ending, cancellation, duplicate pickups, buggy entry/exit, save/load, carried resources, island boundary, sound data and voice inventory")
+		print("KESTREL TESTS PASSED: resource gates, player/NPC fishing, cooking, meal, pathfinding, NPC requests, handoffs, repairs, ending, cancellation, duplicate pickups, buggy entry/exit, save/load, carried resources, island boundary, sound data, voice inventory, cinematic visibility/skip, autonomous jobs, command priority and greeting cooldowns")
 		get_tree().quit(0)
 	else:
 		for failure in failures: push_error("TEST FAILED: "+failure)
 		get_tree().quit(1)
+
+func run_revision_tests(failures: Array):
+	# Test the actual seekable scene rather than duplicating its visibility rules.
+	start_intro()
+	for t in [0.0,4.0,7.9]:
+		cinematic.sample(t)
+		if world.plane.is_visible_in_tree() or world.wreck_root.visible: failures.append("Wreck visible before impact")
+		for npc in npcs:
+			if npc.visible: failures.append("Survivor visible before impact")
+	cinematic.sample(8.5)
+	if flight.visible or intro_fade<0.99: failures.append("Impact transition")
+	cinematic.sample(12.0)
+	if not world.wreck_root.visible or flight.visible: failures.append("Post-crash aircraft visibility")
+	cinematic.sample(13.5)
+	var count=0
+	for actor in cinematic.actors:
+		if actor.visible: count+=1
+	if count!=1: failures.append("Staggered emergency exit")
+	cinematic.sample(28.0)
+	for actor in cinematic.actors:
+		if not actor.visible: failures.append("Four survivors did not escape")
+	cinematic.sample(34.0)
+	for i in range(cinematic.actors.size()):
+		if cinematic.actors[i].position.distance_to(cinematic.slot(i))>0.1: failures.append("Regroup formation")
+	begin_play()
+	if mode!="play" or not player.visible or not world.wreck_root.visible: failures.append("Intro skip final state")
+	# A held Finn must not be stolen by Maya's automatic request.
+	for npc in npcs:
+		npc.cancel()
+		npc.routine_enabled=true
+		npc.greeting_cooldown=999
+	for p in world.pickups:
+		p.taken=false
+		p.node.visible=true
+	inventory.Wood=0
+	inventory.Fish=0
+	inventory.Meal=0
+	inventory.Scrap=0
+	fire_lit=false
+	world.fire.visible=false
+	repaired=false
+	module_installed=false
+	module_carried=false
+	autonomy_enabled=true
+	npcs[1].command("wait")
+	var held_position=npcs[1].position
+	for i in range(1600):
+		for npc in npcs: npc._process(0.05)
+	if npcs[1].position.distance_to(held_position)>0.1 or npcs[1].task!="idle" or module_installed:
+		failures.append("Wait command overridden by autonomous request")
+	npcs[1].command("routine")
+	for i in range(9000):
+		for npc in npcs: npc._process(0.05)
+		if repaired and inventory.Wood>=4 and inventory.Fish>=1: break
+	if not repaired or inventory.Wood<4 or inventory.Fish<1:
+		failures.append("Autonomous radio, supplies and food progression")
+		for npc in npcs: print(npc.person," ",npc.task," ",npc.state," ",npc.position)
+	inventory.Stone=3
+	use_fire()
+	for i in range(4000):
+		for npc in npcs: npc._process(0.05)
+		if inventory.Meal>0: break
+	if inventory.Meal<1: failures.append("Autonomous cooking after fire is built")
+	# One greeting per approach; remaining nearby does not retrigger it.
+	var rowan=npcs[2]
+	rowan.command("wait")
+	rowan.greeting_cooldown=0
+	rowan.player_was_near=false
+	nearby_voice_cooldown=0
+	player.position=rowan.position+Vector3(1,0,0)
+	var before=events.size()
+	# The log has a fixed cap, so inspect the greeting counter through its cooldown.
+	rowan.greet(0.1)
+	if rowan.greeting_cooldown<37 or not rowan.player_was_near: failures.append("Approach greeting")
+	var line=events.back()
+	rowan.greet(40)
+	if events.back()!=line or rowan.greeting_cooldown!=0: failures.append("Greeting repeated while stationary")
+	player.position=rowan.position+Vector3(8,0,0)
+	rowan.greet(0.1)
+	nearby_voice_cooldown=0
+	player.position=rowan.position+Vector3(1,0,0)
+	rowan.greet(0.1)
+	if rowan.greeting_cooldown<37: failures.append("Greeting failed on re-entry")
+	# Pause must freeze jobs and resource accounting.
+	mode="pause"
+	var supplies=inventory.duplicate()
+	for npc in npcs: npc._process(100)
+	if inventory!=supplies: failures.append("Jobs advanced while paused")
+	autonomy_enabled=false
 

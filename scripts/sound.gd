@@ -11,6 +11,11 @@ var speech: AudioStreamPlayer
 var speech_queue: Array[String] = []
 var engine: AudioStreamPlayer
 
+func _process(delta):
+	if music and speech:
+		var level=-80.0 if not music_on else (-30.0 if speech.playing else -25.0)
+		music.volume_db=lerpf(music.volume_db,level,minf(delta*3,1))
+
 func _ready():
 	if FileAccess.file_exists("res://audio/voices/index.json"):
 		var data=JSON.parse_string(FileAccess.get_file_as_string("res://audio/voices/index.json").trim_prefix("\ufeff"))
@@ -58,11 +63,16 @@ func make_clip(kind: String, duration: float, looped: bool = false) -> AudioStre
 			"engine": sample=sin(t*TAU*48)*0.28+sin(t*TAU*96)*0.09+low*0.2
 			"campfire": sample=low*2.2+random.randf_range(-0.2,0.2)*(1.0 if random.randf()>0.993 else 0.0)
 			"music":
-				var notes = [146.832,174.614,220.0,261.626]
-				for j in range(4):
-					sample += sin(TAU*float(notes[j])*t)*0.09*(0.6+0.4*sin(t*TAU/16+j))
-				var beat = fmod(t,2.0)
-				sample += sin(t*TAU*float(notes[int(t/2)%4])*2)*exp(-beat*2.8)*0.13
+				var chords=[[130.813,164.814,196.0],[110.0,130.813,164.814],[87.307,110.0,130.813],[97.999,123.471,146.832]]
+				var chord=chords[int(t/4)%4]
+				var section=fmod(t,4.0)
+				var swell=sin(PI*section/4.0)
+				for note in chord:
+					sample+=(sin(TAU*float(note)*t)+sin(TAU*float(note)*1.002*t)*0.25)*0.075*swell
+				var beat=fmod(t,0.5)
+				var note=float(chord[int(t*2)%3])*2.0
+				# Soft plucked overtones above a changing, warm major-key harmony.
+				sample+=(sin(TAU*note*t)+sin(TAU*note*2*t)*0.28)*exp(-beat*8)*minf(1,beat*100)*0.12
 			"step": sample = low*2*decay+sin(t*TAU*90)*decay*0.2
 			"pickup": sample = sin(t*TAU*(650+t*1300))*decay*0.6
 			"click": sample = sin(t*TAU*550)*decay*0.3
@@ -99,10 +109,16 @@ func play(kind: String):
 func toggle_mute():
 	muted = not muted
 	AudioServer.set_bus_mute(0,muted)
-	if muted: speech.stop()
+	if muted: clear_speech()
+
+func clear_speech():
+	speech.stop()
+	speech_queue.clear()
 
 func speak(line: String):
 	if voice_on and not muted and voice_index.has(line):
+		if speech_queue.has(line): return
+		if speech_queue.size()>=3: speech_queue.pop_front()
 		speech_queue.append(line)
 		if not speech.playing: next_voice()
 

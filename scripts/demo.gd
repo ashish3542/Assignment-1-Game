@@ -23,9 +23,10 @@ func walk(destination: Vector3):
 	game.player.moving=false
 
 func run():
+	game.autonomy_enabled=false
 	await wait(2)
 	game.start_intro()
-	await wait(18.5)
+	while game.mode=="intro": await wait(0.2)
 	game.demo_active=true
 	game.demo_caption="AUTOMATED WALKTHROUGH / actual game systems"
 	await wait(2)

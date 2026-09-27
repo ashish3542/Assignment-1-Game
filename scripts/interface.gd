@@ -79,7 +79,7 @@ func show_dialogue(npc):
 		"Rowan": options = [["How is everyone doing?","story"],["Cook a fish for the camp","cook"],["Collect wood for camp","wood"]]
 	options.append(["Follow me","follow"])
 	options.append(["Wait here / cancel task","wait"])
-	options.append(["Return to camp","camp"])
+	options.append(["Resume your own duties","routine"])
 	for i in range(options.size()):
 		var action: String = options[i][1]
 		button(options[i][0],Vector2(380,267+i*48),func(): game.choose_dialogue(npc,action),520)
@@ -138,12 +138,12 @@ func draw_title():
 func draw_intro():
 	draw_rect(Rect2(0,0,1280,86),Color("07171d"))
 	draw_rect(Rect2(0,592,1280,128),Color("07171d"))
-	text(Vector2(52,52),"LOST SIGNAL  /  FLIGHT 408",15,gold)
+	text(Vector2(52,52),game.intro_phase,15,gold)
 	text(Vector2(1060,52),"ENTER · SKIP",14,muted)
-	text(Vector2(175,643),game.intro_caption,22)
+	wrapped(game.intro_caption,Vector2(130,633),90,22)
 	text(Vector2(175,679),"KESTREL ISLAND  ·  SOMEWHERE IN THE SOUTH PACIFIC",12,gold)
-	if game.intro_time>10 and game.intro_time<11.5:
-		draw_rect(Rect2(0,0,1280,720),Color(0.02,0.025,0.025,1))
+	if game.intro_fade>0:
+		draw_rect(Rect2(0,0,1280,720),Color(0.02,0.025,0.025,game.intro_fade))
 
 func draw_hud():
 	panel(Rect2(28,26,332,86),0.83)
@@ -151,7 +151,7 @@ func draw_hud():
 	text(Vector2(48,83),game.location_name(),25,cream,true)
 	panel(Rect2(28,130,332,164),0.84)
 	text(Vector2(48,157),"01 / SURVIVE. THEN SIGNAL.",13,gold)
-	var goals = [[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Ask Maya to repair the radio"],[game.won,"Send the rescue signal"]]
+	var goals = [[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Maya repairs the ridge radio"],[game.won,"Send the rescue signal"]]
 	for i in range(goals.size()):
 		text(Vector2(48,186+i*27),("✓  " if goals[i][0] else "○  ")+goals[i][1],16,muted if goals[i][0] else cream)
 	draw_map()
@@ -226,7 +226,7 @@ func draw_help():
 	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
 	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
 	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
-	var lines = ["WASD / arrows — Move     Mouse — Look     Shift — Run     Space — Jump", "E — Talk / collect / use     1 — Eat meal or ration     R — Craft spear", "G — Throw stone     M — Mute all     N — Voice on/off     Tab / Esc — Close", "F6 — Save journey     F9 — Load journey     E near buggy — Repair / drive / exit", "", "FIRST: collect 4 wood west of camp and 3 stones east of camp. Use E at the fire.", "NEXT: fish at the pier (F on map). Press E to cast, then E when BITE appears.", "Cook at the fire, then press 1 to eat. Finn can catch fish; Rowan can cook it.", "THEN: ask Maya to repair the radio. She requests Finn's help. Watch the handoff.", "Walk to the ridge transmitter (R) and press E after fire, food and repairs are ready.", "", "EXTRA: collect 3 scrap near the aircraft (X), then repair and drive the buggy.", "Shared supplies are available to everyone. NPC deliveries add to that inventory.", "Direct commands override NPC requests. Ask a busy Finn to wait to free him for Maya."]
+	var lines = ["WASD / arrows — Move     Mouse — Look     Shift — Run     Space — Jump", "E — Talk / collect / use     1 — Eat meal or ration     R — Craft spear", "G — Throw stone     M — Mute all     N — Voice on/off     Tab / Esc — Close", "F6 — Save journey     F9 — Load journey     E near buggy — Repair / drive / exit", "", "FIRST: Rowan gathers wood. Collect 3 stones east of camp; build the fire with E.", "NEXT: fish at the pier (F on map). Press E to cast, then E when BITE appears.", "Cook at the fire, then press 1 to eat. Finn can catch fish; Rowan can cook it.", "Maya checks the ridge radio and asks Finn for parts. Their duties start automatically.", "Walk to the ridge transmitter (R) and press E after fire, food and repairs are ready.", "", "EXTRA: collect 3 scrap near the aircraft (X), then repair and drive the buggy.", "Shared supplies are available to everyone. NPC deliveries add to that inventory.", "Wait / Follow pause duties. Choose Resume your own duties to let the crew work again."]
 	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
 	text(Vector2(88,658),"CREW LOG",12,gold)
 	if not game.events.is_empty(): text(Vector2(88,688),str(game.events.back()).left(115),15,muted)

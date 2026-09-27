@@ -9,5 +9,7 @@ build/
 *.mp4
 *.mov
 *.mkv
+*.avi
+*.wav.import
 Thumbs.db
 .DS_Store

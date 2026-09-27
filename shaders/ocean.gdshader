@@ -10,7 +10,14 @@ void fragment() {
 	float ripple = sin(world_pos.x*1.8+TIME) * sin(world_pos.z*1.3-TIME*0.7);
 	float shallow = 1.0-smoothstep(64.0,120.0,length(world_pos.xz*vec2(0.9,1.15)));
 	ALBEDO = mix(vec3(0.025,0.19,0.26),vec3(0.09,0.55,0.53),shallow) + wave*0.025;
+	float radius=length(vec2(world_pos.x/1.12,world_pos.z));
+	float edge=1.0-smoothstep(56.0,87.0,radius);
+	float hill=exp(-((world_pos.x-6.0)*(world_pos.x-6.0)+(world_pos.z+35.0)*(world_pos.z+35.0))/950.0)*8.0;
+	float height=-2.5+edge*(4.0+hill+sin(world_pos.x*0.06)*cos(world_pos.z*0.07));
+	float shore=smoothstep(-1.1,-0.1,height);
+	float foam=shore*pow(max(0.0,sin(radius*2.0-TIME*1.6+wave*0.3)),6.0);
+	ALBEDO=mix(ALBEDO,vec3(0.74,0.87,0.77),foam*0.8);
 	ROUGHNESS = 0.27;
 	METALLIC = 0.22;
-	NORMAL = normalize(vec3(ripple*0.1,0.98,wave*0.05));
+	NORMAL_MAP=vec3(0.5+ripple*0.06,0.5+wave*0.025,1.0);
 }

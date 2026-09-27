@@ -7,6 +7,8 @@ var fire_light: OmniLight3D
 var beacon_light: OmniLight3D
 var beacon_beam: MeshInstance3D
 var plane: Node3D
+var wreck_root: Node3D
+var smoke: GPUParticles3D
 var buggy: Node3D
 var palms: Array[Node3D] = []
 var camp = Vector3(-8,0,20)
@@ -38,6 +40,7 @@ func _ready():
 	_build_camp()
 	_build_landmarks()
 	_build_foliage()
+	_build_grass()
 	_build_pickups()
 	nav.region = Rect2i(-50,-50,101,101)
 	nav.cell_size = Vector2(2,2)
@@ -63,7 +66,7 @@ func _build_environment():
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("a1c7d0")
-	env.ambient_light_energy = 0.3
+	env.ambient_light_energy = 0.43
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
 	env.fog_light_color = Color("b3c9c1")
@@ -72,8 +75,8 @@ func _build_environment():
 	add_child(we)
 	var sun = DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-27,-38,0)
-	sun.light_color = Color("fff0da")
-	sun.light_energy = 0.85
+	sun.light_color = Color("ffe2b8")
+	sun.light_energy = 1.02
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 120
 	add_child(sun)
@@ -160,14 +163,63 @@ func _build_camp():
 		M.box(self,table_pos+Vector3(x,0.45,0),Vector3(0.12,0.9,0.7),Color("625a44"))
 
 func _build_landmarks():
-	plane = M.plane(self,true)
+	wreck_root=Node3D.new()
+	wreck_root.name="CrashWreckage"
+	add_child(wreck_root)
+	plane = M.plane(wreck_root,true)
 	plane.position = ground(Vector3(-40,0,37),0.9)
 	plane.rotation = Vector3(0.1,-0.5,-0.13)
 	obstacles.append(Vector3(-40,37,3.3))
 	for i in range(8):
 		var pos = ground(Vector3(-42+rng.randf_range(-7,8),0,37+rng.randf_range(-7,8)),0.15)
-		var debris = M.box(self,pos,Vector3(1.5,0.15,0.6),Color("b5bbae"))
+		var debris = M.box(wreck_root,pos,Vector3(1.5,0.15,0.6),Color("b5bbae"))
 		debris.rotation = Vector3(0,rng.randf()*TAU,0.2)
+	# Slow, soft smoke marks the crash site after impact only.
+	smoke=GPUParticles3D.new()
+	wreck_root.add_child(smoke)
+	smoke.position=plane.position+Vector3(-2,1.5,0)
+	smoke.amount=22
+	smoke.lifetime=8
+	smoke.preprocess=6
+	smoke.visibility_aabb=AABB(Vector3(-12,-3,-12),Vector3(30,40,30))
+	var pm=ParticleProcessMaterial.new()
+	pm.direction=Vector3(0.18,1,0.05)
+	pm.spread=15
+	pm.initial_velocity_min=0.8
+	pm.initial_velocity_max=1.4
+	pm.gravity=Vector3(0.08,0.1,0)
+	pm.scale_min=1.5
+	pm.scale_max=3.5
+	var gradient=Gradient.new()
+	gradient.set_color(0,Color(0.17,0.19,0.18,0.22))
+	gradient.set_color(1,Color(0.4,0.43,0.42,0))
+	var ramp=GradientTexture1D.new()
+	ramp.gradient=gradient
+	pm.color_ramp=ramp
+	smoke.process_material=pm
+	var puff=QuadMesh.new()
+	puff.size=Vector2(2.5,2.5)
+	var smoke_mat=M.material(Color.WHITE)
+	smoke_mat.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	smoke_mat.vertex_color_use_as_albedo=true
+	smoke_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	smoke_mat.billboard_mode=BaseMaterial3D.BILLBOARD_ENABLED
+	smoke_mat.billboard_keep_scale=true
+	smoke_mat.no_depth_test=false
+	var soft=Gradient.new()
+	soft.set_color(0,Color(1,1,1,0.65))
+	soft.set_color(1,Color(1,1,1,0))
+	soft.add_point(0.35,Color(1,1,1,0.25))
+	var puff_texture=GradientTexture2D.new()
+	puff_texture.gradient=soft
+	puff_texture.width=64
+	puff_texture.height=64
+	puff_texture.fill=GradientTexture2D.FILL_RADIAL
+	puff_texture.fill_from=Vector2(0.5,0.5)
+	puff_texture.fill_to=Vector2(1,0.5)
+	smoke_mat.albedo_texture=puff_texture
+	puff.material=smoke_mat
+	smoke.draw_pass_1=puff
 	# Signal station: open sides make interaction and movement readable.
 	for x in [-1.1,1.1]:
 		for z in [-1.1,1.1]:
@@ -247,11 +299,49 @@ func _build_foliage():
 			M.sphere(self,ground(p,0.15),Vector3(1.1,0.55,0.85),Color("496637").lightened(rng.randf()*0.1))
 
 func near_landmark(p: Vector3, distance: float) -> bool:
-	for target in [camp,fish_spot,salvage,tower,Vector3(24,0,3),wood_spot]:
+	for target in [camp,fish_spot,salvage,tower,Vector3(24,0,3),wood_spot,Vector3(-29,0,35),Vector3(-40,0,37)]:
 		if Vector2(p.x-target.x,p.z-target.z).length()<distance:
 			return true
+	var escape_path=Geometry2D.get_closest_point_to_segment(Vector2(p.x,p.z),Vector2(-29,35),Vector2(-8,24))
+	if escape_path.distance_to(Vector2(p.x,p.z))<2.5: return true
 	# Keep the central cooperation corridor clear.
 	return absf(p.x)<8 and p.z>-30 and p.z<28
+
+func set_crash_visible(value: bool):
+	wreck_root.visible=value
+	smoke.emitting=value
+	for p in pickups:
+		if p.kind=="Scrap" or p.id==60: p.node.visible=value and not p.taken
+
+func _build_grass():
+	# One mesh for thousands of blades keeps the extra vegetation inexpensive.
+	var st=SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in range(6500):
+		var p=Vector3(rng.randf_range(-70,70),0,rng.randf_range(-66,56))
+		if height_at(p.x,p.z)<2.7 or near_landmark(p,4): continue
+		p=ground(p)
+		var h=rng.randf_range(0.18,0.52)
+		var a=rng.randf()*TAU
+		var side=Vector3(cos(a),0,sin(a))*0.06
+		var c=Color("5c803f").lightened(rng.randf()*0.16)
+		for j in range(2):
+			st.set_color(c.darkened(0.22))
+			st.set_uv(Vector2(0,0))
+			st.add_vertex(p-side)
+			st.set_uv(Vector2(1,0))
+			st.add_vertex(p+side)
+			st.set_color(c)
+			st.set_uv(Vector2(0.5,1))
+			st.add_vertex(p+Vector3(0.09,h,0.06))
+			side=side.rotated(Vector3.UP,PI/2)
+	st.generate_normals()
+	var grass=MeshInstance3D.new()
+	grass.mesh=st.commit()
+	var mat=ShaderMaterial.new()
+	mat.shader=load("res://shaders/grass.gdshader")
+	grass.material_override=mat
+	add_child(grass)
 
 func _build_pickups():
 	for i in range(12):
