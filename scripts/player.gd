@@ -11,6 +11,8 @@ var foot_time = 0.0
 var driving = false
 var jump_y = 0.0
 var jump_speed = 0.0
+var velocity=Vector3.ZERO
+var space_was_down=false
 
 func setup(w, g):
 	world = w
@@ -42,19 +44,12 @@ func _physics_process(delta):
 	if Input.is_physical_key_pressed(KEY_SHIFT): speed = 8.0
 	if driving: speed = 15.0
 	if game.fishing > 0: speed = 0
-	moving = dir.length()>0.1 and speed>0
-	var target = position+dir*speed*delta
-	var margin = 1.2 if driving else 0.45
-	if world.walkable(target,margin):
-		position.x = target.x
-		position.z = target.z
-	else:
-		var xonly = Vector3(target.x,0,position.z)
-		var zonly = Vector3(position.x,0,target.z)
-		if world.walkable(xonly,margin): position.x = target.x
-		elif world.walkable(zonly,margin): position.z = target.z
-	if not driving and Input.is_physical_key_pressed(KEY_SPACE) and jump_y<=0 and game.fishing<=0:
+	if world.in_tent(position): speed=minf(speed,2.2)
+	move_horizontal(dir,speed,delta)
+	var space_down=Input.is_physical_key_pressed(KEY_SPACE)
+	if not driving and not world.in_tent(position) and space_down and not space_was_down and jump_y<=0 and game.fishing<=0:
 		jump_speed = 5
+	space_was_down=space_down
 	jump_speed -= 15*delta
 	jump_y = maxf(0,jump_y+jump_speed*delta)
 	if jump_y==0: jump_speed=0
@@ -65,7 +60,7 @@ func _physics_process(delta):
 		if foot_time>0.42 and not driving:
 			game.sound.play("step")
 			foot_time = 0
-	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving)
+	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving,false,"escape" if world.in_tent(position) else "idle",false,delta,clampf(velocity.length()/3.5,0.6,1.65))
 	if driving:
 		world.buggy.position = world.ground(position)
 		world.buggy.rotation.y = body.rotation.y
@@ -73,10 +68,20 @@ func _physics_process(delta):
 	else: body.visible = true
 	update_camera(delta)
 
+func move_horizontal(direction: Vector3, speed: float, delta: float):
+	velocity=velocity.move_toward(direction*speed,delta*(20.0 if direction.length()>0 else 28.0))
+	var previous=position
+	position=world.move_character(position,velocity*delta,1.2 if driving else 0.45)
+	moving=Vector2(position.x-previous.x,position.z-previous.z).length()>0.002
+	if not moving: velocity=Vector3.ZERO
+
 func update_camera(delta: float):
 	var distance = 8.2 if driving else 5.2
 	var focus = position+Vector3(0,1.4,0)
 	var desired = focus+Vector3(sin(yaw)*distance,1.3+pitch*3,cos(yaw)*distance)
 	desired.y = maxf(desired.y,world.height_at(desired.x,desired.z)+0.7)
-	camera.position = camera.position.lerp(desired,minf(1,delta*12))
+	desired=world.camera_position(focus,desired)
+	# Contract immediately at an obstruction; only ease out into clear space.
+	var eased=camera.position.lerp(desired,minf(1,delta*12))
+	camera.position=world.camera_position(focus,eased)
 	camera.look_at(focus)

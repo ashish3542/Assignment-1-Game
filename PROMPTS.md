@@ -153,3 +153,23 @@ Work began on 2026-09-26: hide wreckage until impact; animate four survivors lea
 Resumed on 2026-09-27 from the student's saved commit. During review, actual voice-file durations showed that some cinematic cuts interrupted dialogue. Extended shot timings to let the lines finish and adjusted Maya's camera shot to show her face. Final verification and delivery are recorded in VALIDATION.md.
 
 Completed implementation and review: revised 75.3-second opening, automatic role-based jobs, approach greetings with cooldowns, command overrides, articulated character and working poses, graphical refinements, softer music and 23 additional synthetic voice lines (41 total). Updated run instructions and the learning guide. Integrated tests passed and a new 3:34 explicitly automated revision preview was recorded and visually sampled; its audio track and levels were checked. No student reflection or manual playtest is claimed.
+
+## 19. Planning: voices, animation and tent collisions
+
+> so for now just planing i want voice to be like a real person talking and can we make animoation like a real character and character can walk through the tent so it has to be stopped  is it acheviable or not  or its beyond capcity for now
+
+Planning response: explained prerecorded natural speech, rigged human models and blended animation as achievable upgrades; identified tent collision as a movement-system bug. No implementation was performed during that planning response. This prompt was backfilled from the conversation during the next implementation turn.
+
+## 20. Improve what is feasible; fix overlapping conversation
+
+> so do we need to get that animation from somewhere else and for the animation if it is way beoynd your capability then just make how much you can and there are many bugs as well going on everyone talking at same  time it should be like a  gta vice city vibe
+
+Implementation direction: improve the original procedural animation without importing an asset pack; add shared collision rules for characters and NPC navigation; coordinate audio, subtitle and talking poses around one active speaker; reduce chatter, and frame conversations with a closer camera. The requested Vice City feeling is treated as inspiration for readable third-person presentation, not a claim to reproduce that game's assets, scale or quality. Results are recorded in VALIDATION.md.
+
+Implemented: tent and camp-furniture boundaries, a usable entrance, NPC routes around solids, camera retraction at camp walls, smoother locomotion/pose transitions, a ducking pose inside the tent, one active speaker with matching subtitle/talking gesture, local and rate-limited incidental speech, pause-aware dialogue, and a closer conversation camera. No external animation pack or new voice service was used; the existing voices remain synthetic.
+
+## 21. Resume after the second usage interruption
+
+> ok so resume the work wherever it was stuck due to usage limit
+
+The implementation, clean-copy regression tests and 33.8-second automated polish preview were complete before the interruption. The usage limit prevented automatic approval review of the final GitHub fetch; that command was not executed. Resumed by checking the saved working tree and preparing the tested changes and submission documents for publication.

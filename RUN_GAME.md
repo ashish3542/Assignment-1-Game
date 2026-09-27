@@ -31,6 +31,10 @@ On the original development PC, double-click `PLAY.cmd` to launch the copy of Go
 
 Mouse capture is released by Escape. Click dialogue and menu buttons with the mouse.
 
+Tent sides and the rear, the bench, crates and workbench block movement. Enter the tent through its open front; the character moves slowly and ducks inside. Jumping inside the tent is disabled. These are simple footprint collisions, not a full climbing/physics system.
+
+Only the current speaker gets a subtitle and talking gesture. Voices take turns with a short gap. Ordinary crew speech is heard within 22 meters; recent job messages remain in the Tab journal. Opening a direct conversation clears unrelated speech and pauses other jobs. Turning voices off with N retains timed subtitles. Pause/Journal also pauses the conversation.
+
 ## Complete the chapter
 
 1. Start at camp (C on map). The three survivors begin their own duties after a short pause. Approach them for a spoken greeting; press E to talk or give directions.

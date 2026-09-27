@@ -120,11 +120,23 @@ static func frond(parent: Node3D, origin: Vector3, angle: float, length: float, 
 	parent.add_child(leaf)
 	beam(parent,origin,origin+direction*length*0.8+Vector3(0,-0.5,0),0.018,Color("8c9451"))
 
-static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = false, pose: String = "idle", talking: bool = false):
-	var stride = sin(t*7.4)*0.48 if moving else sin(t*1.6)*0.018
-	body.position.y=absf(sin(t*7.4))*0.026 if moving else sin(t*1.8)*0.006
-	body.rotation.x=0.035 if moving else 0.0
-	body.rotation.z=sin(t*(7.4 if moving else 1.1))*0.014
+static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = false, pose: String = "idle", talking: bool = false, delta: float=0.01667, pace: float=1.0):
+	var joints=[]
+	var previous=[]
+	for side in [-1,1]:
+		for path in ["Arm"+str(side),"Arm"+str(side)+"/Elbow","Leg"+str(side),"Leg"+str(side)+"/Knee"]:
+			joints.append(body.get_node(path))
+			previous.append(body.get_node(path).rotation)
+	var old_height=body.position.y
+	var old_tilt=body.rotation
+	var weight=move_toward(float(body.get_meta("walk_weight",0.0)),1.0 if moving else 0.0,delta*5)
+	var phase=float(body.get_meta("stride_phase",0.0))+delta*7.4*pace
+	body.set_meta("walk_weight",weight)
+	body.set_meta("stride_phase",phase)
+	var stride=sin(phase)*0.45*weight+sin(t*1.6)*0.014*(1-weight)
+	body.position.y=absf(sin(phase))*0.022*weight+sin(t*1.8)*0.006*(1-weight)
+	body.rotation.x=0.045*weight
+	body.rotation.z=sin(phase)*0.012*weight+sin(t*1.1)*0.01*(1-weight)
 	body.get_node("Head").rotation.x=sin(t*1.6)*0.025
 	body.get_node("Head/Mouth").scale.y=1.0+absf(sin(t*12))*1.8 if talking else 1.0
 	for side in [-1,1]:
@@ -138,6 +150,11 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 		body.rotation.x=0.48 if pose=="gather" else 0.20
 		body.position.y-=0.15
 		body.get_node("Arm1").rotation.x=-0.6
+		if pose=="gather":
+			for side in [-1,1]:
+				body.get_node("Leg"+str(side)).rotation.x=-0.25
+				body.get_node("Leg"+str(side)+"/Knee").rotation.x=0.5
+			body.get_node("Arm1").rotation.x=-0.8+sin(t*3)*0.12
 	elif pose=="wave":
 		body.get_node("Arm1").rotation=Vector3(-0.6,0,-1.0)
 		body.get_node("Arm1/Elbow").rotation=Vector3(-2.1,0,sin(t*8)*0.22)
@@ -149,6 +166,12 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	elif talking and not moving and not carry:
 		body.get_node("Arm1").rotation.x=-0.3+sin(t*2)*0.15
 		body.get_node("Arm1/Elbow").rotation.x=-0.7+sin(t*2.7)*0.25
+	var blend=1.0-exp(-12.0*delta)
+	for i in range(joints.size()):
+		joints[i].rotation=Vector3(lerp_angle(previous[i].x,joints[i].rotation.x,blend),lerp_angle(previous[i].y,joints[i].rotation.y,blend),lerp_angle(previous[i].z,joints[i].rotation.z,blend))
+	body.position.y=lerpf(old_height,body.position.y,blend)
+	body.rotation.x=lerp_angle(old_tilt.x,body.rotation.x,blend)
+	body.rotation.z=lerp_angle(old_tilt.z,body.rotation.z,blend)
 
 static func plane(parent: Node3D, broken: bool = false) -> Node3D:
 	var p = Node3D.new()

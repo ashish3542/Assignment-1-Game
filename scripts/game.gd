@@ -75,7 +75,7 @@ func _ready():
 	for i in range(3):
 		var npc = Survivor.new()
 		add_child(npc)
-		npc.setup(self,names[i],jobs[i],colors[i],world.camp+Vector3(-3+i*3,0,-3))
+		npc.setup(self,names[i],jobs[i],colors[i],world.camp+Vector3(-2+i*3,0,-2))
 		npcs.append(npc)
 	cine_camera = Camera3D.new()
 	cine_camera.far=900
@@ -104,12 +104,16 @@ func _ready():
 			var demo=load("res://scripts/revision_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--polish-demo":
+			var demo=load("res://scripts/polish_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
 	if mode=="play": nearby_voice_cooldown=maxf(0,nearby_voice_cooldown-delta)
 	for npc in npcs:
-		npc.tag.visible=mode=="play" and npc.position.distance_to(player.camera.position)<25
+		npc.tag.visible=mode=="play" and npc.position.distance_to(player.position)<12 and npc.position.distance_to(player.camera.position)>2.5
 		if mode!="play": npc.chat.visible=false
 	toast_time=maxf(0,toast_time-delta)
 	if mode=="menu":
@@ -205,6 +209,7 @@ func pause_game():
 func show_help():
 	previous_mode=mode
 	mode="help"
+	sound.engine.volume_db=-80
 	ui.clear_buttons()
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 
@@ -212,13 +217,18 @@ func restart():
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	get_tree().reload_current_scene()
 
-func report(line: String):
-	toast=line
-	toast_time=5
+func report(line: String, speaker: String="", priority: int=1) -> bool:
 	events.append(line)
 	if events.size()>60: events.pop_front()
 	if line.begins_with("Maya:") or line.begins_with("Finn:") or line.begins_with("Rowan:") or line.begins_with("COAST GUARD:"):
-		sound.speak(line)
+		# Crew speech stays local. Distant job progress is still recorded in the journal.
+		if not speaker.is_empty() and priority<=1:
+			for npc in npcs:
+				if npc.person==speaker and npc.position.distance_to(player.position)>22: return false
+		return sound.speak(line,speaker,priority)
+	toast=line
+	toast_time=4
+	return false
 
 func location_name() -> String:
 	if player.position.distance_to(world.tower)<17: return "Signal Ridge"
@@ -383,9 +393,17 @@ func update_projectiles(delta):
 			projectiles.remove_at(i)
 
 func open_dialogue(npc):
+	sound.clear_speech()
 	active_npc=npc
 	dialogue_line="I am here. "+npc.state+". Need a hand with something?"
 	mode="dialogue"
+	player.velocity=Vector3.ZERO
+	var facing=(player.position-npc.position).normalized()
+	var side=Vector3(-facing.z,0,facing.x)
+	cine_camera.fov=48
+	cine_camera.position=world.camera_position(npc.position+Vector3(0,1.2,0),npc.position+facing*4.5+side*1.6+Vector3(0,1.8,0))
+	cine_camera.look_at(npc.position+Vector3(0,1.15,0)-side*1.0)
+	cine_camera.current=true
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	ui.show_dialogue(npc)
 
@@ -395,7 +413,8 @@ func choose_dialogue(npc, action: String):
 			"Maya": dialogue_line="A storm took the engine. The ridge radio needs an aircraft module. Finn can bring it while I make repairs."
 			"Finn": dialogue_line="We have a fishing line from the wreck. Try the pier. I can bring fish to Rowan while you gather firewood."
 			"Rowan": dialogue_line="Four of us survived. Make a fire, then eat a cooked fish. I can cook what Finn brings. We share all supplies."
-		sound.speak(dialogue_line)
+		sound.clear_speech()
+		sound.speak(dialogue_line,npc.person,2)
 		return
 	npc.command(action)
 	resume_game()
@@ -411,6 +430,7 @@ func activate_beacon():
 		report("Secure the camp first: build a fire, cook a fish, and eat it.")
 		return
 	won=true
+	sound.clear_speech()
 	world.beacon_light.visible=true
 	world.beacon_beam.visible=true
 	sound.play("success")
@@ -444,6 +464,10 @@ func load_game():
 		report("Save file is not a supported journey.")
 		return
 	var data: Dictionary=parsed
+	sound.clear_speech()
+	player.velocity=Vector3.ZERO
+	player.jump_y=0
+	player.jump_speed=0
 	for npc in npcs: npc.cancel()
 	reserved.clear()
 	for k in inventory: inventory[k]=maxi(0,int(data.get("inventory",{}).get(k,0)))
@@ -475,7 +499,7 @@ func load_game():
 	world.buggy.position=world.ground(Vector3(float(bp[0]),0,float(bp[1])))
 	world.set_crash_visible(true)
 	for i in range(npcs.size()):
-		npcs[i].position=world.ground(world.camp+Vector3(-3+i*3,0,-3))
+		npcs[i].position=world.ground(world.camp+Vector3(-2+i*3,0,-2))
 		npcs[i].visible=true
 		npcs[i].routine_enabled=true
 		npcs[i].idle_time=0
@@ -589,6 +613,7 @@ func run_tests():
 		if sound.clips[kind].data.is_empty(): failures.append("Missing audio "+kind)
 	if sound.voice_index.size()<35: failures.append("Missing spoken dialogue")
 	await run_revision_tests(failures)
+	load("res://scripts/polish_tests.gd").new().run(self,failures)
 	# Free queued menu controls before the runner exits.
 	mode="pause"
 	sound.stop_all()
@@ -678,6 +703,8 @@ func run_revision_tests(failures: Array):
 	# One greeting per approach; remaining nearby does not retrigger it.
 	var rowan=npcs[2]
 	rowan.command("wait")
+	sound.clear_speech()
+	sound.recent_lines.clear()
 	rowan.greeting_cooldown=0
 	rowan.player_was_near=false
 	nearby_voice_cooldown=0
@@ -690,6 +717,8 @@ func run_revision_tests(failures: Array):
 	if events.back()!=line or rowan.greeting_cooldown!=0: failures.append("Greeting repeated while stationary")
 	player.position=rowan.position+Vector3(8,0,0)
 	rowan.greet(0.1)
+	sound.clear_speech()
+	sound.advance_conversation(40)
 	nearby_voice_cooldown=0
 	player.position=rowan.position+Vector3(1,0,0)
 	rowan.greet(0.1)

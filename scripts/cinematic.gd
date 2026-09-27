@@ -138,7 +138,7 @@ func finish():
 	for i in range(game.npcs.size()):
 		var npc=game.npcs[i]
 		npc.visible=true
-		npc.position=game.world.ground(game.world.camp+Vector3(-3+i*3,0,-3))
+		npc.position=game.world.ground(game.world.camp+Vector3(-2+i*3,0,-2))
 		game.M.animate_human(npc.body,0,false)
 	game.player.position=game.world.ground(game.world.camp+Vector3(0,0,6))
 	game.player.body.rotation=Vector3.ZERO

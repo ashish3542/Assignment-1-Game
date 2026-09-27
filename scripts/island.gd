@@ -2,6 +2,8 @@ extends Node3D
 const M = preload("res://scripts/models.gd")
 var rng = RandomNumberGenerator.new()
 var obstacles: Array[Vector3] = []
+var solid_rects: Array[Dictionary] = []
+var tent_center=Vector3.ZERO
 var fire: Node3D
 var fire_light: OmniLight3D
 var beacon_light: OmniLight3D
@@ -42,13 +44,13 @@ func _ready():
 	_build_foliage()
 	_build_grass()
 	_build_pickups()
-	nav.region = Rect2i(-50,-50,101,101)
-	nav.cell_size = Vector2(2,2)
+	nav.region = Rect2i(-100,-100,201,201)
+	nav.cell_size = Vector2(1,1)
 	nav.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	nav.update()
-	for x in range(-50,51):
-		for z in range(-50,51):
-			if not walkable(Vector3(x*2,0,z*2),0.65):
+	for x in range(-100,101):
+		for z in range(-100,101):
+			if not walkable(Vector3(x,0,z),0.45):
 				nav.set_point_solid(Vector2i(x,z))
 
 func _build_environment():
@@ -125,13 +127,24 @@ func _build_camp():
 	var tent = Node3D.new()
 	add_child(tent)
 	tent.position = ground(camp+Vector3(-5,0,-3))
+	tent_center=tent.position
+	# Solid sides and rear, with a clear entrance at +Z. Movement and routes share these.
+	for side in [-1,1]: add_solid(tent_center+Vector3(side*1.2,0,0),Vector2(0.7,3.6),2.3)
+	add_solid(tent_center+Vector3(0,0,-1.7),Vector2(3.1,0.22),2.3)
 	for side in [-1,1]:
 		var tarp = M.box(tent,Vector3(side*0.78,1.15,0),Vector3(0.07,2.7,3.4),Color("c38548"))
 		tarp.rotation.z = side*0.64
 		M.beam(tent,Vector3(side*1.8,0,-1.9),Vector3(0,2.3,-1.9),0.045,Color("473e2c"))
 	M.box(tent,Vector3(0,0.04,0),Vector3(3.2,0.05,3.3),Color("4c5546"))
+	var back_surface=SurfaceTool.new()
+	back_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point in [Vector3(-1.6,0,-1.7),Vector3(0,2.3,-1.7),Vector3(1.6,0,-1.7)]: back_surface.add_vertex(point)
+	back_surface.generate_normals()
+	var back_cloth=M.mesh(tent,back_surface.commit(),Vector3.ZERO,Color("ad773e"))
+	back_cloth.material_override.cull_mode=BaseMaterial3D.CULL_DISABLED
 	for i in range(3):
 		M.box(self,ground(camp+Vector3(4+i*0.8,0,2),0.35),Vector3(0.7,0.7,0.7),Color("6c6550"))
+	add_solid(camp+Vector3(4.8,0,2),Vector2(2.3,0.7),0.7)
 	for i in range(10):
 		var a = i*TAU/10
 		M.sphere(self,camp+Vector3(cos(a)*0.95,0.1,sin(a)*0.95),Vector3(0.5,0.35,0.4),Color("74766a"))
@@ -157,8 +170,10 @@ func _build_camp():
 	add_child(fire_light)
 	# A driftwood bench and a modest communal workbench.
 	M.box(self,ground(camp+Vector3(0,0,3),0.4),Vector3(3.2,0.3,0.6),Color("716047"))
+	add_solid(camp+Vector3(0,0,3),Vector2(3.2,0.6),0.6)
 	var table_pos = ground(camp+Vector3(3,0,-4))
 	M.box(self,table_pos+Vector3(0,0.9,0),Vector3(2,0.12,1),Color("a38c64"))
+	add_solid(table_pos,Vector2(2,1),1.0)
 	for x in [-0.8,0.8]:
 		M.box(self,table_pos+Vector3(x,0.45,0),Vector3(0.12,0.9,0.7),Color("625a44"))
 
@@ -372,24 +387,75 @@ func walkable(p: Vector3, margin: float = 0.45) -> bool:
 	for o in obstacles:
 		if Vector2(p.x-o.x,p.z-o.y).length()<o.z+margin:
 			return false
+	for solid in solid_rects:
+		if solid.rect.grow(margin).has_point(Vector2(p.x,p.z)): return false
 	return true
 
+func add_solid(center: Vector3, size: Vector2, height: float):
+	solid_rects.append({"rect":Rect2(Vector2(center.x,center.z)-size*0.5,size),"base":height_at(center.x,center.z),"height":height})
+
+func in_tent(p: Vector3) -> bool:
+	return absf(p.x-tent_center.x)<0.8 and p.z>tent_center.z-1.6 and p.z<tent_center.z+1.7
+
+func move_character(start: Vector3, displacement: Vector3, margin: float=0.45) -> Vector3:
+	# Substeps prevent high speed or a slow frame from skipping a thin wall.
+	var flat=Vector3(displacement.x,0,displacement.z)
+	var steps=maxi(1,ceili(flat.length()/0.16))
+	var step=flat/float(steps)
+	var result=start
+	for i in range(steps):
+		var candidate=result+step
+		if walkable(candidate,margin): result=candidate
+		else:
+			var along_x=result+Vector3(step.x,0,0)
+			var along_z=result+Vector3(0,0,step.z)
+			if absf(step.x)>0.0001 and walkable(along_x,margin): result=along_x
+			elif absf(step.z)>0.0001 and walkable(along_z,margin): result=along_z
+	return ground(result)
+
+func clear_segment(a: Vector3, b: Vector3, margin: float=0.38) -> bool:
+	var steps=maxi(1,ceili(a.distance_to(b)/0.15))
+	for i in range(1,steps+1):
+		if not walkable(a.lerp(b,float(i)/steps),margin): return false
+	return true
+
+func camera_position(focus: Vector3, desired: Vector3) -> Vector3:
+	var steps=maxi(1,ceili(focus.distance_to(desired)/0.12))
+	var last=focus
+	for i in range(1,steps+1):
+		var p=focus.lerp(desired,float(i)/steps)
+		for solid in solid_rects:
+			if p.y>solid.base and p.y<solid.base+solid.height+0.15 and solid.rect.grow(0.15).has_point(Vector2(p.x,p.z)):
+				return last
+		last=p
+	return desired
+
 func path_to(a: Vector3, b: Vector3) -> PackedVector3Array:
-	var start = Vector2i(roundi(a.x/2),roundi(a.z/2))
-	var end = Vector2i(roundi(b.x/2),roundi(b.z/2))
+	var start = Vector2i(roundi(a.x),roundi(a.z))
+	var end = Vector2i(roundi(b.x),roundi(b.z))
 	var result = PackedVector3Array()
 	if not nav.is_in_boundsv(start) or not nav.is_in_boundsv(end):
 		return result
-	if nav.is_point_solid(start):
-		for offset in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1)]:
-			if nav.is_in_boundsv(start+offset) and not nav.is_point_solid(start+offset):
-				start += offset
-				break
-	if nav.is_point_solid(end):
-		return result
+	start=nearest_nav_point(a,start)
+	end=nearest_nav_point(b,end)
+	if nav.is_point_solid(start) or nav.is_point_solid(end): return result
 	for point in nav.get_point_path(start,end):
 		result.append(ground(Vector3(point.x,0,point.y)))
+	if not result.is_empty() and walkable(b,0.38) and clear_segment(result[result.size()-1],b): result.append(ground(b))
 	return result
+
+func nearest_nav_point(p: Vector3, cell: Vector2i) -> Vector2i:
+	var best=cell
+	var distance=INF
+	for x in range(-2,3):
+		for z in range(-2,3):
+			var c=cell+Vector2i(x,z)
+			if not nav.is_in_boundsv(c) or nav.is_point_solid(c): continue
+			var q=ground(Vector3(c.x,0,c.y))
+			if p.distance_to(q)<distance and clear_segment(p,q):
+				best=c
+				distance=p.distance_to(q)
+	return best
 
 func _process(_delta):
 	var t = Time.get_ticks_msec()/1000.0

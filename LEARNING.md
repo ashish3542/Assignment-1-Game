@@ -40,6 +40,14 @@ Maya enters `waiting_parts` at the transmitter. If Finn is idle and available fo
 - Tell Finn to wait while Maya needs a module. He should stay put. Resume his duties and watch the delivery. Explain why `available()` checks both his task and whether duties are enabled.
 - Compare the old and new videos. Identify one real improvement and one remaining limitation in your own words. Art and voices are still simplified/synthetic.
 
+## Bug-fix lesson: visuals and game rules must agree
+
+The tent used to look solid but had no obstacle footprint in the custom movement system. `island.gd` now supplies the same solid boundaries to player movement and NPC routing. Movement is checked in small steps, so a long frame cannot jump from one side of a thin wall to the other. This prototype uses footprint collision, not Godot's full CharacterBody3D physics controller.
+
+The sound system already had one voice player, but each NPC independently started its speech bubble and mouth animation immediately. That made conversations look simultaneous and disconnected from queued voices. `sound.gd` now exposes one `active_speaker` and `active_line`; the subtitle and character animation use that same state. A small gap separates turns, incidental comments do not queue behind conversations, and stale lines expire.
+
+Try sprinting toward the tent side, then entering through the open front. Next, speak to Maya while crew are working: her conversation should take focus, other chatter should clear, and only her mouth should animate for her response. These are observations for you to verify, not a reflection written on your behalf.
+
 ## Try these small changes
 
 - Change walking speed from 5 to 4; predict and test the difference.

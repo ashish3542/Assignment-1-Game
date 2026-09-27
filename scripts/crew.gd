@@ -45,8 +45,8 @@ func setup(g, who: String, job: String, color: Color, p: Vector3):
 		M.box(body,Vector3(0.333,0.9,0),Vector3(0.01,0.04,0.12),Color("b44938"))
 	tag=Label3D.new()
 	tag.position.y=2.22
-	tag.font_size=34
-	tag.pixel_size=0.007
+	tag.font_size=28
+	tag.pixel_size=0.006
 	tag.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 	tag.modulate=Color("f4e8ce")
 	add_child(tag)
@@ -72,10 +72,8 @@ func setup(g, who: String, job: String, color: Color, p: Vector3):
 	M.cylinder(tool,Vector3(0,-0.28,0),0.025,0.3,Color("88998f"))
 	tool.visible=false
 
-func say(line: String):
-	chat.text=line
-	chat_time=5
-	game.report(person+": "+line)
+func say(line: String, ambient: bool=false) -> bool:
+	return game.report(person+": "+line,person,0 if ambient else 1)
 
 func go(destination: Vector3, after: String, description: String):
 	target=world.ground(destination)
@@ -144,7 +142,7 @@ func choose_routine():
 		"Maya":
 			if not game.repaired: command("repair",false)
 			elif game.inventory.Scrap<3: gather("Scrap")
-			else: go(world.camp+Vector3(3,0,-4),"rest","Checking salvaged equipment")
+			else: go(world.camp+Vector3(3,0,-2.5),"rest","Checking salvaged equipment")
 		"Finn":
 			if game.repair_requested and not game.module_installed and not game.module_carried: command("parts",false)
 			elif game.inventory.Fish+game.inventory.Meal<2: command("fish",false)
@@ -154,7 +152,7 @@ func choose_routine():
 		"Rowan":
 			if game.fire_lit and game.inventory.Fish>0: command("cook",false)
 			elif game.inventory.Wood<4: gather("Wood")
-			else: go(world.camp+Vector3(-4,0,-2),"rest","Checking the shelter and first-aid kit")
+			else: go(world.tent_center+Vector3(0,0,2.8),"rest","Checking the shelter and first-aid kit")
 
 func gather(kind: String):
 	var best=-1
@@ -165,7 +163,7 @@ func gather(kind: String):
 		var d=position.distance_to(p.node.position)
 		if d<distance: best=i; distance=d
 	if best<0:
-		go(world.camp+Vector3(3,0,-4),"rest","Sorting the camp supplies")
+		go(world.camp+Vector3(3,0,-2.5),"rest","Sorting the camp supplies")
 		return
 	var pickup=world.pickups[best]
 	reserved_id=pickup.id
@@ -177,14 +175,13 @@ func greet(delta):
 	var distance=position.distance_to(game.player.position)
 	if distance>6: player_was_near=false
 	if distance<3.8 and not player_was_near and greeting_cooldown<=0 and game.nearby_voice_cooldown<=0:
+		if not game.sound.active_line.is_empty() or not game.sound.speech_queue.is_empty() or game.sound.conversation_gap>0: return
+		var greetings={"Maya":"Hey. Good to see you on your feet. I'll handle the radio.","Finn":"Hey, you doing okay? I'll keep an eye on the food.","Rowan":"There you are. Take a breath. We're in this together."}
+		if not say(greetings[person],true): return
 		player_was_near=true
 		greeting_cooldown=38
 		game.nearby_voice_cooldown=8
 		wave_time=2.2
-		match person:
-			"Maya": say("Hey. Good to see you on your feet. I'll handle the radio.")
-			"Finn": say("Hey, you doing okay? I'll keep an eye on the food.")
-			"Rowan": say("There you are. Take a breath. We're in this together.")
 
 func _process(delta):
 	if not game: return
@@ -192,13 +189,13 @@ func _process(delta):
 		if game.active_npc==self:
 			pose_clock+=delta
 			face_point(game.player.position,delta)
-			M.animate_human(body,pose_clock,false,false,"idle",game.sound.speech.playing)
+			M.animate_human(body,pose_clock,false,cargo.visible,"idle",game.sound.is_speaking(person),delta)
 		return
 	if game.mode!="play": return
 	pose_clock+=delta
-	tag.text=person.to_upper()+" / "+role+"\n"+state
-	chat_time=maxf(0,chat_time-delta)
-	chat.visible=chat_time>0 and position.distance_to(game.player.position)<18
+	tag.text=person.to_upper()
+	if position.distance_to(game.player.position)<5: tag.text+=" / "+role+"\n"+state.left(34)
+	chat.visible=false # The single shared subtitle is the authoritative speech display.
 	wave_time=maxf(0,wave_time-delta)
 	greet(delta)
 	var moving=false
@@ -283,9 +280,10 @@ func _process(delta):
 	if task=="gathering": pose="gather"
 	elif task=="fish": pose="fish"
 	elif task=="cook": pose="cook"
-	elif task in ["repairing","waiting_parts","rest"]: pose="repair"
+	elif task=="repairing": pose="repair"
 	elif wave_time>0 and not moving and not cargo.visible: pose="wave"; face_point(game.player.position,delta)
-	M.animate_human(body,pose_clock,moving,cargo.visible,pose,chat_time>0)
+	if world.in_tent(position): pose="escape"
+	M.animate_human(body,pose_clock,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
 	var look=game.player.position-position
 	var head=body.get_node("Head")
 	var desired=clampf(wrapf(atan2(-look.x,-look.z)-body.rotation.y,-PI,PI),-0.55,0.55) if wave_time>0 else 0.0
@@ -300,7 +298,12 @@ func move_path(delta: float) -> bool:
 	var flat=Vector3(path[0].x-position.x,0,path[0].z-position.z)
 	if flat.length()<0.22: path.remove_at(0); return false
 	if wave_time>1.0: face_point(game.player.position,delta); return false
-	position=world.ground(position+flat.normalized()*minf(flat.length(),2.6*delta))
+	var previous=position
+	position=world.move_character(position,flat.normalized()*minf(flat.length(),2.6*delta),0.38)
+	if position.distance_to(previous)<0.002:
+		# Replan a segment if a corner became blocked; never tunnel through a prop.
+		path=world.path_to(position,target)
+		return false
 	body.rotation.y=lerp_angle(body.rotation.y,atan2(-flat.x,-flat.z),minf(1,delta*8))
 	return true
 
@@ -338,8 +341,8 @@ func arrive():
 			cargo.visible=false
 			task="idle"
 			state="Supplies delivered"
-			if delivered=="Wood": say("More firewood. That's one less thing to worry about.")
-			else: say("I've put the spare parts by the shelter.")
+			if delivered=="Wood": say("More firewood. That's one less thing to worry about.",true)
+			else: say("I've put the spare parts by the shelter.",true)
 		"deliver_fish":
 			game.inventory.Fish+=1
 			carry_kind=""

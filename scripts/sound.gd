@@ -8,10 +8,20 @@ var music_on = true
 var voice_on = true
 var voice_index: Dictionary = {}
 var speech: AudioStreamPlayer
-var speech_queue: Array[String] = []
+var speech_queue: Array[Dictionary] = []
+var active_line=""
+var active_speaker=""
+var line_remaining=0.0
+var conversation_gap=0.0
+var conversation_clock=0.0
+var recent_lines: Dictionary={}
 var engine: AudioStreamPlayer
 
 func _process(delta):
+	var game=get_parent()
+	var paused=game.mode in ["pause","help"]
+	speech.stream_paused=paused
+	if not paused: advance_conversation(delta)
 	if music and speech:
 		var level=-80.0 if not music_on else (-30.0 if speech.playing else -25.0)
 		music.volume_db=lerpf(music.volume_db,level,minf(delta*3,1))
@@ -23,7 +33,6 @@ func _ready():
 	speech=AudioStreamPlayer.new()
 	add_child(speech)
 	speech.volume_db=-5
-	speech.finished.connect(next_voice)
 	for kind in ["pickup","step","click","catch","fire","success","crash"]:
 		clips[kind] = make_clip(kind, 2.5 if kind in ["success","crash"] else 0.28)
 	ambience = AudioStreamPlayer.new()
@@ -109,36 +118,71 @@ func play(kind: String):
 func toggle_mute():
 	muted = not muted
 	AudioServer.set_bus_mute(0,muted)
-	if muted: clear_speech()
 
 func clear_speech():
 	speech.stop()
 	speech_queue.clear()
+	active_line=""
+	active_speaker=""
+	line_remaining=0
+	conversation_gap=0
 
-func speak(line: String):
-	if voice_on and not muted and voice_index.has(line):
-		if speech_queue.has(line): return
-		if speech_queue.size()>=3: speech_queue.pop_front()
-		speech_queue.append(line)
-		if not speech.playing: next_voice()
+func speak(line: String, speaker: String="", priority: int=1) -> bool:
+	if line.is_empty() or active_line==line: return false
+	for entry in speech_queue:
+		if entry.line==line: return false
+	if priority==0:
+		# Ambient chatter is disposable. Do not build a backlog of old greetings.
+		if not active_line.is_empty() or not speech_queue.is_empty() or conversation_gap>0: return false
+		if conversation_clock-float(recent_lines.get(line,-100.0))<35: return false
+	if speech_queue.size()>=4: return false
+	var who=speaker
+	if who.is_empty() and ":" in line: who=line.get_slice(":",0).capitalize()
+	speech_queue.append({"line":line,"speaker":who,"priority":priority,"expires":conversation_clock+25})
+	if active_line.is_empty() and conversation_gap<=0: next_voice()
+	return true
 
 func next_voice():
-	if speech_queue.is_empty(): return
-	var line=speech_queue.pop_front()
-	speech.stream=AudioStreamWAV.load_from_file(voice_index[line])
-	speech.play()
+	if not active_line.is_empty(): return
+	while not speech_queue.is_empty():
+		var entry=speech_queue.pop_front()
+		if entry.expires<conversation_clock: continue
+		active_line=entry.line
+		active_speaker=entry.speaker
+		recent_lines[active_line]=conversation_clock
+		var clip: AudioStreamWAV
+		if voice_index.has(active_line): clip=AudioStreamWAV.load_from_file(voice_index[active_line])
+		line_remaining=clip.get_length() if clip else clampf(active_line.length()/15.0,2,8)
+		if clip and voice_on:
+			speech.stream=clip
+			speech.play()
+		return
+
+func advance_conversation(delta: float):
+	conversation_clock+=delta
+	if not active_line.is_empty():
+		line_remaining=maxf(0,line_remaining-delta)
+		if line_remaining<=0 and not speech.playing:
+			active_line=""
+			active_speaker=""
+			conversation_gap=0.55
+	else:
+		conversation_gap=maxf(0,conversation_gap-delta)
+		if conversation_gap<=0: next_voice()
+
+func is_speaking(who: String) -> bool:
+	return not active_line.is_empty() and active_speaker==who
 
 func toggle_voice():
 	voice_on=not voice_on
 	speech.stop()
-	speech_queue.clear()
 
 func toggle_music():
 	music_on = not music_on
 	music.volume_db = -25 if music_on else -80
 
 func stop_all():
-	speech_queue.clear()
+	clear_speech()
 	for child in get_children():
 		if child is AudioStreamPlayer:
 			child.stop()

@@ -12,11 +12,13 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 
 - A 75-second skippable opening: flight, impact, four survivors escaping the emergency exit, regrouping and choosing duties, then walking to camp. Wreckage appears only after impact.
 - Third-person movement, mouse camera, sprint and jump on a compact freely explorable island.
+- Solid tent sides/rear and camp furniture; an accessible tent entrance. Player, buggy and NPC routes share obstacle rules. Movement substeps prevent running through thin obstacles; the camera retracts at camp walls.
 - Original procedural terrain, wind-swayed grass, palms, shoreline foam, soft smoke, camp, wreckage, pier, ranger shelter and radio tower; smoother edges and warmer lighting.
 - Collect wood, stone, scrap and rations; build fire; catch, cook and eat fish.
 - Health and hunger with a forgiving health floor.
 - Three NPCs with approach greetings, dialogue, articulated walking/working/gesturing animations and visible tools. They work independently: Maya checks the radio, Finn retrieves parts and catches fish, Rowan gathers wood and cooks.
 - Follow/wait commands pause that survivor's duties. **Resume your own duties** restores autonomy. Other NPCs respect held commands.
+- One shared speaking turn controls voice, subtitles and talking gestures. NPC speech is local, incidental chatter is limited, and direct conversations clear unrelated chatter and use a closer camera. Subtitles also work with voices disabled.
 - **Finn → Rowan:** catch, carry and deliver a fish; Rowan cooks it.
 - **Maya → Finn → Maya:** request, retrieve and hand over a radio module, then repair the transmitter.
 - Repairable/drivable buggy, recoverable thrown stones, visible craftable spear.
@@ -47,3 +49,5 @@ Run `godot --headless --path . -- --test` (substitute your Godot executable path
 `--demo` runs an explicitly labeled automated walkthrough of actual collection, survival, dialogue, NPC cooperation, driving and the ending. It is not active during normal play.
 
 `--revision-demo` records the updated opening, automatic greetings and duties, player gathering/fire, autonomous food preparation and command overrides. Both demonstrations are automated, not student playtests.
+
+`--polish-demo` stages a short review of solid tent walls, its open entrance, three simultaneous speech requests playing in order, and the direct-conversation camera. The integrated runner includes the regression scenarios in `scripts/polish_tests.gd`.

@@ -82,8 +82,8 @@ func show_dialogue(npc):
 	options.append(["Resume your own duties","routine"])
 	for i in range(options.size()):
 		var action: String = options[i][1]
-		button(options[i][0],Vector2(380,267+i*48),func(): game.choose_dialogue(npc,action),520)
-	button("BACK TO ISLAND  ·  Esc",Vector2(380,567),game.resume_game,520)
+		button(options[i][0],Vector2(728,267+i*48),func(): game.choose_dialogue(npc,action),512)
+	button("BACK TO ISLAND  ·  Esc",Vector2(728,567),game.resume_game,512)
 
 func show_end():
 	clear_buttons()
@@ -97,11 +97,11 @@ func _draw():
 		"menu": draw_title()
 		"intro": draw_intro()
 		"dialogue":
-			draw_rect(Rect2(0,0,1280,720),Color(0.01,0.035,0.04,0.52))
-			panel(Rect2(345,90,590,545),0.97)
-			text(Vector2(380,130),"SURVIVOR / "+game.active_npc.role.to_upper(),13,gold)
-			text(Vector2(380,180),game.active_npc.person,38,cream,true)
-			wrapped(game.dialogue_line,Vector2(380,216),65,18)
+			draw_rect(Rect2(0,0,1280,76),Color("07171d"))
+			panel(Rect2(704,90,560,545),0.94)
+			text(Vector2(728,130),"SURVIVOR / "+game.active_npc.role.to_upper(),13,gold)
+			text(Vector2(728,180),game.active_npc.person,38,cream,true)
+			wrapped(game.dialogue_line,Vector2(728,216),63,18)
 		"pause":
 			draw_rect(Rect2(0,0,1280,720),Color(0.02,0.05,0.06,0.72))
 			panel(Rect2(430,120,420,455),0.95)
@@ -122,6 +122,13 @@ func _draw():
 	if game.demo_active:
 		panel(Rect2(360,112,650,40),0.96)
 		text(Vector2(378,139),game.demo_caption,16,gold)
+	if game.mode in ["play","dialogue"] and not game.sound.active_line.is_empty():
+		var origin=Vector2(24,530) if game.mode=="dialogue" else Vector2(320,468)
+		panel(Rect2(origin,Vector2(640,87)),0.94)
+		text(origin+Vector2(22,22),game.sound.active_speaker.to_upper(),12,gold)
+		var line=game.sound.active_line
+		if ": " in line: line=line.substr(line.find(": ")+2)
+		wrapped(line,origin+Vector2(22,48),74,18)
 
 func draw_title():
 	draw_rect(Rect2(0,0,580,720),Color(0.025,0.08,0.10,0.82))
@@ -178,9 +185,7 @@ func draw_hud():
 		text(Vector2(442,469),"FISHING / "+("BITE! PRESS E NOW" if game.fishing>=3 else "Wait for a bite..."),20,gold)
 		draw_rect(Rect2(442,490,390,8),Color("315356"))
 		draw_rect(Rect2(442,490,390*minf(game.fishing/5,1),8),gold)
-	if not game.events.is_empty(): panel(Rect2(377,23,636,78),0.78)
-	for i in range(mini(3,game.events.size())):
-		text(Vector2(385,40+i*23),str(game.events[game.events.size()-1-i]).left(76),13,cream)
+	# Recent crew history stays in the journal; only the current speaker is subtitled.
 
 func bar(p: Vector2, value: float, color: Color, label: String):
 	text(p,label,10,muted)
@@ -226,8 +231,10 @@ func draw_help():
 	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
 	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
 	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
-	var lines = ["WASD / arrows — Move     Mouse — Look     Shift — Run     Space — Jump", "E — Talk / collect / use     1 — Eat meal or ration     R — Craft spear", "G — Throw stone     M — Mute all     N — Voice on/off     Tab / Esc — Close", "F6 — Save journey     F9 — Load journey     E near buggy — Repair / drive / exit", "", "FIRST: Rowan gathers wood. Collect 3 stones east of camp; build the fire with E.", "NEXT: fish at the pier (F on map). Press E to cast, then E when BITE appears.", "Cook at the fire, then press 1 to eat. Finn can catch fish; Rowan can cook it.", "Maya checks the ridge radio and asks Finn for parts. Their duties start automatically.", "Walk to the ridge transmitter (R) and press E after fire, food and repairs are ready.", "", "EXTRA: collect 3 scrap near the aircraft (X), then repair and drive the buggy.", "Shared supplies are available to everyone. NPC deliveries add to that inventory.", "Wait / Follow pause duties. Choose Resume your own duties to let the crew work again."]
+	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "Rowan gathers wood. Collect 3 stones east of camp; build the fire with E.", "Finn catches fish and Rowan cooks. Press 1 to eat a meal from shared supplies.", "To fish yourself: E at the pier, then E when BITE appears. Cook with E at the fire.", "Maya and Finn repair the radio. Send the signal at R after fire, food and repairs.", "Wait / Follow hold a survivor's duties. Resume your own duties releases them.", "Find 3 scrap at X to repair the buggy. E enters/exits; WASD steers relative to camera."]
 	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
-	text(Vector2(88,658),"CREW LOG",12,gold)
-	if not game.events.is_empty(): text(Vector2(88,688),str(game.events.back()).left(115),15,muted)
+	text(Vector2(88,465),"RECENT CREW LOG / MOST RECENT FIRST",12,gold)
+	for i in range(mini(6,game.events.size())):
+		text(Vector2(88,500+i*27),str(game.events[game.events.size()-1-i]).left(122),15,muted)
+	text(Vector2(88,687),"TAB / ESC — BACK TO ISLAND",13,gold)
 

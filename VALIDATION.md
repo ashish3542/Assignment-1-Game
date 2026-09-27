@@ -2,6 +2,16 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Collision and conversation polish — 2026-09-27
+
+The integrated runner passed again from a fresh source directory without `.godot` or Git metadata. New regression scenarios in `scripts/polish_tests.gd` exercised player sprinting into a tent side with long simulation steps; walking through the entrance; stopping at the rear wall; an NPC following a complete route around the tent without entering solids; camera obstruction; and three same-frame speech requests taking ordered turns. Duplicate speech and incidental interruptions were rejected. Pausing froze the conversation. Direct dialogue cleared unrelated speech and identified the correct speaker. Subtitle timing was tested with voices disabled.
+
+The original report of everyone talking at once had a visual synchronization cause: a single audio player already serialized clips, but bubbles and talking poses began independently when an NPC requested speech. The revised shared active-speaker state now controls the subtitle and talking animation as well as playback. This is a targeted fix; it is not evidence that every possible bug has been eliminated.
+
+Recorded a 33.8-second staged automated polish preview with audio and inspected rendered frames. It shows the actual movement solver stopping at the tent wall, entry through the open front, serialized speech, and the closer conversation camera. The final review also corrected oversized foreground labels and added visible cloth to the blocked tent rear. No script errors appeared during the recording. The standard restricted-environment certificate warning remains.
+
+`Lost-Signal-Polish-Preview.mp4` is alongside the project, not committed as a large Git asset. Earlier videos document earlier revisions. The current source still uses original procedural animation and Microsoft synthetic voice clips; no motion-capture pack, human actor performance or new neural voice service is claimed.
+
 ## Revision verification — 2026-09-27
 
 Resumed from the student's c2b8673 checkpoint. The revised integrated runner passed the previous gameplay checks plus:
