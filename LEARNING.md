@@ -5,7 +5,8 @@ Run a feature first, then read the small function that produced what you saw.
 | File | Responsibility | Start here |
 | --- | --- | --- |
 | `scripts/game.gd` | Inventory, interactions, objectives, saves | `use_fire()` |
-| `scripts/survivor.gd` | NPC states, requests and deliveries | `command()` and `arrive()` |
+| `scripts/crew.gd` | NPC routines, greetings, commands and deliveries | `choose_routine()`, `greet()` and `command()` |
+| `scripts/cinematic.gd` | Shot timing, actor movement and crash visibility | `sample()`, `CUES` and `finish()` |
 | `scripts/player.gd` | Input, movement, camera | `_physics_process()` |
 | `scripts/island.gd` | World and walkable routes | `walkable()` and `path_to()` |
 | `scripts/interface.gd` | Menus, dialogue, map, HUD | `show_dialogue()` |
@@ -19,7 +20,7 @@ Run a feature first, then read the small function that produced what you saw.
 
 ## Example: NPC teamwork
 
-Maya enters `waiting_parts` at the transmitter. If Finn is idle, she requests a module. He follows a route, collects it, changes to delivery, and carries a visible item. Handoff sets `module_installed`. Maya observes it, acknowledges him and repairs the transmitter. Player commands take priority; cancellation releases reservations and carried resources.
+Maya enters `waiting_parts` at the transmitter. If Finn is idle and available for duties, she requests a module. He follows a route, collects it, changes to delivery, and carries a visible item. Handoff sets `module_installed`. Maya observes it, acknowledges him and repairs the transmitter. Player commands take priority; cancellation releases reservations and carried resources. A held or following NPC is unavailable for automatic requests.
 
 ## Real development problems and fixes
 
@@ -28,6 +29,16 @@ Maya enters `waiting_parts` at the transmitter. If Finn is idle, she requests a 
 3. Saving a removed-but-undelivered resource could lose it. Save snapshots now preserve carried resources in restored shared inventory.
 4. Rendered screenshots showed washed-out lighting. Lighting was reduced and procedural ground detail added.
 5. Live Windows speech initialization stalled a restricted launch. The game now plays pre-generated speech clips without initializing live TTS.
+6. The original opening showed the already-placed wreck behind the flying aircraft. Wreckage now belongs to one group whose visibility is controlled by the cinematic timeline, including debris and salvage pickups.
+7. The first revised camera timings were shorter than several speech clips. Measuring the WAV durations exposed the problem. The `CUES` table now gives each line enough time to finish.
+
+## Observe the revised behavior
+
+- Begin a new story and watch the plane, emergency exit, four-person meeting and camp transition. Press Enter during a second run: the same final playable state should result.
+- Stand back at camp. Watch each crew member leave for a job without pressing E. These decisions come from programmed priorities, not a live language model.
+- Approach Rowan, hear a greeting, then remain nearby. It should not repeat continuously. Leave, wait for the cooldown, and return.
+- Tell Finn to wait while Maya needs a module. He should stay put. Resume his duties and watch the delivery. Explain why `available()` checks both his task and whether duties are enabled.
+- Compare the old and new videos. Identify one real improvement and one remaining limitation in your own words. Art and voices are still simplified/synthetic.
 
 ## Try these small changes
 

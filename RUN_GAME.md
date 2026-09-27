@@ -9,7 +9,7 @@ Tested on Windows with **Godot 4.7.2 standard edition**, using the Compatibility
 3. Keep all project folders, including scripts, shaders and audio.
 4. Open Godot. Select **Import** and choose `project.godot` from this folder.
 5. Open the project, wait for initial import, and press **F5**.
-6. Click **Begin the story**. Enter skips the opening.
+6. Click **Begin the story**. The revised opening lasts about 75 seconds and shows the four survivors escaping and meeting. Enter skips it. Choose a new story to see this; loading an old save goes straight to play.
 
 On the original development PC, double-click `PLAY.cmd` to launch the copy of Godot downloaded in Downloads. If it cannot find Godot, use the Import steps. This launcher is not a standalone exported game executable.
 
@@ -33,18 +33,18 @@ Mouse capture is released by Escape. Click dialogue and menu buttons with the mo
 
 ## Complete the chapter
 
-1. Find the camp ahead of you (C on map). Talk to the three survivors if desired.
-2. Collect **4 wood** west of camp and **3 stone** east/southeast of camp. Approach loose items and press E. Inventory is shared with the crew.
+1. Start at camp (C on map). The three survivors begin their own duties after a short pause. Approach them for a spoken greeting; press E to talk or give directions.
+2. Collect **3 stone** east/southeast of camp. Rowan gathers the **4 wood** needed for the fire automatically; you can help collect wood west of camp. Approach loose items and press E. Inventory is shared with the crew. Reserved items being collected by an NPC cannot also be picked up by the player.
 3. Stand at the stone fire ring and press E to build the fire.
-4. Go to the fishing pier (F). Press E to cast, wait for **BITE! PRESS E NOW**, and press E during that window. Retry if missed. A salvaged line is already available; a spear is not needed.
-5. Return to the fire and press E to cook the fish. Press **1** to eat. Rations restore hunger but do not satisfy the cooked-fish objective.
-6. Talk to Maya and select **Repair the transmitter · ask Finn for help**. She travels to the ridge and asks Finn for a module.
-7. Watch Finn retrieve the module from the aircraft and hand it to Maya. She acknowledges him and repairs the transmitter. Travel takes time. If Finn has an ongoing command, let it finish or tell him to wait so he becomes available.
+4. Finn retrieves the radio module when Maya needs it, then catches fish. You can also fish yourself at the pier (F): press E to cast, wait for **BITE! PRESS E NOW**, then press E. A salvaged line is already available; a spear is not needed.
+5. Once there is fire and fish, Rowan cooks automatically after completing a current job. You can also use E at the fire to cook. Press **1** to eat. Rations restore hunger but do not satisfy the cooked-fish objective.
+6. Maya checks the ridge transmitter automatically. You can also talk to her and select **Repair the transmitter · ask Finn for help** to give a direct instruction.
+7. Watch Finn retrieve the module and hand it to Maya. She acknowledges him and repairs the transmitter. Travel takes time. **Wait here** and **Follow me** pause that survivor's duties; choose **Resume your own duties** to make them available to the crew again.
 8. Go to the equipment at the tower base (R). Press E after fire, food and repairs are complete to send the rescue signal.
 
 ### Another NPC cooperation example
 
-After building the fire, ask Finn to **catch fish and deliver it to Rowan**. He walks to the pier, fishes, returns and hands it over. If Rowan is idle, Rowan cooks it. If busy, ask Rowan to cook afterwards. Eat with 1. Status labels, overhead dialogue, crew log and inventory show the actual handoff.
+After building the fire, watch Finn **catch fish and deliver it to Rowan** as part of his routine, or assign that task yourself. He walks to the pier, fishes, returns and hands it over. Rowan cooks when available. Eat with 1. Status labels, overhead dialogue, crew log and inventory show the actual handoff. A survivor explicitly told to wait remains held until you resume their duties or assign a new task.
 
 ### Optional exploration
 
@@ -52,13 +52,15 @@ Collect 3 scrap near the aircraft (X), then press E near the yellow buggy by the
 
 ## Save behavior
 
-F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp, while carried supplies are restored to shared inventory. Loose thrown stones are not separately saved. Restart/Title starts a new run without deleting an existing save.
+F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp and independent duties resume, while carried supplies are restored to shared inventory. Held/follow commands and loose thrown stones are not separately saved. Restart/Title starts a new run without deleting an existing save.
 
 ## Troubleshooting
 
 - **E does nothing:** move closer and read the prompt. A nearby NPC/pickup can take priority over the campfire.
 - **No audio:** check M, N and Windows' output device. Subtitles remain available.
 - **NPC is traveling:** watch its status label; jobs use real routes, not instant completion.
+- **NPC remains waiting:** talk and select **Resume your own duties**. An explicit Wait command is respected even if another survivor needs help.
+- **No repeated greeting:** approach greetings have a 38-second individual cooldown and require you to leave beyond 6 meters before returning within about 4 meters. Crew also space out greetings to avoid talking over each other.
 - **No save:** save once with F6. Saves belong to the current Windows user.
 - **Slow graphics:** use Compatibility rendering. Visual checks used 1280×720 on an RTX 4050 laptop GPU; this is not a minimum-hardware guarantee.
 - Automated runs in the restricted assistant environment printed a system certificate-store warning. The offline gameplay tests still passed; the game has no login.

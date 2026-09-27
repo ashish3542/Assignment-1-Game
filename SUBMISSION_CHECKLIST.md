@@ -10,6 +10,7 @@
 - [x] Write run instructions; verify the game/test runner works from a fresh source copy.
 - [ ] Upload RUN_GAME.md to Canvas (Markdown or TXT required).
 - [x] Record an automated gameplay demonstration with audio (Lost-Signal-Walkthrough.mp4, alongside the project folder).
+- [x] Record the revised opening and independent crew behavior with audio (Lost-Signal-Revision-Preview.mp4, 3:34, alongside the project folder). The earlier walkthrough shows the full chapter ending; this newer preview shows the revised features.
 - [ ] Review the supplied demo, add your own explanation if needed, and upload your chosen video.
 - [ ] Manually play the game and write your own learning reflection.
 

@@ -139,3 +139,17 @@ Validation: integrated gameplay tests passed after fixing pier walkability, canc
 Scope: a compact procedural prototype, not a GTA-scale or photorealistic game. No wildlife, spear combat, swimming, passengers or live AI NPC API calls. Prompt entries 12–16 were added together during this implementation session from the available conversation, rather than automatically logged at their original timestamps.
 
 Publication result: The completed game and documents were successfully pushed to the existing GitHub repository on 2026-09-26 (implementation commit 9fedc53). The permission-reviewed network path was available in this session, so the earlier restriction did not prevent this push. The source ZIP and automated MP4 are also saved alongside the project folder. Canvas submission and instructor access are still the student's responsibility.
+
+## 17. Cinematic, graphics and independent survivors
+
+> so can we make the graphic a little bit good and in cinmatic not like just plane crashing but something like the are coming out of the plane and they are only the survivior and while the plane is going to crahs in the back gorund there is already plane crashed so fixed it and while we go near npc they should talk something by themselve and lets make it little bit human with good tune it looked like robot and they are assinged there own job rather then just loooking at me and waiting for me to say but tfor that also make animiation how they come out met and everything like that
+
+Work began on 2026-09-26: hide wreckage until impact; animate four survivors leaving the emergency exit and regrouping; add independent crew duties, approach greetings, articulated character movement, vegetation, shoreline foam, improved lighting, revised music and additional synthetic speech. Integrated behavior tests passed. Work was interrupted before final visual/audio review and documentation. The student preserved that state in commit c2b8673.
+
+## 18. Resume interrupted work
+
+> so complete the work that was stopped becuase of the usage limit hit
+
+Resumed on 2026-09-27 from the student's saved commit. During review, actual voice-file durations showed that some cinematic cuts interrupted dialogue. Extended shot timings to let the lines finish and adjusted Maya's camera shot to show her face. Final verification and delivery are recorded in VALIDATION.md.
+
+Completed implementation and review: revised 75.3-second opening, automatic role-based jobs, approach greetings with cooldowns, command overrides, articulated character and working poses, graphical refinements, softer music and 23 additional synthetic voice lines (41 total). Updated run instructions and the learning guide. Integrated tests passed and a new 3:34 explicitly automated revision preview was recorded and visually sampled; its audio track and levels were checked. No student reflection or manual playtest is claimed.

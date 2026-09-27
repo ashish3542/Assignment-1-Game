@@ -1,6 +1,8 @@
 extends RefCounted
 ## A seekable timeline: every shot derives from time, so skipping never leaves actors behind.
-const DURATION=64.0
+const DURATION=75.3
+# Authored shot time -> playback time. Each spoken clip has room to finish.
+const CUES=[Vector2(0,0),Vector2(4,6.1),Vector2(8,11.5),Vector2(10.5,14),Vector2(13,18.3),Vector2(18,24),Vector2(23,28.2),Vector2(29,35.3),Vector2(35,41.5),Vector2(40,48.3),Vector2(45,53.5),Vector2(50,59.5),Vector2(55,65.3),Vector2(64,75.3)]
 var game
 var actors: Array
 var meeting: Vector3
@@ -29,7 +31,8 @@ func caption(line: String):
 		game.sound.clear_speech()
 		game.sound.speak(line)
 
-func sample(t: float):
+func sample(playback_time: float):
+	var t=story_time(playback_time)
 	game.intro_fade=0.0
 	game.world.set_crash_visible(t>=9.8)
 	game.flight.visible=t<8
@@ -91,7 +94,7 @@ func sample(t: float):
 			shot(meeting+Vector3(6,2.5,6),meeting+Vector3(0,1,0),48)
 			caption("FINN: I checked the cabin. No one else made it. Just the four of us.")
 		elif t<45:
-			shot(slot(3)+Vector3(4,1.9,3.8),slot(3)+Vector3(0,1.2,0),48)
+			shot(slot(3)+Vector3(1.8,1.65,-4.5),slot(3)+Vector3(0,1.2,0),44)
 			caption("MAYA: There's an old radio tower on the ridge. I'll check it.")
 		elif t<50:
 			shot(slot(0)+Vector3(4,2,4),slot(0)+Vector3(0,1.1,0),48)
@@ -101,7 +104,7 @@ func sample(t: float):
 			caption("ROWAN: I'll gather firewood and look after camp. We do this together.")
 	else:
 		game.intro_phase="KESTREL ISLAND / A SECOND CHANCE"
-		var u=smoothstep(55.0,DURATION,t)
+		var u=smoothstep(55.0,64.0,t)
 		var center=meeting.lerp(game.world.camp+Vector3(0,0,4),u)
 		for i in range(actors.size()):
 			var finish=game.world.ground(game.world.camp+Vector3(-3+i*2,0,4))
@@ -111,6 +114,18 @@ func sample(t: float):
 		shot(center+Vector3(10,5.5,12),center+Vector3(0,0.9,0),56)
 		caption("ROWAN: That old shelter will do. Come on. Let's make it home.")
 		game.intro_fade=smoothstep(63.0,64.0,t)
+
+func story_time(playback_time: float) -> float:
+	for i in range(CUES.size()-1):
+		if playback_time<=CUES[i+1].y:
+			return lerpf(CUES[i].x,CUES[i+1].x,clampf(inverse_lerp(CUES[i].y,CUES[i+1].y,playback_time),0,1))
+	return 64.0
+
+func playback_time(authored_time: float) -> float:
+	for i in range(CUES.size()-1):
+		if authored_time<=CUES[i+1].x:
+			return lerpf(CUES[i].y,CUES[i+1].y,inverse_lerp(CUES[i].x,CUES[i+1].x,authored_time))
+	return DURATION
 
 func face(actor, target: Vector3):
 	var d=target-actor.position

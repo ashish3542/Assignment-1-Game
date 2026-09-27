@@ -100,6 +100,10 @@ func _ready():
 			var demo=load("res://scripts/demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--revision-demo":
+			var demo=load("res://scripts/revision_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
@@ -603,24 +607,33 @@ func run_tests():
 func run_revision_tests(failures: Array):
 	# Test the actual seekable scene rather than duplicating its visibility rules.
 	start_intro()
+	for i in range(cinematic.CUES.size()-1):
+		cinematic.sample(cinematic.CUES[i].y+0.01)
+		if intro_caption.is_empty(): continue
+		if not sound.voice_index.has(intro_caption):
+			failures.append("Cinematic caption has no voice clip: "+intro_caption)
+			continue
+		var clip=AudioStreamWAV.load_from_file(sound.voice_index[intro_caption])
+		if not clip or clip.get_length()>cinematic.CUES[i+1].y-cinematic.CUES[i].y:
+			failures.append("Cinematic cut interrupts spoken dialogue: "+intro_caption)
 	for t in [0.0,4.0,7.9]:
-		cinematic.sample(t)
+		cinematic.sample(cinematic.playback_time(t))
 		if world.plane.is_visible_in_tree() or world.wreck_root.visible: failures.append("Wreck visible before impact")
 		for npc in npcs:
 			if npc.visible: failures.append("Survivor visible before impact")
-	cinematic.sample(8.5)
+	cinematic.sample(cinematic.playback_time(8.5))
 	if flight.visible or intro_fade<0.99: failures.append("Impact transition")
-	cinematic.sample(12.0)
+	cinematic.sample(cinematic.playback_time(12.0))
 	if not world.wreck_root.visible or flight.visible: failures.append("Post-crash aircraft visibility")
-	cinematic.sample(13.5)
+	cinematic.sample(cinematic.playback_time(13.5))
 	var count=0
 	for actor in cinematic.actors:
 		if actor.visible: count+=1
 	if count!=1: failures.append("Staggered emergency exit")
-	cinematic.sample(28.0)
+	cinematic.sample(cinematic.playback_time(28.0))
 	for actor in cinematic.actors:
 		if not actor.visible: failures.append("Four survivors did not escape")
-	cinematic.sample(34.0)
+	cinematic.sample(cinematic.playback_time(34.0))
 	for i in range(cinematic.actors.size()):
 		if cinematic.actors[i].position.distance_to(cinematic.slot(i))>0.1: failures.append("Regroup formation")
 	begin_play()
@@ -669,7 +682,6 @@ func run_revision_tests(failures: Array):
 	rowan.player_was_near=false
 	nearby_voice_cooldown=0
 	player.position=rowan.position+Vector3(1,0,0)
-	var before=events.size()
 	# The log has a fixed cap, so inspect the greeting counter through its cooldown.
 	rowan.greet(0.1)
 	if rowan.greeting_cooldown<37 or not rowan.player_was_near: failures.append("Approach greeting")
