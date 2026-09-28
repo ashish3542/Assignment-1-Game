@@ -68,6 +68,7 @@ func _physics_process(delta):
 			game.sound.play("step")
 			foot_time = 0
 	var pose="escape" if world.in_tent(position) else "idle"
+	body.get_node("Head").rotation.y=lerp_angle(body.get_node("Head").rotation.y,0,minf(1,delta*8))
 	if game.shelter.player_help>0 and not moving: pose="repair"
 	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving,false,pose,false,delta,clampf(velocity.length()/3.5,0.6,1.65))
 	update_camera(delta)
@@ -94,7 +95,8 @@ func animate_action(delta: float):
 	var a=game.actions
 	if a.resting or a.waking>0:
 		body.set_meta("sleep_height",0.33 if a.rest_kind=="tent" else 0.20)
-		var amount=clampf(a.rest_time/1.2,0,1) if a.resting else a.waking/0.9
+		body.set_meta("rest_breath",a.rest_time)
+		var amount=clampf(a.rest_time/a.REST_DURATION,0,1) if a.resting else a.waking/a.WAKE_DURATION
 		M.animate_human(body,amount,false,false,"sleep",false,delta)
 	elif a.picking():
 		M.animate_human(body,a.pickup_time,a.approaching,false,"idle" if a.approaching else "gather",false,delta)

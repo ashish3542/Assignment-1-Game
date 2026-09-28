@@ -2,6 +2,14 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Gradual sleeping and waking — 2026-09-28
+
+Replaced rigid backward rotation around the feet with hip-centered key poses in `rest_pose.gd`: crouch, move the legs forward, sit, brace with the arms, recline and settle. Transition duration is 3.8 seconds down and 3.2 seconds up, with eased interpolation, relaxed hands and subtle chest breathing. Sole clearance constrains hip height as the legs unfold. Partial interruption reverses from the current progress, and healing counts only time after settling, including a frame that crosses the transition boundary.
+
+The integrated gameplay runner passed with added checks for the upright seated stage, no healing before settling, continuity when interrupted, pause freezing the wake sequence, and returning control with the body back at its original offset. Existing collection, health, construction, collision, cooperation, save/load and voice regressions passed. The known restricted-environment certificate-store warning remains; no script errors occurred in these runs.
+
+Recorded the 27.7-second `Lost-Signal-Sleep-Preview.mp4` with audio and inspected sampled frames of crouching, sitting, reclining, settled rest, sitting up and tent bedding. The recording explicitly stages starting health and a completed tent, and includes a partial interruption. It is an automated visual review, not a student playtest or human motion capture. Subsequent cleanup resets residual player head/leg offsets on returning to ordinary animation and preserves NPC head tracking; it is covered by the final integrated run. Updated the older Comfort demo's waits to accommodate the longer wake duration.
+
 ## Collection animation and health recovery — 2026-09-28
 
 Replaced the whole-root pickup bow with a shared hip/knee crouch and arm reach. Player collection now approaches, reserves, reaches, transfers one item at 0.85 seconds, and stands by 1.65 seconds. NPCs use the same timing before carrying supplies home. Movement can cancel player collection; cancellation before contact releases the reservation and after contact retains the collected supply. NPCs stop more precisely at their final collection position. Removed the buggy model, repair/drive interactions, movement overrides, engine loop and vehicle save fields. Older save files with vehicle fields still load, ignoring those fields.

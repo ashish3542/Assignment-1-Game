@@ -63,7 +63,8 @@ func run(g, failures: Array):
 	p.yaw=0
 	a.toggle_rest()
 	if not a.resting or a.rest_kind!="ground" or not is_instance_valid(w.rest_mat): failures.append("Ground leaf mat rest unavailable")
-	a.update(1.2)
+	a.update(a.REST_DURATION)
+	if g.health!=40: failures.append("Healing started before settling onto the mat")
 	var base=g.health
 	a.update(5)
 	var ground_gain=g.health-base
@@ -71,18 +72,18 @@ func run(g, failures: Array):
 	g.mode="pause"; a.update(10)
 	if g.health!=base+ground_gain: failures.append("Rest healed during pause")
 	g.mode="play"
-	a.wake(); a.update(1)
+	a.wake(); a.update(a.WAKE_DURATION+0.1)
 	if a.resting or a.busy(): failures.append("Wake did not release control")
 	g.shelter.restore({"paid":true,"progress":1.0})
 	p.position=w.ground(w.tent_center+Vector3(0,0,0.8))
-	a.toggle_rest(); a.update(1.2)
+	a.toggle_rest(); a.update(a.REST_DURATION)
 	base=g.health; a.update(5)
 	if a.rest_kind!="tent" or absf(g.health-base-10.0)>0.001: failures.append("Tent recovery should be faster")
 	g.save_game(); base=g.health; g.load_game()
 	if a.busy() or g.health!=base: failures.append("Sleeping save/load lost health or trapped player")
 	g.hunger=0; a.toggle_rest()
 	if a.resting: failures.append("Starvation bypassed with sleep")
-	g.hunger=80; g.health=99.9; a.toggle_rest(); a.update(2)
+	g.hunger=80; g.health=99.9; a.toggle_rest(); a.update(a.REST_DURATION+1)
 	if g.health!=100 or a.resting: failures.append("Rest health cap / automatic wake")
 	a.reset()
 	g.health=50; g.inventory.Meal=1; g.eat()
@@ -94,6 +95,25 @@ func run(g, failures: Array):
 	if absf(p.body.rotation.x)>0.05 or p.body.get_node("Leg1/Knee").rotation.x>-2: failures.append("Pickup still bows whole body instead of crouching")
 	for frame in range(40): g.M.animate_human(p.body,1.0,false,false,"sleep",false,0.05)
 	if absf(p.body.rotation.x-PI/2)>0.05: failures.append("Rest pose is not lying down")
+	# Interrupting during the seated phase must reverse the current pose, not jump flat.
+	a.reset()
+	p.position=w.ground(w.camp+Vector3(0,0,7))
+	g.health=40; g.hunger=80
+	a.toggle_rest(); a.update(a.REST_DURATION*0.48)
+	for frame in range(20): p.animate_action(0.05)
+	var seated_position=p.body.position
+	var seated_tilt=p.body.rotation.x
+	if absf(seated_tilt)>0.15 or p.body.get_node("Leg1").rotation.x<1.3: failures.append("Missing upright seated rest phase")
+	a.wake(); p.animate_action(0.001)
+	if p.body.position.distance_to(seated_position)>0.01 or absf(p.body.rotation.x-seated_tilt)>0.01: failures.append("Interrupted rest snapped to another pose")
+	g.mode="pause"
+	var wake_remaining=a.waking
+	a.update(1)
+	if a.waking!=wake_remaining: failures.append("Wake animation advanced while paused")
+	g.mode="play"
+	a.update(a.WAKE_DURATION)
+	for frame in range(30): g.M.animate_human(p.body,0,false,false,"idle",false,0.05)
+	if a.busy() or p.body.position.length()>0.02: failures.append("Wake left a displaced body / blocked movement")
 	a.reset()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(g.save_path))
 	print("COMFORT: contact-timed pickup, cancellation, rest gates/rates, food, save/load and poses checked")

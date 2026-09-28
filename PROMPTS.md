@@ -207,3 +207,9 @@ Implemented knee-crouched, arm-reaching collection for the player and crew, with
 > resume the work from where you hit usage limi
 
 Continued from the saved implementation and recordings. Reviewed the crouch and resting poses, corrected the body height over the bedding, and continued final clean-copy tests, documentation and GitHub publication. No work was restarted from scratch.
+
+## 27. Make sleeping look more natural
+
+> make the animation little bit smoother for sleeping it looks like its like dying laying make it more natural
+
+Replaced the rigid backward rotation with a 3.8-second sequence centered on the hips: crouch, bring the legs forward, sit, support the recline with the arms, and settle with relaxed hands and subtle breathing. Getting up reverses the same poses over 3.2 seconds. Interrupting partway returns from the current pose. Added sole clearance during the leg transition; healing starts only after settling. Tests and a staged ground/tent recording are documented in VALIDATION.md. This remains original procedural animation, not human motion capture.

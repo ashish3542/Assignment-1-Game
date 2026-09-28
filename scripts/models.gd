@@ -128,6 +128,8 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 			joints.append(body.get_node(path))
 			previous.append(body.get_node(path).rotation)
 	var old_height=body.position.y
+	var old_position=body.position
+	body.position=Vector3.ZERO
 	var old_tilt=body.rotation
 	var weight=move_toward(float(body.get_meta("walk_weight",0.0)),1.0 if moving else 0.0,delta*5)
 	var phase=float(body.get_meta("stride_phase",0.0))+delta*7.4*pace
@@ -138,13 +140,14 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	body.rotation.x=0.045*weight
 	body.rotation.z=sin(phase)*0.012*weight+sin(t*1.1)*0.01*(1-weight)
 	body.get_node("Head").rotation.x=sin(t*1.6)*0.025
+	body.get_node("Chest").scale.y=0.66
 	body.get_node("Head/Mouth").scale.y=1.0+absf(sin(t*12))*1.8 if talking else 1.0
 	body.get_node("Backpack").visible=not (pose=="sleep" and t>0.35)
 	if body.has_node("Spear"): body.get_node("Spear").visible=not (pose=="sleep" and t>0.35)
 	for side in [-1,1]:
 		var leg=body.get_node("Leg"+str(side))
 		var arm=body.get_node("Arm"+str(side))
-		leg.rotation.x=stride*side
+		leg.rotation=Vector3(stride*side,0,0)
 		leg.get_node("Knee").rotation.x=maxf(0,-stride*side)*0.9
 		arm.rotation=Vector3(0.6 if carry else -stride*side,0,side*0.07)
 		arm.get_node("Elbow").rotation=Vector3(0.9 if carry else -0.14-maxf(0,stride*side)*0.35,0,0)
@@ -163,15 +166,7 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 		body.get_node("Arm-1").rotation.x=0.8*crouch
 		body.get_node("Arm-1/Elbow").rotation.x=0.65*crouch
 	elif pose=="sleep":
-		body.rotation.x=PI/2*smoothstep(0.0,1.0,t)
-		body.rotation.z=0
-		body.position.y=float(body.get_meta("sleep_height",0.20))*smoothstep(0.0,1.0,t)
-		body.get_node("Head").rotation=Vector3.ZERO
-		for side in [-1,1]:
-			body.get_node("Leg"+str(side)).rotation=Vector3.ZERO
-			body.get_node("Leg"+str(side)+"/Knee").rotation=Vector3.ZERO
-			body.get_node("Arm"+str(side)).rotation=Vector3(0,0,side*0.12)
-			body.get_node("Arm"+str(side)+"/Elbow").rotation=Vector3.ZERO
+		preload("res://scripts/rest_pose.gd").apply(body,t)
 	elif pose=="escape":
 		body.rotation.x=0.20
 		body.position.y-=0.15
@@ -191,6 +186,8 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	for i in range(joints.size()):
 		joints[i].rotation=Vector3(lerp_angle(previous[i].x,joints[i].rotation.x,blend),lerp_angle(previous[i].y,joints[i].rotation.y,blend),lerp_angle(previous[i].z,joints[i].rotation.z,blend))
 	body.position.y=lerpf(old_height,body.position.y,blend)
+	body.position.x=lerpf(old_position.x,body.position.x,blend)
+	body.position.z=lerpf(old_position.z,body.position.z,blend)
 	body.rotation.x=lerp_angle(old_tilt.x,body.rotation.x,blend)
 	body.rotation.z=lerp_angle(old_tilt.z,body.rotation.z,blend)
 

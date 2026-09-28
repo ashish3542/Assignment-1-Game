@@ -40,7 +40,7 @@ func run():
 	game.actions.toggle_rest()
 	await wait(9)
 	game.actions.wake()
-	await wait(1.1)
+	await wait(game.actions.WAKE_DURATION+0.2)
 	game.inventory.Ration=1
 	game.inventory.Meal=0
 	game.eat()
@@ -54,7 +54,7 @@ func run():
 	shot(w.tent_center+Vector3(0,0.6,0),Vector3(0,0.6,5))
 	await wait(9)
 	game.actions.wake()
-	await wait(1.2)
+	await wait(game.actions.WAKE_DURATION+0.2)
 	game.demo_caption="H or movement wakes you / the island has no buggy"
 	await wait(2)
 	game.sound.stop_all()

@@ -2,6 +2,8 @@ extends RefCounted
 ## Interruptible player actions. Item ownership changes at contact, never on button press.
 const PICKUP_DURATION=1.65
 const CONTACT_TIME=0.85
+const REST_DURATION=3.8
+const WAKE_DURATION=3.2
 var game
 var pickup: Dictionary={}
 var pickup_time=0.0
@@ -89,7 +91,7 @@ func toggle_rest():
 func wake():
 	if not resting: return
 	resting=false
-	waking=0.9*clampf(rest_time/1.2,0,1)
+	waking=WAKE_DURATION*clampf(rest_time/REST_DURATION,0,1)
 	game.report("Getting up. Food and rest both help restore your health.")
 
 func reset():
@@ -109,10 +111,12 @@ func update(delta: float):
 		waking=maxf(0,waking-delta)
 		return
 	if resting:
+		var previous_rest=rest_time
 		rest_time+=delta
 		if game.hunger<=5: wake(); return
-		if rest_time>1.2:
-			game.health=minf(100,game.health+delta*(2.0 if rest_kind=="tent" else 0.8))
+		if rest_time>REST_DURATION:
+			var healing_time=maxf(0,rest_time-maxf(REST_DURATION,previous_rest))
+			game.health=minf(100,game.health+healing_time*(2.0 if rest_kind=="tent" else 0.8))
 			if game.health>=100: wake()
 		return
 	if not picking(): return

@@ -121,3 +121,11 @@ Try interrupting a pickup before and after the hand reaches it, then inspect the
 shared count. After hunger has lowered health, compare ten seconds of ground rest
 with ten seconds inside the tent. Explain why different recovery rates make
 building shelter useful. Record your own results; these are experiments to try.
+
+The next sleep refinement moves the body's pivot from the feet to the hips while
+posing the legs and arms separately. `scripts/rest_pose.gd` describes crouching,
+sitting, supporting the torso and settling; `player_actions.gd` runs that timeline
+forward or backward. Try H, wait until seated, then press H again. The character
+should return from that position, not jump to the fully lying pose first. Watch
+the health bar: recovery starts only after settling. These observations connect
+animation timing, interruption handling and the actual health rule.

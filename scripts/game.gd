@@ -119,6 +119,10 @@ func _ready():
 			var demo=load("res://scripts/comfort_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--sleep-demo":
+			var demo=load("res://scripts/sleep_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta

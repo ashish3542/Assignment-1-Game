@@ -61,3 +61,5 @@ The [optional voice-generation tool](tools/voices/README.md) documents how the n
 `--survival-demo` records the empty beach, larger plane, shipwreck and forest, then follows the actual autonomous resource trips and shelter construction without injecting materials. `scripts/survival_tests.gd` covers the new progression, resource costs, cooperation and saves.
 
 `--comfort-demo` stages a short review of player/NPC collection, ground rest, food and tent recovery. Low health and a completed tent are explicitly labeled test fixtures. `scripts/comfort_tests.gd` checks contact timing, cancellation, recovery rates and saves.
+
+Rest now uses a gradual crouch → sit → supported recline, with relaxed arms and subtle breathing. Getting up reverses these poses; interrupting halfway returns from the current position. `scripts/rest_pose.gd` contains the procedural poses. `--sleep-demo` records the ground/tent transitions and an interrupted lie-down with explicitly staged health and shelter.
