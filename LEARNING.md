@@ -7,6 +7,7 @@ Run a feature first, then read the small function that produced what you saw.
 | `scripts/game.gd` | Inventory, interactions, objectives, saves | `use_fire()` |
 | `scripts/crew.gd` | NPC routines, greetings, commands and deliveries | `choose_routine()`, `greet()` and `command()` |
 | `scripts/cinematic.gd` | Shot timing, actor movement and crash visibility | `sample()`, `CUES` and `finish()` |
+| `scripts/player_actions.gd` | Collection, cancellation and health recovery | `start_pickup()`, `toggle_rest()`, `update()` |
 | `scripts/player.gd` | Input, movement, camera | `_physics_process()` |
 | `scripts/island.gd` | World and walkable routes | `walkable()` and `path_to()` |
 | `scripts/interface.gd` | Menus, dialogue, map, HUD | `show_dialogue()` |
@@ -101,3 +102,22 @@ Record what you actually observe in your own words.
 ## Your reflection
 
 Write this yourself: What did you request? What happened? What did you change after testing? Which function can you explain? What remains imperfect? Use real observations, including where AI output needed correction.
+
+## Pickup and rest: time is part of a game rule
+
+The earlier pickup pose rotated the entire model around its feet. The revised
+`models.gd` bends the hip and knee joints and lowers the hips while keeping the
+torso upright. `player_actions.gd` reserves an item first, then transfers it at
+0.85 seconds into the reach, and ends the action at 1.65 seconds. The NPC routine
+uses the same contact and stand-up timing. Animation and inventory must agree:
+canceling before contact releases the item; canceling afterward must not duplicate it.
+
+Rest is a separate state, not a menu that instantly refills health. On clear ground
+it creates a temporary leaf mat. A finished tent permits faster recovery. Both
+need food, stop at full health, and freeze while paused. Save/load restores health
+and supplies, but clears temporary actions and puts the player back on their feet.
+
+Try interrupting a pickup before and after the hand reaches it, then inspect the
+shared count. After hunger has lowered health, compare ten seconds of ground rest
+with ten seconds inside the tent. Explain why different recovery rates make
+building shelter useful. Record your own results; these are experiments to try.

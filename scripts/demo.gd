@@ -50,6 +50,7 @@ func run():
 		await walk(p.node.position)
 		game.interaction={"type":"pickup","item":p}
 		game.interact()
+		await wait(2.5)
 		await wait(0.4)
 	for p in game.world.pickups:
 		if game.inventory.Stone>=3: break
@@ -57,6 +58,7 @@ func run():
 		await walk(p.node.position)
 		game.interaction={"type":"pickup","item":p}
 		game.interact()
+		await wait(2.5)
 		await wait(0.4)
 	await walk(game.world.camp+Vector3(0,0,2))
 	game.use_fire()
@@ -97,30 +99,6 @@ func run():
 		await wait(0.2)
 		elapsed+=0.2
 	await wait(3)
-	game.demo_caption="08 / Optional exploration: salvage and repair a buggy"
-	for i in range(24,27):
-		var p=game.world.pickups[i]
-		await walk(p.node.position)
-		game.interaction={"type":"pickup","item":p}
-		game.interact()
-	await walk(game.world.buggy.position)
-	game.interaction={"type":"buggy"}
-	game.interact()
-	game.interact()
-	game.demo_caption="09 / Drive the buggy across the island"
-	for frame in range(240):
-		var delta=get_physics_process_delta_time()
-		var next=game.player.position+Vector3(-0.25,0,-1)*9*delta
-		if game.world.walkable(next,1.2): game.player.position=game.world.ground(next)
-		game.world.buggy.position=game.player.position
-		game.world.buggy.rotation.y=0.25
-		game.player.body.visible=false
-		game.player.moving=true
-		game.player.yaw=0.25
-		game.player.update_camera(delta)
-		await get_tree().physics_frame
-	game.interaction={"type":"exit"}
-	game.interact()
 	game.demo_caption="10 / With camp secure, send the rescue signal"
 	await walk(game.world.tower+Vector3(0,0,3))
 	game.activate_beacon()

@@ -29,7 +29,7 @@ func run():
 	game.demo_caption="01 / A larger aircraft: recover fabric, rations and spare parts"
 	shot(game,"plane")
 	await wait(5)
-	game.demo_caption="02 / Tidebreak shipwreck: rope, timber, scrap and a damaged buggy"
+	game.demo_caption="02 / Tidebreak shipwreck: rope, timber and spare parts"
 	shot(game,"ship")
 	await wait(5)
 	game.demo_caption="03 / Dense inland forest; clear beach for the new camp"

@@ -26,6 +26,8 @@ var pose_clock=0.0
 var routine_step=0
 var fishing_rod: Node3D
 var tool: Node3D
+var pickup_prop: MeshInstance3D
+var gather_point=Vector3.ZERO
 
 func setup(g, who: String, job: String, color: Color, p: Vector3):
 	game=g
@@ -62,6 +64,8 @@ func setup(g, who: String, job: String, color: Color, p: Vector3):
 	add_child(chat)
 	cargo=M.box(body,Vector3(0,0.99,-0.4),Vector3(0.45,0.30,0.33),Color("b6b597"))
 	cargo.visible=false
+	pickup_prop=M.box(body.get_node("Arm1/Elbow"),Vector3(0,-0.32,0),Vector3(0.18,0.16,0.22),Color("b6a47d"))
+	pickup_prop.visible=false
 	fishing_rod=Node3D.new()
 	body.add_child(fishing_rod)
 	M.beam(fishing_rod,Vector3(0.15,1.05,-0.35),Vector3(0.1,2.7,-2.5),0.018,Color("b09561"))
@@ -97,6 +101,7 @@ func cancel():
 		game.inventory[carry_kind]+=1
 		carry_kind=""
 	cargo.visible=false
+	pickup_prop.visible=false
 	path.clear()
 	task="idle"
 	state="Waiting"
@@ -177,7 +182,13 @@ func gather(kind: String):
 	var pickup=world.pickups[best]
 	reserved_id=pickup.id
 	game.reserved[reserved_id]=person
-	go(pickup.node.position,"gathering","Collecting "+kind.to_lower())
+	gather_point=pickup.node.position
+	var away=position-gather_point
+	away.y=0
+	if away.length()<0.1: away=Vector3.BACK
+	var approach=world.ground(gather_point+away.normalized()*0.4)
+	if not world.walkable(approach,0.38): approach=world.ground(gather_point)
+	go(approach,"gathering","Collecting "+kind.to_lower())
 
 func greet(delta):
 	greeting_cooldown=maxf(0,greeting_cooldown-delta)
@@ -226,7 +237,12 @@ func _process(delta):
 		if timer>9: task="idle"
 	elif task=="gathering":
 		timer+=delta
-		if timer>1.8: collect_resource()
+		face_point(gather_point,delta)
+		if timer>=0.85 and carry_kind.is_empty(): collect_resource()
+		if timer>=1.65:
+			pickup_prop.visible=false
+			cargo.visible=not carry_kind.is_empty()
+			go(world.camp+Vector3(2,0,1),"deliver_resource","Bringing supplies home")
 	elif task=="building":
 		face_point(world.tent_center+Vector3(0,1,0),delta)
 		state="Raising shelter · "+str(int(game.shelter.progress*100))+"%"
@@ -297,7 +313,7 @@ func _process(delta):
 	elif task in ["repairing","building"]: pose="repair"
 	elif wave_time>0 and not moving and not cargo.visible: pose="wave"; face_point(game.player.position,delta)
 	if world.in_tent(position): pose="escape"
-	M.animate_human(body,pose_clock,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
+	M.animate_human(body,timer if pose=="gather" else pose_clock,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
 	var look=game.player.position-position
 	var head=body.get_node("Head")
 	var desired=clampf(wrapf(atan2(-look.x,-look.z)-body.rotation.y,-PI,PI),-0.55,0.55) if wave_time>0 else 0.0
@@ -310,7 +326,8 @@ func face_point(point: Vector3, delta: float):
 func move_path(delta: float) -> bool:
 	if path.is_empty(): return false
 	var flat=Vector3(path[0].x-position.x,0,path[0].z-position.z)
-	if flat.length()<0.22: path.remove_at(0); return false
+	var tolerance=0.04 if next_task=="gathering" and path.size()==1 else 0.22
+	if flat.length()<tolerance: path.remove_at(0); return false
 	if wave_time>1.0: face_point(game.player.position,delta); return false
 	var previous=position
 	position=world.move_character(position,flat.normalized()*minf(flat.length(),2.6*delta),0.38)
@@ -327,10 +344,9 @@ func collect_resource():
 			pickup.taken=true
 			pickup.node.visible=false
 			carry_kind=pickup.kind
-			cargo.visible=true
+			pickup_prop.visible=true
 	game.reserved.erase(reserved_id)
 	reserved_id=-1
-	go(world.camp+Vector3(2,0,1),"deliver_resource","Bringing supplies home")
 
 func arrive():
 	match task:

@@ -1,6 +1,6 @@
 # Credits and provenance
 
-- Concept developed from the student's prompts: plane crash, remote island, four survivors, exploration, gathering, fishing, food, NPC cooperation, transport and rescue.
+- Concept developed from the student's prompts: plane crash, remote island, four survivors, exploration, gathering, fishing, food, NPC cooperation and rescue (transport was explored in an earlier revision and removed at the student's request).
 - Kestrel Island, characters and dialogue were drafted during AI-assisted development. Generic survival themes and names are not claimed to be unique.
 - GDScript, procedural meshes, interface and shaders were created for this project with Codex assistance.
 - Music, ocean/birds and sound effects are original procedural PCM synthesis in `scripts/sound.gd`.

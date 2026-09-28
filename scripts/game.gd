@@ -15,6 +15,7 @@ var cine_camera: Camera3D
 var flight: Node3D
 var cinematic
 var shelter
+var actions
 var intro_fade=0.0
 var intro_phase=""
 var autonomy_enabled=true
@@ -30,7 +31,6 @@ var repaired = false
 var repair_requested = false
 var module_installed = false
 var module_carried = false
-var buggy_fixed = false
 var won = false
 var spear = false
 var team_events = 0
@@ -70,6 +70,7 @@ func _ready():
 	fire_audio.volume_db=-15
 	player = Player.new()
 	add_child(player)
+	actions=load("res://scripts/player_actions.gd").new(self)
 	player.setup(world,self)
 	var names = ["Maya","Finn","Rowan"]
 	var jobs = ["Engineer","Scout","Medic"]
@@ -114,6 +115,10 @@ func _ready():
 			var demo=load("res://scripts/survival_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--comfort-demo":
+			var demo=load("res://scripts/comfort_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
@@ -129,13 +134,13 @@ func _process(delta):
 	elif mode=="intro": update_intro(delta)
 	elif mode=="play":
 		shelter.update(delta)
+		actions.update(delta)
+		if demo_active and actions.busy(): player.animate_action(delta)
 		if demo_active and is_instance_valid(demo_focus):
 			player.camera.position=player.camera.position.lerp(demo_focus.position+Vector3(7,4,7),minf(delta*3,1))
 			player.camera.look_at(demo_focus.position+Vector3(0,1,0))
-		sound.engine.volume_db=-23 if player.driving and player.moving else -80
 		hunger=maxf(0,hunger-delta*0.055)
 		if hunger<1: health=maxf(10,health-delta*0.22)
-		elif hunger>60: health=minf(100,health+delta*0.4)
 		if fishing>0:
 			fishing+=delta
 			if fishing>5:
@@ -166,6 +171,10 @@ func _unhandled_input(event):
 		else: resume_game()
 		return
 	if mode!="play": return
+	if key==KEY_H:
+		actions.toggle_rest()
+		return
+	if actions.busy() and key not in [KEY_F6,KEY_F9,KEY_E]: return
 	match key:
 		KEY_E: interact()
 		KEY_B:
@@ -213,14 +222,12 @@ func resume_game():
 
 func pause_game():
 	mode="pause"
-	sound.engine.volume_db=-80
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	ui.show_pause()
 
 func show_help():
 	previous_mode=mode
 	mode="help"
-	sound.engine.volume_db=-80
 	ui.clear_buttons()
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 
@@ -252,9 +259,14 @@ func location_name() -> String:
 func find_interaction():
 	interaction={}
 	prompt=""
-	if player.driving:
-		prompt="E  /  Leave the buggy"
-		interaction={"type":"exit"}
+	if actions.resting:
+		prompt="H / E / Move  ·  Wake up · "+("Tent +2 health/s" if actions.rest_kind=="tent" else "Leaf mat +0.8 health/s")
+		return
+	if actions.picking():
+		prompt="Collecting "+actions.pickup.kind.to_lower()+" · Move to cancel"
+		return
+	if actions.waking>0:
+		prompt="Getting up..."
 		return
 	if fishing>0:
 		prompt="E  /  Reel in!" if fishing>=3 else "Wait for the bite..."
@@ -287,11 +299,10 @@ func find_interaction():
 	elif player.position.distance_to(world.tower+Vector3(0,0,3))<4:
 		interaction={"type":"beacon"}
 		prompt="E  /  Send rescue signal" if repaired else "E  /  Inspect transmitter"
-	elif player.position.distance_to(world.buggy.position)<3.5:
-		interaction={"type":"buggy"}
-		prompt="E  /  Drive buggy" if buggy_fixed else "E  /  Repair buggy · 3 scrap"
 
 func interact():
+	if actions.resting: actions.wake(); return
+	if actions.busy(): return
 	if fishing>0:
 		if fishing>=3 and fishing<=5:
 			inventory.Fish+=1
@@ -304,36 +315,12 @@ func interact():
 	match interaction.type:
 		"shelter": shelter.help()
 		"npc": open_dialogue(interaction.npc)
-		"pickup":
-			var p=interaction.item
-			if p.taken or reserved.has(p.id): return
-			p.taken=true
-			p.node.visible=false
-			inventory[p.kind]+=1
-			sound.play("pickup")
-			report("Collected "+p.kind.to_lower()+". Added to shared camp supplies.")
+		"pickup": actions.start_pickup(interaction.item)
 		"fire": use_fire()
 		"fish":
 			fishing=0.01
 			report("Line cast. Wait for BITE, then press E.")
 		"beacon": activate_beacon()
-		"buggy":
-			if not buggy_fixed:
-				if inventory.Scrap<3:
-					report("The buggy needs 3 scrap. Search the wreckage at Crash Beach.")
-					return
-				inventory.Scrap-=3
-				buggy_fixed=true
-				sound.play("success")
-				report("Buggy repaired. Press E again to drive. WASD steers relative to camera.")
-			else:
-				player.driving=true
-				player.position=world.buggy.position
-		"exit":
-			player.driving=false
-			player.body.visible=true
-			var exit_pos=player.position+Vector3(2,0,0)
-			if world.walkable(exit_pos): player.position=world.ground(exit_pos)
 
 func use_fire():
 	if not fire_lit:
@@ -357,6 +344,7 @@ func use_fire():
 	else: report("No raw fish. Fish at the pier or ask Finn to catch one.")
 
 func eat():
+	if actions.busy(): return
 	if inventory.Meal>0:
 		inventory.Meal-=1
 		ate_meal=true
@@ -367,10 +355,12 @@ func eat():
 	elif inventory.Ration>0:
 		inventory.Ration-=1
 		hunger=minf(100,hunger+25)
+		health=minf(100,health+8)
 		report("A salvaged ration helps. A cooked fish is still needed for the camp objective.")
 	else: report("No meals or rations. Cook a fish at camp.")
 
 func craft_spear():
+	if actions.busy(): return
 	if spear:
 		report("Your spear is ready. It is a survival tool; wildlife combat is not in this chapter.")
 		return
@@ -389,6 +379,7 @@ func add_spear_model():
 	tool.name="Spear"
 
 func throw_stone():
+	if actions.busy(): return
 	if inventory.Stone<=0:
 		report("No stones to throw. Save three for the fire.")
 		return
@@ -457,13 +448,14 @@ func activate_beacon():
 	report("COAST GUARD: Kestrel station, we read you. Hold your position. Help is coming.")
 
 func save_game():
+	actions.cancel_pickup()
 	var saved_inventory=inventory.duplicate()
 	for npc in npcs:
 		if not npc.carry_kind.is_empty(): saved_inventory[npc.carry_kind]+=1
 	var taken=[]
 	for p in world.pickups:
 		if p.taken and p.id<1000: taken.append(p.id)
-	var data={"version":1,"inventory":saved_inventory,"health":health,"hunger":hunger,"fire":fire_lit,"meal":ate_meal,"repaired":repaired,"module":module_installed,"buggy":buggy_fixed,"won":won,"spear":spear,"team_events":team_events,"taken":taken,"player":[player.position.x,player.position.z],"buggy_pos":[world.buggy.position.x,world.buggy.position.z]}
+	var data={"version":1,"inventory":saved_inventory,"health":health,"hunger":hunger,"fire":fire_lit,"meal":ate_meal,"repaired":repaired,"module":module_installed,"won":won,"spear":spear,"team_events":team_events,"taken":taken,"player":[player.position.x,player.position.z]}
 	data.version=2
 	data.shelter=shelter.snapshot()
 	# Save delivered supplies only; reset active tasks on load to avoid ghost reservations.
@@ -483,6 +475,7 @@ func load_game():
 		report("Save file is not a supported journey.")
 		return
 	var data: Dictionary=parsed
+	actions.reset()
 	sound.clear_speech()
 	player.velocity=Vector3.ZERO
 	player.jump_y=0
@@ -498,7 +491,6 @@ func load_game():
 	module_installed=bool(data.get("module",false))
 	module_carried=false
 	repair_requested=false
-	buggy_fixed=bool(data.get("buggy",false))
 	won=bool(data.get("won",false))
 	spear=bool(data.get("spear",false))
 	team_events=int(data.get("team_events",0))
@@ -519,15 +511,12 @@ func load_game():
 	var pp=data.get("player",[-6,33])
 	player.position=world.ground(Vector3(float(pp[0]),0,float(pp[1])))
 	if not world.walkable(player.position): player.position=world.ground(world.camp+Vector3(0,0,6))
-	var bp=data.get("buggy_pos",[24,3])
-	world.buggy.position=world.ground(Vector3(float(bp[0]),0,float(bp[1])))
 	world.set_crash_visible(true)
 	for i in range(npcs.size()):
 		npcs[i].position=world.ground(world.camp+Vector3(-2+i*3,0,-2))
 		npcs[i].visible=true
 		npcs[i].routine_enabled=true
 		npcs[i].idle_time=0
-	player.driving=false
 	player.visible=true
 	player.body.visible=true
 	if spear: add_spear_model()
@@ -599,9 +588,12 @@ func run_tests():
 	# Verify actual player interactions and duplicate protection.
 	mode="play"
 	var stone=world.pickups[12]
+	player.position=world.ground(stone.node.position+Vector3(0,0,0.4))
 	interaction={"type":"pickup","item":stone}
 	var before=int(inventory.Stone)
 	interact()
+	interact()
+	for frame in range(100): actions.update(0.05)
 	interact()
 	if inventory.Stone!=before+1: failures.append("Duplicate pickup")
 	fishing=1
@@ -610,15 +602,6 @@ func run_tests():
 	fishing=3.5
 	interact()
 	if inventory.Fish!=1: failures.append("Player fishing timing")
-	inventory.Scrap=3
-	interaction={"type":"buggy"}
-	interact()
-	if not buggy_fixed or inventory.Scrap!=0: failures.append("Buggy repair cost")
-	interact()
-	if not player.driving: failures.append("Buggy entry")
-	interaction={"type":"exit"}
-	interact()
-	if player.driving: failures.append("Buggy exit")
 	# An interrupted module delivery must become retrievable again.
 	module_installed=false
 	repaired=false
@@ -640,7 +623,7 @@ func run_tests():
 	inventory.Wood=999
 	load_game()
 	if inventory.Wood!=expected_wood: failures.append("Save/load carried resource preservation")
-	if not fire_lit or not ate_meal or not buggy_fixed: failures.append("Save/load progress")
+	if not fire_lit or not ate_meal: failures.append("Save/load progress")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	for kind in ["pickup","step","success","crash"]:
 		if sound.clips[kind].data.is_empty(): failures.append("Missing audio "+kind)
@@ -648,6 +631,7 @@ func run_tests():
 	check_voice_assets(failures)
 	await run_revision_tests(failures)
 	load("res://scripts/polish_tests.gd").new().run(self,failures)
+	load("res://scripts/comfort_tests.gd").new().run(self,failures)
 	# Free queued menu controls before the runner exits.
 	mode="pause"
 	sound.stop_all()
@@ -657,7 +641,7 @@ func run_tests():
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if failures.is_empty():
-		print("KESTREL TESTS PASSED: resource gates, player/NPC fishing, cooking, meal, pathfinding, NPC requests, handoffs, repairs, ending, cancellation, duplicate pickups, buggy entry/exit, save/load, carried resources, island boundary, sound data, voice inventory, cinematic visibility/skip, autonomous jobs, command priority and greeting cooldowns")
+		print("KESTREL TESTS PASSED: resource gates, player/NPC fishing, cooking, meal, pathfinding, NPC requests, handoffs, repairs, ending, cancellation, duplicate pickups, animated collection, rest recovery, save/load, carried resources, island boundary, sound data, voice inventory, cinematic visibility/skip, autonomous jobs, command priority and greeting cooldowns")
 		get_tree().quit(0)
 	else:
 		for failure in failures: push_error("TEST FAILED: "+failure)

@@ -195,3 +195,15 @@ Implementation direction: start at an empty beach, add dense inland forest, repl
 Resumed on 2026-09-28. The first integrated check showed the crew could gather supplies and build the shelter, but loading the new save version failed. Corrected numeric version parsing before continuing the remaining tests, dialogue, visual review and documentation. Actual final results are recorded in VALIDATION.md.
 
 Completed: empty starting beach; staged shared shelter costing 6 wood, 2 cloth and 2 rope; automatic crew gathering/building and player assistance; denser inland forest; a 1.65-scale aircraft; Tidebreak shipwreck salvage; updated objectives, map, instructions and 53 neural voice clips. Integrated tests passed in the project and a fresh copy. A 3:32 automated in-game recording completed the actual resource-to-shelter loop, and rendered frames were inspected. No manual student playtest or reflection is claimed.
+
+## 25. Improve collection, remove the buggy and add health recovery
+
+> fix the picking animation character arent picking item with good animation there whole body is benting forward and also there is buggy already nothing like that in island in rular how can that exist and also when the player heathhs get low one of the way to increase is rather by having food or sleeping in tent and until the tent isnt made some floor or some kind of things where  they can just lay down
+
+Implemented knee-crouched, arm-reaching collection for the player and crew, with item transfer at hand contact and interruption-safe reservations. Removed the buggy, driving controls, engine loop and vehicle save fields. Meals and rations heal; H creates a temporary ground leaf mat or sleeps on bedding inside a completed tent. Ground rest restores health more slowly, hunger still matters, and the player can wake at any time. This uses procedural joint animation, not motion capture. The prompt is recorded verbatim; verification and visual refinements are documented in VALIDATION.md. No student reflection or manual playtest is claimed.
+
+## 26. Continue the collection and recovery update
+
+> resume the work from where you hit usage limi
+
+Continued from the saved implementation and recordings. Reviewed the crouch and resting poses, corrected the body height over the bedding, and continued final clean-copy tests, documentation and GitHub publication. No work was restarted from scratch.

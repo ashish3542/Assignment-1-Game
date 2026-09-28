@@ -2,6 +2,18 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Collection animation and health recovery — 2026-09-28
+
+Replaced the whole-root pickup bow with a shared hip/knee crouch and arm reach. Player collection now approaches, reserves, reaches, transfers one item at 0.85 seconds, and stands by 1.65 seconds. NPCs use the same timing before carrying supplies home. Movement can cancel player collection; cancellation before contact releases the reservation and after contact retains the collected supply. NPCs stop more precisely at their final collection position. Removed the buggy model, repair/drive interactions, movement overrides, engine loop and vehicle save fields. Older save files with vehicle fields still load, ignoring those fields.
+
+Added H to rest on a temporary leaf mat on clear ground, or to sleep on bedding inside the completed tent. Ground recovery is 0.8 health/second and tent recovery is 2 health/second, after settling down. Rest requires food above 5, stops at full health, and can be interrupted. Meals heal 15, rations heal 8; passive standing regeneration was removed. Loading retains health/food but resets temporary actions and poses.
+
+The integrated runner passed in the development project before final refinements, then passed with the final code in a fresh source copy without `.godot`, Git metadata or voice-generation dependencies. `comfort_tests.gd` covers player/NPC contact timing, reservations, cancellation before/after contact, pause, save/load, ignored legacy vehicle fields, unfinished-tent rejection, leaf-mat creation, both recovery rates, hunger gating, health cap, waking, food healing and joint/root poses. Existing shelter, collision, dialogue, fishing, cooking, cooperation, rescue and voice checks also passed. The final autonomous shelter simulation completed in 188.7 seconds. The restricted environment printed its known certificate-store warning; the final clean-copy run had no script errors or ObjectDB shutdown warnings.
+
+Recorded and inspected frames from a 34.2-second automated review with audio. Visual review exposed excessive clearance between the resting body and mat; lowered the pose and hid the backpack while lying down, then re-recorded and inspected the corrected ground/tent poses. `Lost-Signal-Comfort-Preview.mp4` (alongside the project, about 3.3 MB) shows the revised player/NPC collection, ground rest, ration healing and tent recovery. Low starting health and the completed tent are explicitly labeled staged fixtures. This is not a manual student playtest. The later early-wake adjustment and equipped-spear visibility are covered by source checks/clean-copy execution but are not separately demonstrated in that recording.
+
+Limits: original procedural joint animation with a small generic held pickup prop, not motion capture or full hand inverse kinematics. Rest restores the player's health; NPC resting schedules and time-of-day skipping are not implemented. Earlier videos and validation entries below describe historical versions, including the now-removed vehicle.
+
 ## Wilderness, salvage and cooperative shelter — 2026-09-28
 
 The starting camp is an empty beach. Tent, furniture and fire geometry stay hidden until built; their hidden footprints do not block movement. Removed the ready-made pier and ranger shelter; signal equipment appears after Maya assembles it. Added instanced inland broadleaf forest, increased palms, enlarged the flight and crashed plane by 1.65, and added the original procedural Tidebreak shipwreck with accessible landward salvage and a damaged cargo buggy. New Cloth and Rope pickups have persistent IDs and join the shared inventory.
@@ -82,4 +94,4 @@ Copied the source, scripts, shaders and audio to a fresh directory without `.god
 - Audio data is present; subjective loudness and quality need player feedback.
 - Other GPUs, operating systems and a standalone exported executable are not tested.
 - Restricted runs printed a certificate-store warning; some headless exits reported ObjectDB shutdown warnings. Gameplay assertions passed. No game network connection is required.
-- Simplified procedural models and basic driving; no wildlife, spear combat, swimming or GTA-scale world.
+- Simplified procedural models and animation; no wildlife, spear combat, swimming or GTA-scale world.

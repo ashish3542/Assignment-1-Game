@@ -15,7 +15,6 @@ var line_remaining=0.0
 var conversation_gap=0.0
 var conversation_clock=0.0
 var recent_lines: Dictionary={}
-var engine: AudioStreamPlayer
 
 func _process(delta):
 	var game=get_parent()
@@ -45,11 +44,6 @@ func _ready():
 	music.stream = make_clip("music",16.0,true)
 	music.volume_db = -25
 	music.play()
-	engine=AudioStreamPlayer.new()
-	add_child(engine)
-	engine.stream=make_clip("engine",2.0,true)
-	engine.volume_db=-80
-	engine.play()
 
 func make_clip(kind: String, duration: float, looped: bool = false) -> AudioStreamWAV:
 	var rate = 22050
@@ -69,7 +63,6 @@ func make_clip(kind: String, duration: float, looped: bool = false) -> AudioStre
 				sample = low*3*(0.55+0.25*sin(t*TAU/8))+sin(t*TAU*55)*0.02
 				var bird=fmod(t,3.1)
 				if bird<0.22: sample+=sin(t*TAU*(1500+sin(bird*30)*500))*sin(bird/0.22*PI)*0.07
-			"engine": sample=sin(t*TAU*48)*0.28+sin(t*TAU*96)*0.09+low*0.2
 			"campfire": sample=low*2.2+random.randf_range(-0.2,0.2)*(1.0 if random.randf()>0.993 else 0.0)
 			"music":
 				var chords=[[130.813,164.814,196.0],[110.0,130.813,164.814],[87.307,110.0,130.813],[97.999,123.471,146.832]]

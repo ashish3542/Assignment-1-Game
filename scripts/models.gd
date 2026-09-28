@@ -72,7 +72,7 @@ static func human(parent: Node3D, shirt: Color, skin: Color) -> Node3D:
 		beam(body,Vector3(side*0.06,1.47,-0.1),Vector3(side*0.14,1.35,-0.14),0.016,shirt.darkened(0.25))
 		beam(body,Vector3(side*0.16,1.42,0),Vector3(side*0.17,0.98,-0.14),0.026,Color("565947"))
 	box(body,Vector3(-0.12,1.19,-0.162),Vector3(0.12,0.13,0.022),shirt.lightened(0.08))
-	box(body, Vector3(0,1.13,0.20), Vector3(0.32,0.43,0.20), Color("655e45"))
+	box(body, Vector3(0,1.13,0.20), Vector3(0.32,0.43,0.20), Color("655e45")).name="Backpack"
 	for side in [-1,1]:
 		var arm = Node3D.new()
 		arm.name = "Arm" + str(side)
@@ -139,22 +139,43 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	body.rotation.z=sin(phase)*0.012*weight+sin(t*1.1)*0.01*(1-weight)
 	body.get_node("Head").rotation.x=sin(t*1.6)*0.025
 	body.get_node("Head/Mouth").scale.y=1.0+absf(sin(t*12))*1.8 if talking else 1.0
+	body.get_node("Backpack").visible=not (pose=="sleep" and t>0.35)
+	if body.has_node("Spear"): body.get_node("Spear").visible=not (pose=="sleep" and t>0.35)
 	for side in [-1,1]:
 		var leg=body.get_node("Leg"+str(side))
 		var arm=body.get_node("Arm"+str(side))
 		leg.rotation.x=stride*side
 		leg.get_node("Knee").rotation.x=maxf(0,-stride*side)*0.9
-		arm.rotation=Vector3(-0.48 if carry else -stride*side,0,side*0.07)
-		arm.get_node("Elbow").rotation=Vector3(-0.85 if carry else -0.14-maxf(0,stride*side)*0.35,0,0)
-	if pose in ["gather","escape"]:
-		body.rotation.x=0.48 if pose=="gather" else 0.20
+		arm.rotation=Vector3(0.6 if carry else -stride*side,0,side*0.07)
+		arm.get_node("Elbow").rotation=Vector3(0.9 if carry else -0.14-maxf(0,stride*side)*0.35,0,0)
+	if pose=="gather":
+		# Knees fold beneath the hips; the root stays upright rather than bowing from the feet.
+		var crouch=smoothstep(0.0,0.5,t)*(1.0-smoothstep(1.0,1.65,t))
+		body.rotation.x=0
+		body.rotation.z=0
+		body.position.y=-0.50*crouch
+		body.get_node("Head").rotation.x=0.16*crouch
+		for side in [-1,1]:
+			body.get_node("Leg"+str(side)).rotation.x=1.30*crouch
+			body.get_node("Leg"+str(side)+"/Knee").rotation.x=-2.50*crouch
+		body.get_node("Arm1").rotation=Vector3(0.56*crouch,0,-0.30*crouch)
+		body.get_node("Arm1/Elbow").rotation.x=0.12*crouch
+		body.get_node("Arm-1").rotation.x=0.8*crouch
+		body.get_node("Arm-1/Elbow").rotation.x=0.65*crouch
+	elif pose=="sleep":
+		body.rotation.x=PI/2*smoothstep(0.0,1.0,t)
+		body.rotation.z=0
+		body.position.y=float(body.get_meta("sleep_height",0.20))*smoothstep(0.0,1.0,t)
+		body.get_node("Head").rotation=Vector3.ZERO
+		for side in [-1,1]:
+			body.get_node("Leg"+str(side)).rotation=Vector3.ZERO
+			body.get_node("Leg"+str(side)+"/Knee").rotation=Vector3.ZERO
+			body.get_node("Arm"+str(side)).rotation=Vector3(0,0,side*0.12)
+			body.get_node("Arm"+str(side)+"/Elbow").rotation=Vector3.ZERO
+	elif pose=="escape":
+		body.rotation.x=0.20
 		body.position.y-=0.15
 		body.get_node("Arm1").rotation.x=-0.6
-		if pose=="gather":
-			for side in [-1,1]:
-				body.get_node("Leg"+str(side)).rotation.x=-0.25
-				body.get_node("Leg"+str(side)+"/Knee").rotation.x=0.5
-			body.get_node("Arm1").rotation.x=-0.8+sin(t*3)*0.12
 	elif pose=="wave":
 		body.get_node("Arm1").rotation=Vector3(-0.6,0,-1.0)
 		body.get_node("Arm1/Elbow").rotation=Vector3(-2.1,0,sin(t*8)*0.22)
@@ -194,19 +215,3 @@ static func plane(parent: Node3D, broken: bool = false) -> Node3D:
 		door.rotation.z=-0.2
 		box(p,Vector3(3.2,-0.37,-0.5),Vector3(1.7,0.08,1.8),Color("3c4540"))
 	return p
-
-static func buggy(parent: Node3D) -> Node3D:
-	var b = Node3D.new()
-	parent.add_child(b)
-	box(b,Vector3(0,0.65,0),Vector3(1.7,0.4,2.7),Color("cf8f36"))
-	box(b,Vector3(0,0.92,-0.85),Vector3(1.65,0.23,0.95),Color("e3ab50"))
-	box(b,Vector3(0,1.0,0.15),Vector3(1.35,0.2,0.7),Color("303e39"))
-	for side in [-1,1]:
-		for z in [-0.92,0.95]:
-			var wheel = cylinder(b,Vector3(side*0.89,0.45,z),0.43,0.28,Color("252e2e"))
-			wheel.rotation.z = PI/2
-		beam(b,Vector3(side*0.7,0.8,0.85),Vector3(side*0.7,1.95,0.8),0.055,Color("404b46"))
-		beam(b,Vector3(side*0.7,0.8,-0.7),Vector3(side*0.7,1.95,-0.5),0.055,Color("404b46"))
-		box(b,Vector3(side*0.57,0.9,-1.37),Vector3(0.25,0.18,0.05),Color("fff1b8"))
-	box(b,Vector3(0,2,0.15),Vector3(1.65,0.09,1.65),Color("545b45"))
-	return b

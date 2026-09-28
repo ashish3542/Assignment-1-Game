@@ -189,7 +189,7 @@ func draw_hud():
 		panel(Rect2(373,571,534,53),0.92)
 		text(Vector2(396,603),game.prompt,18)
 	panel(Rect2(360,689,578,27),0.88)
-	text(Vector2(376,707),"WASD Move   Mouse Look   E Interact   Tab Journal   Esc Pause",13,cream)
+	text(Vector2(376,707),"WASD Move   Mouse Look   E Use   H Rest   Tab Journal   Esc Pause",13,cream)
 	if game.fishing>0:
 		panel(Rect2(415,435,450,92),0.95)
 		text(Vector2(442,469),"FISHING / "+("BITE! PRESS E NOW" if game.fishing>=3 else "Wait for a bite..."),20,gold)
@@ -242,7 +242,7 @@ func draw_help():
 	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
 	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
 	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
-	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "First roof: 6 wood, 2 cloth from plane X, 2 rope from shipwreck S. The crew gather these.", "Two people raise the frame and tarp together. B near the entrance lets you help too.", "Then build fire: 4 wood + 3 stone. Finn catches fish, Rowan cooks, and 1 eats a meal.", "To fish yourself: E at cove F, then E when BITE appears. Cook with E at the fire.", "Maya and Finn assemble the ridge radio. Signal at R after shelter, fire and food.", "Wait / Follow pause duties. Resume duties restores work. Shipwreck buggy: 3 scrap."]
+	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "First roof: 6 wood, 2 cloth from plane X, 2 rope from shipwreck S. The crew gather these.", "Two people raise the frame and tarp together. B near the entrance lets you help too.", "Then build fire: 4 wood + 3 stone. Finn catches fish, Rowan cooks, and 1 eats a meal.", "To fish yourself: E at cove F, then E when BITE appears. Cook with E at the fire.", "Maya and Finn assemble the ridge radio. Signal at R after shelter, fire and food.", "H: rest on a leaf mat or inside the finished tent."]
 	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
 	text(Vector2(88,465),"RECENT CREW LOG / MOST RECENT FIRST",12,gold)
 	for i in range(mini(6,game.events.size())):

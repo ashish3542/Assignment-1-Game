@@ -20,7 +20,7 @@ var beacon_beam: MeshInstance3D
 var plane: Node3D
 var wreck_root: Node3D
 var smoke: GPUParticles3D
-var buggy: Node3D
+var rest_mat: Node3D
 var palms: Array[Node3D] = []
 var camp = Vector3(-8,0,51)
 var fish_spot = Vector3(25,0,49)
@@ -169,7 +169,7 @@ func _build_camp():
 	M.box(camp_furniture,table_pos+Vector3(0,0.9,0),Vector3(2,0.12,1),Color("a38c64"))
 	add_solid(table_pos,Vector2(2,1),1.0,"furniture")
 	for x in [-0.8,0.8]: M.box(camp_furniture,table_pos+Vector3(x,0.45,0),Vector3(0.12,0.9,0.7),Color("625a44"))
-	for x in [-0.6,0.6]: M.box(camp_furniture,tent_center+Vector3(x,0.12,0),Vector3(0.55,0.12,1.7),Color("71826c"))
+	M.box(camp_furniture,tent_center+Vector3(0,0.10,0),Vector3(1.3,0.12,2.1),Color("71826c"))
 	fire_base=Node3D.new()
 	add_child(fire_base)
 	for i in range(10):
@@ -305,9 +305,6 @@ func _build_landmarks():
 	beacon_beam.visible = false
 	signal_station.visible=false
 	shipwreck=load("res://scripts/wilderness.gd").shipwreck(self)
-	buggy=M.buggy(self)
-	buggy.position=ground(ship_spot+Vector3(-5,0,-7))
-	buggy.rotation.y=-0.5
 	# A natural rock fishing ledge, no prebuilt pier or ranger outpost.
 	for i in range(3): M.sphere(self,ground(fish_spot+Vector3(3+i,0,2),-0.15),Vector3(2,0.7,2),Color("777b68"))
 
@@ -532,3 +529,16 @@ func _process(_delta):
 		palms[i].rotation.z = sin(t*0.7+i)*0.009
 
 
+
+func place_rest_mat(center: Vector3, angle: float):
+	if not is_instance_valid(rest_mat):
+		rest_mat=Node3D.new()
+		rest_mat.name="LeafRestMat"
+		add_child(rest_mat)
+		for i in range(12):
+			var leaf=M.box(rest_mat,Vector3(0,0.035+i%2*0.01,-1.0+i*0.18),Vector3(1.22,0.025,0.24),Color("657345") if i%2==0 else Color("7a8652"))
+			leaf.rotation.y=0.12 if i%2==0 else -0.12
+		M.box(rest_mat,Vector3(0,0.04,0.87),Vector3(0.5,0.03,0.28),Color("928765"))
+	rest_mat.position=ground(center)
+	rest_mat.rotation.y=angle
+	rest_mat.visible=true

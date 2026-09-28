@@ -51,7 +51,7 @@ func npc_wait(npc):
 
 func help():
 	if complete():
-		game.report("The shelter is ready. The crew built this together.")
+		game.report("The shelter is ready. Walk inside and press H to sleep and recover health.")
 	elif not paid:
 		game.report(needed()+". Supplies are shared automatically.")
 	else:
@@ -66,7 +66,7 @@ func update(delta: float):
 	for npc in game.npcs:
 		if npc.task=="building" and npc.position.distance_to(work_position(npc.person))<1.0:
 			workers+=1
-	if player_help>0 and game.player.position.distance_to(game.world.tent_center+Vector3(0,0,3.5))<2.5 and not game.player.driving:
+	if player_help>0 and game.player.position.distance_to(game.world.tent_center+Vector3(0,0,3.5))<2.5 and not game.actions.busy():
 		workers+=1
 	else: player_help=0
 	if workers<2: return

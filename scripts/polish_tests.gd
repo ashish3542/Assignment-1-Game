@@ -7,7 +7,6 @@ func run(g, failures: Array):
 	g.sound.clear_speech()
 	var tent=g.world.tent_center
 	var p=g.player
-	p.driving=false
 	p.velocity=Vector3.ZERO
 	p.position=g.world.ground(tent+Vector3(4,0,0))
 	for i in range(8): p.move_horizontal(Vector3.LEFT,8,0.5)

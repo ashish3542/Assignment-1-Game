@@ -13,24 +13,25 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 - A 75-second skippable opening: flight, impact, four survivors escaping the emergency exit, regrouping and choosing duties, then walking to camp. Wreckage appears only after impact.
 - An empty beach at the start: no tent, furniture, campfire, pier or ranger outpost. Dense palms and broadleaf forest cover the inland areas.
 - A shared first-shelter task: 6 wood, 2 aircraft cloth and 2 shipwreck rope. Maya, Finn and Rowan recover and carry materials, then at least two people raise the frame and tarp. The player can collect supplies and press B near the entrance to help.
-- A 65% larger aircraft and an older Tidebreak shipwreck, each with recoverable supplies. The ship also has salvage timber, scrap, rations and a damaged cargo buggy.
+- A 65% larger aircraft and an older Tidebreak shipwreck, each with recoverable supplies. The ship also has salvage timber, scrap, rations.
 - Third-person movement, mouse camera, sprint and jump on a compact freely explorable island.
-- Solid tent sides/rear and camp furniture; an accessible tent entrance. Player, buggy and NPC routes share obstacle rules. Movement substeps prevent running through thin obstacles; the camera retracts at camp walls.
+- Solid tent sides/rear and camp furniture; an accessible tent entrance. Player and NPC routes share obstacle rules. Movement substeps prevent running through thin obstacles; the camera retracts at camp walls.
 - Original procedural terrain, wind-swayed grass, palms, instanced broadleaf canopies, shoreline foam, soft smoke, wrecks and a camp that appears as the survivors build it.
 - Collect wood, stone, scrap and rations; build fire; catch, cook and eat fish.
-- Health and hunger with a forgiving health floor.
+- Health and hunger with a forgiving health floor. Meals restore 15 health and rations 8. H rests on a leaf mat on clear ground (+0.8 health/second), or sleeps inside a finished tent (+2/second). H, E or movement wakes you; rest needs some food remaining.
+- Player and NPC pickups crouch at the knees, reach, collect at hand contact, then stand. Moving cancels a player pickup; reservations prevent duplicates.
 - Three NPCs with approach greetings, dialogue, articulated walking/working/gesturing animations and visible tools. Their first priority is shelter: Maya recovers cloth, Finn recovers rope, and Rowan gathers wood. After construction, Maya assembles the radio, Finn retrieves parts and catches fish, and Rowan gathers firewood and cooks.
 - Follow/wait commands pause that survivor's duties. **Resume your own duties** restores autonomy. Other NPCs respect held commands.
 - One shared speaking turn controls voice, subtitles and talking gestures. NPC speech is local, incidental chatter is limited, and direct conversations clear unrelated chatter and use a closer camera. Subtitles also work with voices disabled.
 - **Finn → Rowan:** catch, carry and deliver a fish; Rowan cooks it.
 - **Maya → Finn → Maya:** request, retrieve and hand over a radio module, then assemble the transmitter.
-- Repairable/drivable buggy, recoverable thrown stones, visible craftable spear.
+- Recoverable thrown stones and a visible craftable spear. The island has no vehicle.
 - Objectives, island map, journal, pause, save/load and rescue ending.
-- Softer changing music that lowers during speech; ocean/birds, footsteps, interaction sounds, fire, engine and crash audio; 53 locally generated neural voice recordings with distinct voices for Maya, Finn, Rowan, the pilot and the coast guard. Playback is offline.
+- Softer changing music that lowers during speech; ocean/birds, footsteps, interaction sounds, fire and crash audio; 53 locally generated neural voice recordings with distinct voices for Maya, Finn, Rowan, the pilot and the coast guard. Playback is offline.
 
 ## Scope
 
-This is a prototype chapter, not a GTA-scale game. Characters and props are simplified procedural models, not photorealistic assets. Construction is a fixed shared shelter site with staged procedural animation, not unrestricted base building, tree chopping or detailed hand-to-tool simulation. Wreck supplies are recovered on foot around the hulls; there is no explorable ship interior. No hostile enemies, spear combat, swimming, other passengers, multiplayer or live AI NPC calls are implemented. The buggy uses simple camera-relative steering. NPC dialogue and decisions work offline. The opening uses an exterior flight sequence and impact cut to black, followed by animated survivors; the crash itself is not physically simulated. Speech is still synthetic, not performed by voice actors.
+This is a prototype chapter, not a GTA-scale game. Characters and props are simplified procedural models, not photorealistic assets. Construction is a fixed shared shelter site with staged procedural animation, not unrestricted base building, tree chopping or detailed hand-to-tool simulation. Wreck supplies are recovered on foot around the hulls; there is no explorable ship interior. No hostile enemies, spear combat, swimming, other passengers, multiplayer or live AI NPC calls are implemented. NPC dialogue and decisions work offline. The opening uses an exterior flight sequence and impact cut to black, followed by animated survivors; the crash itself is not physically simulated. Speech is still synthetic, not performed by voice actors.
 
 Save/load preserves paid building materials, partial/completed shelter progress, chapter progress and carried/delivered supplies; active NPC tasks restart at camp. Old version-1 saves retain a completed shelter; start a new story to see the empty-island progression. Loose player-thrown stones are not separately persisted.
 
@@ -49,7 +50,7 @@ Repository: https://github.com/ashish3542/Assignment-1-Game
 
 Run `godot --headless --path . -- --test` (substitute your Godot executable path). Tests exercise the actual gameplay methods and NPC updates, use a separate test save, and return failure status on broken assertions. They do not replace human playtesting.
 
-`--demo` runs an explicitly labeled automated walkthrough of actual collection, survival, dialogue, NPC cooperation, driving and the ending. It is not active during normal play.
+`--demo` runs an explicitly labeled automated walkthrough of actual collection, survival, dialogue, NPC cooperation and the ending. It is not active during normal play.
 
 `--revision-demo` records the updated opening, automatic greetings and duties, player gathering/fire, autonomous food preparation and command overrides. Both demonstrations are automated, not student playtests.
 
@@ -58,3 +59,5 @@ Run `godot --headless --path . -- --test` (substitute your Godot executable path
 The [optional voice-generation tool](tools/voices/README.md) documents how the neural WAVs were produced. The game does not run a speech model or need Node; only developers rebuilding the audio need that tool. Voice settings and asset hashes are recorded in `audio/voices/generation.json`.
 
 `--survival-demo` records the empty beach, larger plane, shipwreck and forest, then follows the actual autonomous resource trips and shelter construction without injecting materials. `scripts/survival_tests.gd` covers the new progression, resource costs, cooperation and saves.
+
+`--comfort-demo` stages a short review of player/NPC collection, ground rest, food and tent recovery. Low health and a completed tent are explicitly labeled test fixtures. `scripts/comfort_tests.gd` checks contact timing, cancellation, recovery rates and saves.

@@ -51,6 +51,7 @@ func run():
 		await walk(p.node.position)
 		game.interaction={"type":"pickup","item":p}
 		game.interact()
+		await wait(2.5)
 	await walk(game.world.camp+Vector3(0,0,2))
 	var elapsed=0.0
 	while game.inventory.Wood<4 and elapsed<100:
