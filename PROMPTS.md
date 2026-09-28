@@ -181,3 +181,17 @@ The implementation, clean-copy regression tests and 33.8-second automated polish
 Implementation direction: replace the old Windows speech recordings with locally generated Kokoro neural speech, give the cast distinct stock voices, preserve offline playback and coordinated speaking turns, and verify that the new recordings fit the cinematic. These are synthetic voices, not real actors or cloned people. Final results and verification are recorded in VALIDATION.md.
 
 Completed: replaced all 41 voice files, recorded the cast/generation settings and hashes, saved a reproducible optional generation tool, updated cinematic gestures to stop with speech, and added checks for all indexed voice files. The gameplay regressions and cinematic timing checks passed. Created before/after greeting audio and a 29-second automated in-game preview for the student's own listening review. No student listening judgment is claimed.
+
+## 23. Start with wilderness; build shelter and salvage wrecks
+
+> so they gott build the tent and everything its like nothing in that island its full of forest only near beach its and they gotta work together to make tent or place to stay naturally  and also make plane little bit bigger so they can also collect some resources from plane as well and put wreck ship and something like that fomr where they can collect resources adn all
+
+Implementation direction: start at an empty beach, add dense inland forest, replace the already-built camp with staged cooperative construction, enlarge the aircraft and add an older shipwreck with recoverable supplies. Survivors gather wood, aircraft fabric and ship rope before raising their shelter. Remove the prebuilt pier/outpost and assemble the signal equipment later. Work began before a usage interruption; this entry was backfilled from the conversation when work resumed.
+
+## 24. Resume survival construction update
+
+> resume from where you stopped because of the usage limit
+
+Resumed on 2026-09-28. The first integrated check showed the crew could gather supplies and build the shelter, but loading the new save version failed. Corrected numeric version parsing before continuing the remaining tests, dialogue, visual review and documentation. Actual final results are recorded in VALIDATION.md.
+
+Completed: empty starting beach; staged shared shelter costing 6 wood, 2 cloth and 2 rope; automatic crew gathering/building and player assistance; denser inland forest; a 1.65-scale aircraft; Tidebreak shipwreck salvage; updated objectives, map, instructions and 53 neural voice clips. Integrated tests passed in the project and a fresh copy. A 3:32 automated in-game recording completed the actual resource-to-shelter loop, and rendered frames were inspected. No manual student playtest or reflection is claimed.

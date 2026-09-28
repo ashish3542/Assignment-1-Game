@@ -26,6 +26,8 @@ func move(direction: Vector3, speed: float, seconds: float):
 
 func run():
 	game.autonomy_enabled=false
+	# This staged collision check needs a completed shelter; the survival demo builds it.
+	game.shelter.restore({"paid":true,"progress":1.0})
 	game.begin_play()
 	game.demo_active=true
 	for npc in game.npcs:

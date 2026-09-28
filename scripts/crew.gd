@@ -124,6 +124,7 @@ func command(action: String, from_player: bool=true):
 			say("I'll stay here. Take your time.")
 		"camp": go(world.camp+Vector3(2,0,1),"idle","Returning to camp")
 		"wood": gather("Wood")
+		"shelter": game.shelter.assign(self)
 		"fish": go(world.fish_spot,"fish","Heading to the cove")
 		"repair":
 			if game.repaired:
@@ -138,6 +139,9 @@ func command(action: String, from_player: bool=true):
 
 func choose_routine():
 	idle_time=0
+	if not game.shelter.complete():
+		game.shelter.assign(self)
+		return
 	match person:
 		"Maya":
 			if not game.repaired: command("repair",false)
@@ -153,6 +157,11 @@ func choose_routine():
 			if game.fire_lit and game.inventory.Fish>0: command("cook",false)
 			elif game.inventory.Wood<4: gather("Wood")
 			else: go(world.tent_center+Vector3(0,0,2.8),"rest","Checking the shelter and first-aid kit")
+
+func has_resource(kind: String) -> bool:
+	for p in world.pickups:
+		if p.kind==kind and not p.taken and not game.reserved.has(p.id): return true
+	return false
 
 func gather(kind: String):
 	var best=-1
@@ -218,6 +227,10 @@ func _process(delta):
 	elif task=="gathering":
 		timer+=delta
 		if timer>1.8: collect_resource()
+	elif task=="building":
+		face_point(world.tent_center+Vector3(0,1,0),delta)
+		state="Raising shelter · "+str(int(game.shelter.progress*100))+"%"
+		if game.shelter.complete(): task="idle"; idle_time=0
 	elif task=="handoff_module":
 		timer+=delta
 		face_point(game.npcs[0].position,delta)
@@ -235,6 +248,7 @@ func _process(delta):
 		state="Repairing · "+str(int(timer/10*100))+"%"
 		if timer>=10:
 			game.repaired=true
+			world.signal_station.visible=true
 			game.repair_requested=false
 			task="idle"
 			state="Transmitter repaired"
@@ -275,12 +289,12 @@ func _process(delta):
 			state="Meal ready"
 			say("Dinner is ready. Press 1 to eat from our shared supplies.")
 	fishing_rod.visible=task=="fish"
-	tool.visible=task=="repairing"
+	tool.visible=task in ["repairing","building"]
 	var pose="idle"
 	if task=="gathering": pose="gather"
 	elif task=="fish": pose="fish"
 	elif task=="cook": pose="cook"
-	elif task=="repairing": pose="repair"
+	elif task in ["repairing","building"]: pose="repair"
 	elif wave_time>0 and not moving and not cargo.visible: pose="wave"; face_point(game.player.position,delta)
 	if world.in_tent(position): pose="escape"
 	M.animate_human(body,pose_clock,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
@@ -341,7 +355,11 @@ func arrive():
 			cargo.visible=false
 			task="idle"
 			state="Supplies delivered"
-			if delivered=="Wood": say("More firewood. That's one less thing to worry about.",true)
+			if delivered=="Cloth": say("I found fabric in the aircraft. This should keep the rain off." if person=="Rowan" else "Rowan, I found fabric in the aircraft. This should keep the rain off.")
+			elif delivered=="Rope": say("Rope from the shipwreck. Let's lash those poles together." if person=="Maya" else "Rope from the shipwreck. Maya, let's lash those poles together.")
+			elif delivered=="Wood":
+				if not game.shelter.complete(): say("The wood is here. Let's get that shelter up.",true)
+				else: say("More firewood. That's one less thing to worry about.",true)
 			else: say("I've put the spare parts by the shelter.",true)
 		"deliver_fish":
 			game.inventory.Fish+=1

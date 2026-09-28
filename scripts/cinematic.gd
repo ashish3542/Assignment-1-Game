@@ -96,13 +96,13 @@ func sample(playback_time: float):
 			caption("FINN: I checked the cabin. No one else made it. Just the four of us.")
 		elif t<45:
 			shot(slot(3)+Vector3(1.8,1.65,-4.5),slot(3)+Vector3(0,1.2,0),44)
-			caption("MAYA: There's an old radio tower on the ridge. I'll check it.")
+			caption("MAYA: We'll need a signal from the ridge. First, let's get a roof over us.")
 		elif t<50:
 			shot(slot(0)+Vector3(4,2,4),slot(0)+Vector3(0,1.1,0),48)
-			caption("FINN: I'll look for food. If you need parts, Maya, call me.")
+			caption("FINN: I'm heading for that wrecked boat. There might be rope we can use.")
 		else:
 			shot(meeting+Vector3(6,3,7),meeting+Vector3(0,1,0))
-			caption("ROWAN: I'll gather firewood and look after camp. We do this together.")
+			caption("ROWAN: I'll gather wood. Maya, check the plane for fabric. Finn, look for rope.")
 	else:
 		game.intro_phase="KESTREL ISLAND / A SECOND CHANCE"
 		var u=smoothstep(55.0,64.0,t)
@@ -113,7 +113,7 @@ func sample(playback_time: float):
 			face(actors[i],finish+Vector3(0,0,-1))
 			game.M.animate_human(actors[i].body,t+i,true)
 		shot(center+Vector3(10,5.5,12),center+Vector3(0,0.9,0),56)
-		caption("ROWAN: That old shelter will do. Come on. Let's make it home.")
+		caption("ROWAN: That beach is clear. We'll build a shelter there, together.")
 		game.intro_fade=smoothstep(63.0,64.0,t)
 
 func story_time(playback_time: float) -> float:

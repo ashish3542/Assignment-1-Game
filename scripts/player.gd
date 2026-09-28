@@ -22,7 +22,7 @@ func setup(w, g):
 	camera.fov = 65
 	camera.far = 900
 	game.add_child(camera)
-	position = world.ground(Vector3(-6,0,33))
+	position = world.ground(world.camp+Vector3(0,0,6))
 	update_camera(1)
 
 func _input(event):
@@ -60,7 +60,9 @@ func _physics_process(delta):
 		if foot_time>0.42 and not driving:
 			game.sound.play("step")
 			foot_time = 0
-	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving,false,"escape" if world.in_tent(position) else "idle",false,delta,clampf(velocity.length()/3.5,0.6,1.65))
+	var pose="escape" if world.in_tent(position) else "idle"
+	if game.shelter.player_help>0 and not moving: pose="repair"
+	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving,false,pose,false,delta,clampf(velocity.length()/3.5,0.6,1.65))
 	if driving:
 		world.buggy.position = world.ground(position)
 		world.buggy.rotation.y = body.rotation.y

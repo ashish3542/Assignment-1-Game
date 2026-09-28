@@ -26,6 +26,16 @@ func run():
 	game.start_intro()
 	while game.mode=="intro": await wait(0.2)
 	game.demo_active=true
+	game.demo_caption="AUTOMATED REVIEW / first the crew gather and build their shelter"
+	var shelter_wait=0.0
+	while not game.shelter.complete() and shelter_wait<360:
+		game.demo_focus=game.npcs[int(shelter_wait/16)%3]
+		await wait(0.25)
+		shelter_wait+=0.25
+	if not game.shelter.complete():
+		push_error("Revision review: shelter did not finish")
+		get_tree().quit(1)
+		return
 	game.demo_caption="AUTOMATED REVIEW / the crew choose their own jobs"
 	game.demo_focus=game.npcs[2]
 	await wait(8)

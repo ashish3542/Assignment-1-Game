@@ -64,6 +64,32 @@ its timing even with speech disabled. This tests the distinction between an audi
 asset's quality and the game's timing/interaction logic. These are prompts for your
 own observations, not a claim that synthetic speech matches a human actor.
 
+## Survival construction: appearances must come from game state
+
+The old camp was drawn immediately when the scene loaded. The new `shelter.gd`
+keeps separate states for unpaid materials, paid construction and completion.
+The shared cost (6 wood, 2 cloth, 2 rope) is deducted once. Progress advances only
+when at least two workers are physically at their build positions; the player can
+count as a worker by helping nearby. `island.gd` draws the frame, tarp and finished
+camp from that progress, enabling walls and updating navigation when needed.
+
+The crew's `choose_routine()` now prioritizes shelter over radio and food. The same
+pickup reservations prevent two people from collecting one item. The expanded
+aircraft supplies fabric; `wilderness.gd` creates the old shipwreck and uses shared
+mesh instances for many inland trees. Instancing reduces the number of separate
+drawing operations required for the forest.
+
+A real integration failure occurred when the new save version was checked with
+array membership: JSON returned a numeric value that needed explicit conversion
+to an integer. The save was rejected, which caused several later progression and
+collision tests to fail. Fixing the version check restored loading and those tests.
+
+Try a new story. Tell two crew members to wait once building starts: the remaining
+builder should stop making progress. Stand near the open front and press B to be
+the second worker, or resume another survivor's duties. Save halfway through and
+load: the frame and progress should return without charging the materials again.
+Record what you actually observe in your own words.
+
 ## Try these small changes
 
 - Change walking speed from 5 to 4; predict and test the difference.

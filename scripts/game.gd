@@ -14,13 +14,14 @@ var npcs: Array = []
 var cine_camera: Camera3D
 var flight: Node3D
 var cinematic
+var shelter
 var intro_fade=0.0
 var intro_phase=""
 var autonomy_enabled=true
 var nearby_voice_cooldown=0.0
 var mode = "menu"
 var previous_mode = "play"
-var inventory = {"Wood":0,"Stone":0,"Scrap":0,"Fish":0,"Meal":0,"Ration":1}
+var inventory = {"Wood":0,"Stone":0,"Scrap":0,"Fish":0,"Meal":0,"Ration":1,"Cloth":0,"Rope":0}
 var health = 100.0
 var hunger = 85.0
 var fire_lit = false
@@ -57,6 +58,7 @@ var fire_audio: AudioStreamPlayer3D
 func _ready():
 	world = Island.new()
 	add_child(world)
+	shelter=load("res://scripts/shelter.gd").new(self)
 	sound = Sound.new()
 	add_child(sound)
 	fire_audio=AudioStreamPlayer3D.new()
@@ -108,6 +110,10 @@ func _ready():
 			var demo=load("res://scripts/polish_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--survival-demo":
+			var demo=load("res://scripts/survival_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
@@ -122,6 +128,7 @@ func _process(delta):
 		cine_camera.look_at(world.camp+Vector3(2,1,-8))
 	elif mode=="intro": update_intro(delta)
 	elif mode=="play":
+		shelter.update(delta)
 		if demo_active and is_instance_valid(demo_focus):
 			player.camera.position=player.camera.position.lerp(demo_focus.position+Vector3(7,4,7),minf(delta*3,1))
 			player.camera.look_at(demo_focus.position+Vector3(0,1,0))
@@ -161,6 +168,9 @@ func _unhandled_input(event):
 	if mode!="play": return
 	match key:
 		KEY_E: interact()
+		KEY_B:
+			if player.position.distance_to(world.tent_center+Vector3(0,0,3.5))<2.5: shelter.help()
+			else: report("Move to the shelter entrance, then press B to help build.")
 		KEY_1: eat()
 		KEY_R: craft_spear()
 		KEY_G: throw_stone()
@@ -174,6 +184,7 @@ func start_intro():
 	crash_played=false
 	last_intro_caption=""
 	flight=M.plane(self)
+	flight.scale=Vector3(1.65,1.65,1.65)
 	cinematic=load("res://scripts/cinematic.gd").new(self)
 	cine_camera.current=true
 	cinematic.sample(0)
@@ -192,7 +203,7 @@ func begin_play():
 	player.camera.current=true
 	player.update_camera(1)
 	resume_game()
-	report("The crew have their own duties. Gather stones for the fire. E to talk; Tab for your journal.")
+	report("Help the crew: salvage cloth and rope, gather wood, then build a shelter.")
 
 func resume_game():
 	ui.clear_buttons()
@@ -231,12 +242,12 @@ func report(line: String, speaker: String="", priority: int=1) -> bool:
 	return false
 
 func location_name() -> String:
+	if player.position.distance_to(world.ship_spot)<19: return "Tidebreak Shipwreck"
 	if player.position.distance_to(world.tower)<17: return "Signal Ridge"
 	if player.position.distance_to(world.salvage)<17: return "Crash Beach"
 	if player.position.distance_to(world.fish_spot)<17: return "Sheltered Cove"
-	if player.position.distance_to(world.buggy.position)<10: return "Ranger Outpost"
-	if player.position.distance_to(world.camp)<20: return "Survivors' Camp"
-	return "Palmwood Trail"
+	if player.position.distance_to(world.camp)<20: return "Survivors' Camp" if shelter.complete() else "Empty Beach / Shelter Site"
+	return "Kestrel Forest"
 
 func find_interaction():
 	interaction={}
@@ -263,7 +274,11 @@ func find_interaction():
 			interaction={"type":"pickup","item":p}
 			prompt="E  /  Collect "+p.kind.to_lower()
 	if not interaction.is_empty(): return
-	if player.position.distance_to(world.camp)<3:
+	if player.position.distance_to(world.tent_center+Vector3(0,0,3.5))<2.5:
+		interaction={"type":"shelter"}
+		prompt="E  /  Help raise the shelter" if shelter.paid else "E  /  Inspect shelter site"
+		if shelter.complete(): prompt="E  /  Check completed shelter"
+	elif player.position.distance_to(world.camp)<3:
 		interaction={"type":"fire"}
 		prompt="E  /  Cook fish" if fire_lit else "E  /  Build fire · 4 wood + 3 stone"
 	elif player.position.distance_to(world.fish_spot)<4:
@@ -287,6 +302,7 @@ func interact():
 		return
 	if interaction.is_empty(): return
 	match interaction.type:
+		"shelter": shelter.help()
 		"npc": open_dialogue(interaction.npc)
 		"pickup":
 			var p=interaction.item
@@ -327,6 +343,7 @@ func use_fire():
 		inventory.Wood-=4
 		inventory.Stone-=3
 		fire_lit=true
+		world.fire_base.visible=true
 		world.fire.visible=true
 		world.fire_light.visible=true
 		fire_audio.play()
@@ -410,9 +427,9 @@ func open_dialogue(npc):
 func choose_dialogue(npc, action: String):
 	if action=="story":
 		match npc.person:
-			"Maya": dialogue_line="A storm took the engine. The ridge radio needs an aircraft module. Finn can bring it while I make repairs."
-			"Finn": dialogue_line="We have a fishing line from the wreck. Try the pier. I can bring fish to Rowan while you gather firewood."
-			"Rowan": dialogue_line="Four of us survived. Make a fire, then eat a cooked fish. I can cook what Finn brings. We share all supplies."
+			"Maya": dialogue_line="We need a shelter first. I'll salvage fabric from the plane. Later, Finn and I can build a radio on the ridge."
+			"Finn": dialogue_line="That old ship has rope and spare parts. I'll bring rope for our shelter, then catch fish for Rowan at the cove."
+			"Rowan": dialogue_line="Four of us survived. First we need a roof: wood, fabric and rope. Let's build it together. Then I'll help with food."
 		sound.clear_speech()
 		sound.speak(dialogue_line,npc.person,2)
 		return
@@ -426,8 +443,8 @@ func activate_beacon():
 	if not repaired:
 		report("The radio is damaged. Ask Maya to repair it; watch Finn deliver the module.")
 		return
-	if not fire_lit or not ate_meal:
-		report("Secure the camp first: build a fire, cook a fish, and eat it.")
+	if not shelter.complete() or not fire_lit or not ate_meal:
+		report("Secure the camp first: shelter, a fire, and a cooked meal.")
 		return
 	won=true
 	sound.clear_speech()
@@ -447,6 +464,8 @@ func save_game():
 	for p in world.pickups:
 		if p.taken and p.id<1000: taken.append(p.id)
 	var data={"version":1,"inventory":saved_inventory,"health":health,"hunger":hunger,"fire":fire_lit,"meal":ate_meal,"repaired":repaired,"module":module_installed,"buggy":buggy_fixed,"won":won,"spear":spear,"team_events":team_events,"taken":taken,"player":[player.position.x,player.position.z],"buggy_pos":[world.buggy.position.x,world.buggy.position.z]}
+	data.version=2
+	data.shelter=shelter.snapshot()
 	# Save delivered supplies only; reset active tasks on load to avoid ghost reservations.
 	var file=FileAccess.open(save_path,FileAccess.WRITE)
 	if not file:
@@ -460,7 +479,7 @@ func load_game():
 		report("No saved journey yet. Begin the story, then press F6 to save.")
 		return
 	var parsed=JSON.parse_string(FileAccess.get_file_as_string(save_path))
-	if not parsed is Dictionary or parsed.get("version",0)!=1:
+	if not parsed is Dictionary or not int(parsed.get("version",0)) in [1,2]:
 		report("Save file is not a supported journey.")
 		return
 	var data: Dictionary=parsed
@@ -483,6 +502,11 @@ func load_game():
 	won=bool(data.get("won",false))
 	spear=bool(data.get("spear",false))
 	team_events=int(data.get("team_events",0))
+	# Old saves already had a furnished camp. Preserve it without charging new materials.
+	var old_camp={"paid":true,"progress":1.0} if int(data.version)==1 else {}
+	shelter.restore(data.get("shelter",old_camp))
+	world.signal_station.visible=repaired
+	world.fire_base.visible=fire_lit
 	world.fire.visible=fire_lit
 	world.fire_light.visible=fire_lit
 	if fire_lit: fire_audio.play()
@@ -514,6 +538,7 @@ func load_game():
 	report("Journey restored. The crew will resume their duties from camp.")
 
 func capture(filename: String):
+	autonomy_enabled=false
 	if "--camp" in OS.get_cmdline_user_args():
 		begin_play()
 		player.position=world.ground(world.camp+Vector3(7,0,11))
@@ -524,6 +549,13 @@ func capture(filename: String):
 		start_intro()
 		intro_time=2
 	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--survival-view="):
+			demo_active=true
+			begin_play()
+			var view=arg.trim_prefix("--survival-view=")
+			if view=="complete": shelter.restore({"paid":true,"progress":1.0})
+			if view=="frame": shelter.restore({"paid":true,"progress":0.3})
+			load("res://scripts/survival_demo.gd").shot(self,"build" if view in ["complete","frame"] else view)
 		if arg.begins_with("--shot-time="):
 			if mode!="intro": start_intro()
 			intro_time=float(arg.trim_prefix("--shot-time="))
@@ -536,6 +568,7 @@ func run_tests():
 	var failures=[]
 	autonomy_enabled=false
 	mode="play"
+	load("res://scripts/survival_tests.gd").new().run(self,failures)
 	# Run the actual gameplay methods and NPC updates, without waiting in real time.
 	use_fire()
 	if fire_lit: failures.append("Fire accepted missing resources")

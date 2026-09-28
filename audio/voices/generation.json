@@ -51,12 +51,12 @@
     {
       "file": "plan_maya.wav",
       "speaker": "Maya",
-      "text": "There's an old radio tower on the ridge. I'll check it.",
+      "text": "We'll need a signal from the ridge. First, let's get a roof over us.",
       "voice": "af_bella",
       "speed": 1,
-      "duration": 3.242,
-      "gain": 1.263888956221185,
-      "sha256": "0494aa26025601eb4db32f0301503444cec912126db26f6af6125aa4102b73fb"
+      "duration": 4.099666666666667,
+      "gain": 1.1183507869540916,
+      "sha256": "3af811bf13e2e8f87ddac1ecb9c8f6819be05b62d0727dd324efe598eaf33f2e"
     },
     {
       "file": "needfish.wav",
@@ -71,22 +71,22 @@
     {
       "file": "plan_finn.wav",
       "speaker": "Finn",
-      "text": "I'll look for food. If you need parts, Maya, call me.",
+      "text": "I'm heading for that wrecked boat. There might be rope we can use.",
       "voice": "am_puck",
       "speed": 1.02,
-      "duration": 3.0233333333333334,
-      "gain": 0.8440910788768636,
-      "sha256": "2a588068d90e49e69f88954e57a34605a941e5009ab572b31d931f0d3178c161"
+      "duration": 3.5187083333333335,
+      "gain": 0.8703488368768023,
+      "sha256": "2ca85c351d38a941952a152e1bba1b3d01be0e1de08d27953976d48777eb0095"
     },
     {
       "file": "plan_rowan.wav",
       "speaker": "Rowan",
-      "text": "I'll gather firewood and look after camp. We do this together.",
+      "text": "I'll gather wood. Maya, check the plane for fabric. Finn, look for rope.",
       "voice": "af_heart",
       "speed": 0.98,
-      "duration": 3.61825,
-      "gain": 1.3460083778013405,
-      "sha256": "038df92b280a31e2bf24708aade6f4d22f9815f9e56e0dd6e6f1927677293a29"
+      "duration": 4.5105,
+      "gain": 1.3314830732516227,
+      "sha256": "9b4ad8fc6b7d7126912cc157042c22a949158254b44d45d0c3e7dcec3bd0badc"
     },
     {
       "file": "hello_rowan.wav",
@@ -161,12 +161,12 @@
     {
       "file": "home.wav",
       "speaker": "Rowan",
-      "text": "That old shelter will do. Come on. Let's make it home.",
+      "text": "That beach is clear. We'll build a shelter there, together.",
       "voice": "af_heart",
       "speed": 0.98,
-      "duration": 3.37525,
-      "gain": 1.328209096742323,
-      "sha256": "913a838ca8e7f7182b20bd855254c4a438e37f0ec8969f10e375d301ffb1b37b"
+      "duration": 3.1802083333333333,
+      "gain": 1.3090540708617415,
+      "sha256": "f4e5291a1ee6e25e8f5bf242abeb194e13150b188cc9c657375095a2d58d924c"
     },
     {
       "file": "wing.wav",
@@ -241,12 +241,12 @@
     {
       "file": "rowan_story.wav",
       "speaker": "Rowan",
-      "text": "Four of us survived. Make a fire, then eat a cooked fish. I can cook what Finn brings. We share all supplies.",
+      "text": "Four of us survived. First we need a roof: wood, fabric and rope. Let's build it together. Then I'll help with food.",
       "voice": "af_heart",
       "speed": 0.98,
-      "duration": 7.075625,
-      "gain": 1.2608166479200347,
-      "sha256": "ec8626aee1fc80ea5ee698a1eb2771e757c4c242778b6e24cd3303282392fbc0"
+      "duration": 7.432791666666667,
+      "gain": 1.2928175845773178,
+      "sha256": "ad25b92c74abc4353594ed04dce4c29d8e3d9bb21602190218d448552c397f4a"
     },
     {
       "file": "resume_finn.wav",
@@ -281,12 +281,12 @@
     {
       "file": "maya_story.wav",
       "speaker": "Maya",
-      "text": "A storm took the engine. The ridge radio needs an aircraft module. Finn can bring it while I make repairs.",
+      "text": "We need a shelter first. I'll salvage fabric from the plane. Later, Finn and I can build a radio on the ridge.",
       "voice": "af_bella",
       "speed": 1,
-      "duration": 6.9755416666666665,
-      "gain": 1.1564352613942508,
-      "sha256": "ccd3838dd2278dde00b6d215d0deb5171d9ccc12e559577f8659f2467167d8f7"
+      "duration": 7.088791666666666,
+      "gain": 1.1357762694631517,
+      "sha256": "967949429717043ff89ef1cc96906b8d87727a805ceaeab5676f25ba76290a1d"
     },
     {
       "file": "delivered.wav",
@@ -381,12 +381,12 @@
     {
       "file": "finn_story.wav",
       "speaker": "Finn",
-      "text": "We have a fishing line from the wreck. Try the pier. I can bring fish to Rowan while you gather firewood.",
+      "text": "That old ship has rope and spare parts. I'll bring rope for our shelter, then catch fish for Rowan at the cove.",
       "voice": "am_puck",
       "speed": 1.02,
-      "duration": 5.894458333333334,
-      "gain": 0.8964452031048251,
-      "sha256": "686825523bd5f1087e22c2ee05eb54575e4816109e31ee0b0c5a572d98b63638"
+      "duration": 6.7225,
+      "gain": 0.8831123290554106,
+      "sha256": "df595830eb5445b61fb5304b4318a2088c03b8cf09f094881d4786e7ec5f40c0"
     },
     {
       "file": "approach.wav",
@@ -437,6 +437,126 @@
       "duration": 2.1198333333333332,
       "gain": 0.7937530330911099,
       "sha256": "66e8f58970562ff4dd209b6c19f758e0ccd88e79715cd643482906581bcf93f4"
+    },
+    {
+      "file": "shelter_plan.wav",
+      "speaker": "Rowan",
+      "text": "We need a roof before nightfall. I'll gather wood. Bring back cloth and rope.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 4.452,
+      "gain": 1.3032178040604026,
+      "sha256": "5beec91b308335f76116b8ae96b635409d8aa99631dcc867c4ca48b368096b3b"
+    },
+    {
+      "file": "shelter_start.wav",
+      "speaker": "Maya",
+      "text": "We've got the supplies. Finn, hold the frame while we tie it down.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 4.059541666666667,
+      "gain": 1.1714523666985255,
+      "sha256": "30b9d35235a5b380f409b6594c52f2c4bbc67ffc60b441698f421d8c8114df69"
+    },
+    {
+      "file": "shelter_done.wav",
+      "speaker": "Rowan",
+      "text": "That's our roof. Good work, everyone. Now let's get a fire and some food.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 4.268375,
+      "gain": 1.3263228339947868,
+      "sha256": "c8d5147ef286bcd493ea6a61108e30b1bb1149adf64cd705e7773bb5e0573678"
+    },
+    {
+      "file": "cloth_delivery_maya.wav",
+      "speaker": "Maya",
+      "text": "Rowan, I found fabric in the aircraft. This should keep the rain off.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 4.238708333333333,
+      "gain": 1.284831649054253,
+      "sha256": "8e2018599f943e74ec5a975a8959ae5785fefe09d765b56197aef58fe9901a59"
+    },
+    {
+      "file": "rope_delivery_maya.wav",
+      "speaker": "Maya",
+      "text": "Rope from the shipwreck. Let's lash those poles together.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 3.429708333333333,
+      "gain": 1.1730886347132736,
+      "sha256": "00c9a469bde7a87d523f19580738d14d2014baacf98b555327c92da9b619f387"
+    },
+    {
+      "file": "wood_shelter_maya.wav",
+      "speaker": "Maya",
+      "text": "The wood is here. Let's get that shelter up.",
+      "voice": "af_bella",
+      "speed": 1,
+      "duration": 2.6012916666666666,
+      "gain": 1.206208763543003,
+      "sha256": "e2c495a07f3c13af05565715acb5fd66b93a5c297c67583885d40919e4cb3459"
+    },
+    {
+      "file": "cloth_delivery_finn.wav",
+      "speaker": "Finn",
+      "text": "Rowan, I found fabric in the aircraft. This should keep the rain off.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 3.91475,
+      "gain": 0.8575301462327873,
+      "sha256": "b7bf189732b99534c667489e38c61411b399fc1cd82fd8b154a70d44fbe78a6f"
+    },
+    {
+      "file": "rope_delivery_finn.wav",
+      "speaker": "Finn",
+      "text": "Rope from the shipwreck. Maya, let's lash those poles together.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 3.5980833333333333,
+      "gain": 0.8607011190365523,
+      "sha256": "ae7dc57ca60ff850abed1f9763856df20b6fc55b84083107b4bb25fdfe194589"
+    },
+    {
+      "file": "wood_shelter_finn.wav",
+      "speaker": "Finn",
+      "text": "The wood is here. Let's get that shelter up.",
+      "voice": "am_puck",
+      "speed": 1.02,
+      "duration": 2.451375,
+      "gain": 0.7867983634779422,
+      "sha256": "8133542258c8716fcdeab10a33f2574663b657b4dc8ff96716e395da0f0d3317"
+    },
+    {
+      "file": "cloth_delivery_rowan.wav",
+      "speaker": "Rowan",
+      "text": "I found fabric in the aircraft. This should keep the rain off.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 3.368916666666667,
+      "gain": 1.3459059018544643,
+      "sha256": "8080f0e11d10f4b5cfa77e02eb183bd1e1e9fb98405bb24ffdb76f0554c1171a"
+    },
+    {
+      "file": "rope_delivery_rowan.wav",
+      "speaker": "Rowan",
+      "text": "Rope from the shipwreck. Maya, let's lash those poles together.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 4.025333333333333,
+      "gain": 1.3108855102653871,
+      "sha256": "d35bd13e72ccb046c346b0be753a2ba13e774ab931429246ee5921491f344aa2"
+    },
+    {
+      "file": "wood_shelter_rowan.wav",
+      "speaker": "Rowan",
+      "text": "The wood is here. Let's get that shelter up.",
+      "voice": "af_heart",
+      "speed": 0.98,
+      "duration": 2.8251666666666666,
+      "gain": 1.340098997976646,
+      "sha256": "f5196e6dea783a9721c260b752a17585dba3dba5db2207e2c7dff8c462167ea6"
     }
   ]
 }

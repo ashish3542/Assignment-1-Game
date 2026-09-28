@@ -77,6 +77,7 @@ func show_dialogue(npc):
 		"Maya": options = [["What happened to our flight?","story"],["Repair the transmitter · ask Finn for help","repair"],["Collect wood for camp","wood"]]
 		"Finn": options = [["How do we survive here?","story"],["Catch fish and deliver it to Rowan","fish"],["Bring the radio module to Maya","parts"]]
 		"Rowan": options = [["How is everyone doing?","story"],["Cook a fish for the camp","cook"],["Collect wood for camp","wood"]]
+	if not game.shelter.complete(): options[2]=["Help gather supplies and build our shelter","shelter"]
 	options.append(["Follow me","follow"])
 	options.append(["Wait here / cancel task","wait"])
 	options.append(["Resume your own duties","routine"])
@@ -117,9 +118,9 @@ func _draw():
 			text(Vector2(475,388),"Crew handoffs witnessed: "+str(game.team_events),18,gold)
 		_: draw_hud()
 	if game.toast_time>0 and game.mode!="intro":
-		panel(Rect2(335,645,610,42),0.94)
-		text(Vector2(352,672),game.toast.left(80),16,gold)
-	if game.demo_active:
+		panel(Rect2(335,627,610,60),0.94)
+		wrapped(game.toast.left(130),Vector2(352,650),70,16)
+	if game.demo_active and not game.demo_caption.is_empty():
 		panel(Rect2(360,112,650,40),0.96)
 		text(Vector2(378,139),game.demo_caption,16,gold)
 	if game.mode in ["play","dialogue"] and not game.sound.active_line.is_empty():
@@ -156,19 +157,28 @@ func draw_hud():
 	panel(Rect2(28,26,332,86),0.83)
 	text(Vector2(48,52),"LOST SIGNAL",13,gold)
 	text(Vector2(48,83),game.location_name(),25,cream,true)
-	panel(Rect2(28,130,332,164),0.84)
+	panel(Rect2(28,130,332,191),0.84)
 	text(Vector2(48,157),"01 / SURVIVE. THEN SIGNAL.",13,gold)
-	var goals = [[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Maya repairs the ridge radio"],[game.won,"Send the rescue signal"]]
+	var goals = [[game.shelter.complete(),"Build shelter together"],[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Assemble the ridge radio"],[game.won,"Send the rescue signal"]]
 	for i in range(goals.size()):
 		text(Vector2(48,186+i*27),("✓  " if goals[i][0] else "○  ")+goals[i][1],16,muted if goals[i][0] else cream)
 	draw_map()
+	if not game.shelter.complete():
+		panel(Rect2(28,334,332,90),0.86)
+		text(Vector2(48,359),"OUR FIRST ROOF",12,gold)
+		if game.shelter.paid:
+			text(Vector2(48,384),"Building: "+str(int(game.shelter.progress*100))+"%",17)
+			text(Vector2(48,408),"Two builders needed · B to help nearby",14,muted)
+		else:
+			text(Vector2(48,384),"Wood %d/6   Cloth %d/2   Rope %d/2" % [mini(game.inventory.Wood,6),mini(game.inventory.Cloth,2),mini(game.inventory.Rope,2)],15)
+			text(Vector2(48,408),"Forest wood · X Fabric · S Rope",14,muted)
 	panel(Rect2(28,571,275,116),0.85)
 	text(Vector2(48,598),"CONDITION",12,gold)
 	bar(Vector2(48,614),game.health,Color("dca680"),"HEALTH")
 	bar(Vector2(48,649),game.hunger,Color("b3bf7c"),"FOOD")
 	panel(Rect2(968,475,284,212),0.87)
 	text(Vector2(990,503),"SHARED CAMP SUPPLIES",12,gold)
-	var names = ["Wood","Stone","Scrap","Fish","Meal","Ration"]
+	var names = ["Wood","Stone","Cloth","Rope","Scrap","Fish","Meal","Ration"]
 	for i in range(names.size()):
 		var x = 990+(i%2)*125
 		var y = 534+(i/2)*32
@@ -198,7 +208,7 @@ func draw_map():
 	var center = Vector2(1144,124)
 	draw_circle(center,76,Color("1d494d"))
 	island_outline(center,Vector2(58,65),Color("526347"))
-	for entry in [[game.world.camp,"C"],[game.world.tower,"R"],[game.world.fish_spot,"F"],[game.world.salvage,"X"]]:
+	for entry in [[game.world.camp,"C"],[game.world.tower,"R"],[game.world.fish_spot,"F"],[game.world.salvage,"X"],[game.world.ship_spot,"S"]]:
 		var pos = center+Vector2(entry[0].x,entry[0].z)*0.78
 		text(pos,str(entry[1]),12,gold)
 	for npc in game.npcs:
@@ -207,7 +217,8 @@ func draw_map():
 	draw_circle(p,4,cream)
 	draw_line(p,p+Vector2(-sin(game.player.yaw),-cos(game.player.yaw))*11,cream,2)
 	text(Vector2(1138,49),"N",12,gold)
-	text(Vector2(1054,221),"C Camp   F Fish   R Radio",12,muted)
+	text(Vector2(1054,211),"C Camp   F Fish   R Radio",12,muted)
+	text(Vector2(1054,231),"X Plane   S Shipwreck",12,muted)
 
 func island_outline(center: Vector2, radius: Vector2, color: Color):
 	var points = PackedVector2Array()
@@ -231,7 +242,7 @@ func draw_help():
 	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
 	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
 	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
-	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "Rowan gathers wood. Collect 3 stones east of camp; build the fire with E.", "Finn catches fish and Rowan cooks. Press 1 to eat a meal from shared supplies.", "To fish yourself: E at the pier, then E when BITE appears. Cook with E at the fire.", "Maya and Finn repair the radio. Send the signal at R after fire, food and repairs.", "Wait / Follow hold a survivor's duties. Resume your own duties releases them.", "Find 3 scrap at X to repair the buggy. E enters/exits; WASD steers relative to camera."]
+	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "First roof: 6 wood, 2 cloth from plane X, 2 rope from shipwreck S. The crew gather these.", "Two people raise the frame and tarp together. B near the entrance lets you help too.", "Then build fire: 4 wood + 3 stone. Finn catches fish, Rowan cooks, and 1 eats a meal.", "To fish yourself: E at cove F, then E when BITE appears. Cook with E at the fire.", "Maya and Finn assemble the ridge radio. Signal at R after shelter, fire and food.", "Wait / Follow pause duties. Resume duties restores work. Shipwreck buggy: 3 scrap."]
 	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
 	text(Vector2(88,465),"RECENT CREW LOG / MOST RECENT FIRST",12,gold)
 	for i in range(mini(6,game.events.size())):

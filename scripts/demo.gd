@@ -28,17 +28,32 @@ func run():
 	game.start_intro()
 	while game.mode=="intro": await wait(0.2)
 	game.demo_active=true
+	game.autonomy_enabled=true
+	game.demo_caption="AUTOMATED WALKTHROUGH / crew salvage materials and build shelter"
+	var shelter_wait=0.0
+	while not game.shelter.complete() and shelter_wait<360:
+		game.demo_focus=game.npcs[int(shelter_wait/16)%3]
+		await wait(0.25)
+		shelter_wait+=0.25
+	if not game.shelter.complete():
+		push_error("Walkthrough: shelter did not finish")
+		get_tree().quit(1)
+		return
+	game.autonomy_enabled=false
+	for npc in game.npcs: npc.cancel()
 	game.demo_caption="AUTOMATED WALKTHROUGH / actual game systems"
 	await wait(2)
 	game.demo_caption="01 / Gather supplies on foot"
-	for i in range(4):
-		var p=game.world.pickups[i]
+	for p in game.world.pickups:
+		if game.inventory.Wood>=4: break
+		if p.kind!="Wood" or p.taken: continue
 		await walk(p.node.position)
 		game.interaction={"type":"pickup","item":p}
 		game.interact()
 		await wait(0.4)
-	for i in range(12,15):
-		var p=game.world.pickups[i]
+	for p in game.world.pickups:
+		if game.inventory.Stone>=3: break
+		if p.kind!="Stone" or p.taken: continue
 		await walk(p.node.position)
 		game.interaction={"type":"pickup","item":p}
 		game.interact()

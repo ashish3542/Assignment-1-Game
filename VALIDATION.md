@@ -2,6 +2,28 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Wilderness, salvage and cooperative shelter — 2026-09-28
+
+The starting camp is an empty beach. Tent, furniture and fire geometry stay hidden until built; their hidden footprints do not block movement. Removed the ready-made pier and ranger shelter; signal equipment appears after Maya assembles it. Added instanced inland broadleaf forest, increased palms, enlarged the flight and crashed plane by 1.65, and added the original procedural Tidebreak shipwreck with accessible landward salvage and a damaged cargo buggy. New Cloth and Rope pickups have persistent IDs and join the shared inventory.
+
+The integrated runner passed from the development project and from a separate fresh source copy without Git metadata, `.godot`, or generation dependencies. `scripts/survival_tests.gd` checks:
+
+- Empty-start visuals and absence of invisible tent walls; forest density and wreck presence.
+- Routes from camp to every supply pickup; plane salvage hidden before impact while old ship supplies remain visible.
+- The 6 wood / 2 cloth / 2 rope gate and exactly-once deduction.
+- One worker making no progress; two nearby workers, or an NPC plus the assisting player, making progress; pause freezing construction.
+- Partial progress and paid materials surviving save/load, completed-camp persistence, and migration of version-1 saves to an established shelter.
+- Actual autonomous gathering, delivery and construction without injected supplies. The final simulation completed in 190.8 seconds and used cloth from the plane and rope from the ship.
+- Completed walls and furniture, plus the existing collision, dialogue, fishing, cooking, radio handoff, rescue, command override and save regressions.
+
+The first run exposed rejection of the new save format because a JSON numeric version needed explicit integer conversion before array membership testing. That caused cascading construction/progression failures; correcting the version check restored the checks. Visual inspection also prompted wider clearings around the larger aircraft and ship and less regular placement of loose resources.
+
+Updated seven scene/story recordings and added twelve neural construction/material lines, giving 53 indexed clips. All cinematic dialogue still fits its playback windows. The generator used the existing local Kokoro cache with remote access disabled. The WAV manifest records each line and hash; file checks verify mono 24 kHz PCM16, durations, non-silence and non-clipped peaks.
+
+Recorded `Lost-Signal-Survival-Preview.mp4`, a 3:32 automated in-game review, in 1280×720 at 24 fps with audio. It shows the empty beach, both wrecks, forest, actual supply trips and staged construction; no inventory was injected. Inspected sampled frames showing the larger plane, ship, rising frame and finished shelter. This is an automated demonstration, not a manual student playtest. Earlier videos document earlier layouts. The known restricted-environment certificate warning remains. Some intermediate headless runs printed shutdown reference warnings; the final verbose and clean-copy runs passed without those warnings.
+
+Limits: one fixed shelter site, finite loose salvage and fallen wood, simplified procedural characters/props and staged building animation. No tree chopping, unrestricted building placement, explorable wreck interiors, weather simulation or human motion capture is claimed. Existing full-chapter demo scripts were adapted to wait for shelter; their extended videos were not re-recorded in this revision. Old saves intentionally retain their completed camp; begin a new story to see construction.
+
 ## Neural voice replacement — 2026-09-27
 
 Replaced all 41 Windows desktop-speech WAVs with full-precision Kokoro neural synthesis, using five distinct stock voices. Generation ran on the local CPU; the final 41-clip batch ran with remote-model access disabled after the initial model download. Model, cast, speed, text, duration and output hashes are preserved in `audio/voices/generation.json`. The development script and dependency lockfile are in `tools/voices`; model weights and package caches are not part of the game.

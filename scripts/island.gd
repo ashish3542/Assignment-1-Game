@@ -4,6 +4,15 @@ var rng = RandomNumberGenerator.new()
 var obstacles: Array[Vector3] = []
 var solid_rects: Array[Dictionary] = []
 var tent_center=Vector3.ZERO
+var shelter_stage=0
+var shelter_frame: Node3D
+var shelter_cloth: Node3D
+var camp_furniture: Node3D
+var fire_base: Node3D
+var signal_station: Node3D
+var forest_count=0
+var ship_spot=Vector3(55,0,27)
+var shipwreck: Node3D
 var fire: Node3D
 var fire_light: OmniLight3D
 var beacon_light: OmniLight3D
@@ -13,7 +22,7 @@ var wreck_root: Node3D
 var smoke: GPUParticles3D
 var buggy: Node3D
 var palms: Array[Node3D] = []
-var camp = Vector3(-8,0,20)
+var camp = Vector3(-8,0,51)
 var fish_spot = Vector3(25,0,49)
 var salvage = Vector3(-37,0,29)
 var tower = Vector3(15,0,-35)
@@ -37,11 +46,13 @@ func _ready():
 	salvage = ground(salvage)
 	tower = ground(tower)
 	wood_spot = ground(wood_spot)
+	ship_spot = ground(ship_spot)
 	_build_environment()
 	_build_terrain()
 	_build_camp()
 	_build_landmarks()
 	_build_foliage()
+	load("res://scripts/wilderness.gd").grow(self)
 	_build_grass()
 	_build_pickups()
 	nav.region = Rect2i(-100,-100,201,201)
@@ -124,67 +135,101 @@ func _build_terrain():
 	terrain.create_trimesh_collision()
 
 func _build_camp():
-	var tent = Node3D.new()
-	add_child(tent)
-	tent.position = ground(camp+Vector3(-5,0,-3))
-	tent_center=tent.position
-	# Solid sides and rear, with a clear entrance at +Z. Movement and routes share these.
-	for side in [-1,1]: add_solid(tent_center+Vector3(side*1.2,0,0),Vector2(0.7,3.6),2.3)
-	add_solid(tent_center+Vector3(0,0,-1.7),Vector2(3.1,0.22),2.3)
+	tent_center=ground(camp+Vector3(-5,0,-3))
+	shelter_frame=Node3D.new()
+	add_child(shelter_frame)
+	shelter_frame.position=tent_center
+	shelter_cloth=Node3D.new()
+	add_child(shelter_cloth)
+	shelter_cloth.position=tent_center
+	camp_furniture=Node3D.new()
+	add_child(camp_furniture)
 	for side in [-1,1]:
-		var tarp = M.box(tent,Vector3(side*0.78,1.15,0),Vector3(0.07,2.7,3.4),Color("c38548"))
-		tarp.rotation.z = side*0.64
-		M.beam(tent,Vector3(side*1.8,0,-1.9),Vector3(0,2.3,-1.9),0.045,Color("473e2c"))
-	M.box(tent,Vector3(0,0.04,0),Vector3(3.2,0.05,3.3),Color("4c5546"))
-	var back_surface=SurfaceTool.new()
-	back_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for point in [Vector3(-1.6,0,-1.7),Vector3(0,2.3,-1.7),Vector3(1.6,0,-1.7)]: back_surface.add_vertex(point)
-	back_surface.generate_normals()
-	var back_cloth=M.mesh(tent,back_surface.commit(),Vector3.ZERO,Color("ad773e"))
-	back_cloth.material_override.cull_mode=BaseMaterial3D.CULL_DISABLED
+		add_solid(tent_center+Vector3(side*1.2,0,0),Vector2(0.7,3.6),2.3,"shelter")
+		for z in [-1.9,1.9]:
+			M.beam(shelter_frame,Vector3(side*1.8,0,z),Vector3(0,2.3,z),0.055,Color("695139"))
+		var tarp=M.box(shelter_cloth,Vector3(side*0.78,1.15,0),Vector3(0.07,2.7,3.4),Color("c38548"))
+		tarp.rotation.z=side*0.64
+	M.beam(shelter_frame,Vector3(0,2.3,-2),Vector3(0,2.3,2),0.065,Color("695139"))
+	add_solid(tent_center+Vector3(0,0,-1.7),Vector2(3.1,0.22),2.3,"shelter")
+	M.box(shelter_cloth,Vector3(0,0.04,0),Vector3(3.2,0.05,3.3),Color("4c5546"))
+	var back=SurfaceTool.new()
+	back.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point in [Vector3(-1.6,0,-1.7),Vector3(0,2.3,-1.7),Vector3(1.6,0,-1.7)]: back.add_vertex(point)
+	back.generate_normals()
+	var cloth=M.mesh(shelter_cloth,back.commit(),Vector3.ZERO,Color("ad773e"))
+	cloth.material_override.cull_mode=BaseMaterial3D.CULL_DISABLED
+	# A low branch bench and recovered crates only appear after the crew finishes.
+	M.box(camp_furniture,ground(camp+Vector3(0,0,3),0.4),Vector3(3.2,0.3,0.6),Color("716047"))
+	add_solid(camp+Vector3(0,0,3),Vector2(3.2,0.6),0.6,"furniture")
 	for i in range(3):
-		M.box(self,ground(camp+Vector3(4+i*0.8,0,2),0.35),Vector3(0.7,0.7,0.7),Color("6c6550"))
-	add_solid(camp+Vector3(4.8,0,2),Vector2(2.3,0.7),0.7)
+		M.box(camp_furniture,ground(camp+Vector3(4+i*0.8,0,2),0.35),Vector3(0.7,0.7,0.7),Color("6c6550"))
+	add_solid(camp+Vector3(4.8,0,2),Vector2(2.3,0.7),0.7,"furniture")
+	var table_pos=ground(camp+Vector3(3,0,-4))
+	M.box(camp_furniture,table_pos+Vector3(0,0.9,0),Vector3(2,0.12,1),Color("a38c64"))
+	add_solid(table_pos,Vector2(2,1),1.0,"furniture")
+	for x in [-0.8,0.8]: M.box(camp_furniture,table_pos+Vector3(x,0.45,0),Vector3(0.12,0.9,0.7),Color("625a44"))
+	for x in [-0.6,0.6]: M.box(camp_furniture,tent_center+Vector3(x,0.12,0),Vector3(0.55,0.12,1.7),Color("71826c"))
+	fire_base=Node3D.new()
+	add_child(fire_base)
 	for i in range(10):
-		var a = i*TAU/10
-		M.sphere(self,camp+Vector3(cos(a)*0.95,0.1,sin(a)*0.95),Vector3(0.5,0.35,0.4),Color("74766a"))
+		var a=i*TAU/10
+		M.sphere(fire_base,camp+Vector3(cos(a)*0.95,0.1,sin(a)*0.95),Vector3(0.5,0.35,0.4),Color("74766a"))
 	for i in range(3):
-		var log_mesh = M.cylinder(self,camp+Vector3(0,0.2,0),0.15,1.4,Color("514034"))
-		log_mesh.rotation = Vector3(PI/2,i*PI/3,0)
-	fire = Node3D.new()
+		var log_mesh=M.cylinder(fire_base,camp+Vector3(0,0.2,0),0.15,1.4,Color("514034"))
+		log_mesh.rotation=Vector3(PI/2,i*PI/3,0)
+	fire_base.visible=false
+	fire=Node3D.new()
 	add_child(fire)
-	fire.position = camp
+	fire.position=camp
 	for i in range(7):
-		var f = M.sphere(fire,Vector3(rng.randf_range(-0.3,0.3),0.55,rng.randf_range(-0.3,0.3)),Vector3(0.3,1.0,0.3),Color("ffac39"))
-		var fm = M.material(Color("ffac39"))
-		fm.emission_enabled = true
-		fm.emission = Color("ff681c")
-		fm.emission_energy_multiplier = 2
-		f.material_override = fm
-	fire.visible = false
-	fire_light = OmniLight3D.new()
-	fire_light.position = camp+Vector3(0,1.5,0)
-	fire_light.light_color = Color("ffa23d")
-	fire_light.omni_range = 14
-	fire_light.visible = false
+		var f=M.sphere(fire,Vector3(rng.randf_range(-0.3,0.3),0.55,rng.randf_range(-0.3,0.3)),Vector3(0.3,1.0,0.3),Color("ffac39"))
+		var fm=M.material(Color("ffac39"))
+		fm.emission_enabled=true
+		fm.emission=Color("ff681c")
+		fm.emission_energy_multiplier=2
+		f.material_override=fm
+	fire.visible=false
+	fire_light=OmniLight3D.new()
+	fire_light.position=camp+Vector3(0,1.5,0)
+	fire_light.light_color=Color("ffa23d")
+	fire_light.omni_range=14
+	fire_light.visible=false
 	add_child(fire_light)
-	# A driftwood bench and a modest communal workbench.
-	M.box(self,ground(camp+Vector3(0,0,3),0.4),Vector3(3.2,0.3,0.6),Color("716047"))
-	add_solid(camp+Vector3(0,0,3),Vector2(3.2,0.6),0.6)
-	var table_pos = ground(camp+Vector3(3,0,-4))
-	M.box(self,table_pos+Vector3(0,0.9,0),Vector3(2,0.12,1),Color("a38c64"))
-	add_solid(table_pos,Vector2(2,1),1.0)
-	for x in [-0.8,0.8]:
-		M.box(self,table_pos+Vector3(x,0.45,0),Vector3(0.12,0.9,0.7),Color("625a44"))
+	set_shelter_progress(0)
+
+func set_shelter_progress(progress: float):
+	var stage=0 if progress<=0 else (1 if progress<0.55 else (2 if progress<1 else 3))
+	var changed=stage!=shelter_stage
+	shelter_stage=stage
+	shelter_frame.visible=stage>=1
+	shelter_frame.scale.y=clampf(progress/0.5,0.03,1)
+	shelter_cloth.visible=stage>=2
+	shelter_cloth.scale.z=clampf((progress-0.55)/0.25,0.03,1)
+	camp_furniture.visible=stage>=3
+	if changed and nav.region.size.x>0:
+		# Rebuild only camp cells; new walls must affect NPC routes as well as movement.
+		for x in range(int(camp.x)-13,int(camp.x)+14):
+			for z in range(int(camp.z)-12,int(camp.z)+13):
+				var cell=Vector2i(x,z)
+				if nav.is_in_boundsv(cell): nav.set_point_solid(cell,not walkable(Vector3(x,0,z),0.45))
+
+func solid_active(solid: Dictionary) -> bool:
+	if solid.group=="shelter": return shelter_stage>=2
+	if solid.group=="furniture": return shelter_stage>=3
+	return true
 
 func _build_landmarks():
 	wreck_root=Node3D.new()
 	wreck_root.name="CrashWreckage"
 	add_child(wreck_root)
 	plane = M.plane(wreck_root,true)
-	plane.position = ground(Vector3(-40,0,37),0.9)
+	plane.scale=Vector3(1.65,1.65,1.65)
+	plane.position = ground(Vector3(-40,0,37),1.55)
 	plane.rotation = Vector3(0.1,-0.5,-0.13)
-	obstacles.append(Vector3(-40,37,3.3))
+	for z in [-6,-3,0,3,6]:
+		var hull_point=plane.to_global(Vector3(0,0,z*0.7))
+		obstacles.append(Vector3(hull_point.x,hull_point.z,1.8))
 	for i in range(8):
 		var pos = ground(Vector3(-42+rng.randf_range(-7,8),0,37+rng.randf_range(-7,8)),0.15)
 		var debris = M.box(wreck_root,pos,Vector3(1.5,0.15,0.6),Color("b5bbae"))
@@ -235,48 +280,39 @@ func _build_landmarks():
 	smoke_mat.albedo_texture=puff_texture
 	puff.material=smoke_mat
 	smoke.draw_pass_1=puff
-	# Signal station: open sides make interaction and movement readable.
+	# A salvaged signal mast is assembled only after Maya completes her work.
+	signal_station=Node3D.new()
+	add_child(signal_station)
 	for x in [-1.1,1.1]:
 		for z in [-1.1,1.1]:
-			M.beam(self,tower+Vector3(x,0,z),tower+Vector3(x*0.35,12,z*0.35),0.11,Color("747d73"))
+			M.beam(signal_station,tower+Vector3(x,0,z),tower+Vector3(x*0.35,12,z*0.35),0.11,Color("747d73"))
 	for h in [3,6,9]:
-		M.beam(self,tower+Vector3(-0.9,h,-0.9),tower+Vector3(0.9,h+2,0.9),0.07,Color("787d71"))
-	M.box(self,tower+Vector3(0,0.7,2.6),Vector3(1.5,1.4,1),Color("425855"))
-	M.box(self,tower+Vector3(0,1.1,3.12),Vector3(0.9,0.25,0.03),Color("c8893d"))
-	M.cylinder(self,tower+Vector3(0,12,0),1,0.3,Color("ded6b4"))
+		M.beam(signal_station,tower+Vector3(-0.9,h,-0.9),tower+Vector3(0.9,h+2,0.9),0.07,Color("787d71"))
+	M.box(signal_station,tower+Vector3(0,0.7,2.6),Vector3(1.5,1.4,1),Color("425855"))
+	M.box(signal_station,tower+Vector3(0,1.1,3.12),Vector3(0.9,0.25,0.03),Color("c8893d"))
+	M.cylinder(signal_station,tower+Vector3(0,12,0),1,0.3,Color("ded6b4"))
 	beacon_light = OmniLight3D.new()
 	beacon_light.position = tower+Vector3(0,12.5,0)
 	beacon_light.light_color = Color("ffe6a0")
 	beacon_light.omni_range = 25
 	beacon_light.visible = false
 	add_child(beacon_light)
-	beacon_beam = M.cylinder(self,tower+Vector3(0,27,0),0.35,30,Color("fff2be"),2)
+	beacon_beam = M.cylinder(signal_station,tower+Vector3(0,27,0),0.35,30,Color("fff2be"),2)
 	var glow = M.material(Color(1,0.9,0.55,0.19))
 	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	beacon_beam.material_override = glow
 	beacon_beam.visible = false
-	buggy = M.buggy(self)
-	buggy.position = ground(Vector3(24,0,3))
-	buggy.rotation.y = -0.5
-	# Fishing pier.
-	for i in range(7):
-		M.box(self,fish_spot+Vector3(0,0.17,i*0.65),Vector3(2.6,0.16,0.58),Color("8d7960"))
-	for x in [-1,1]:
-		M.cylinder(self,fish_spot+Vector3(x,-0.15,2.8),0.09,2.2,Color("6e6249"))
-	# Ranger shelter near buggy.
-	var shed = ground(Vector3(31,0,-3))
-	M.box(self,shed+Vector3(0,2.2,0),Vector3(5,0.15,4),Color("746f53"))
-	for x in [-2.2,2.2]:
-		for z in [-1.7,1.7]:
-			M.cylinder(self,shed+Vector3(x,1.1,z),0.1,2.2,Color("776347"))
-	# Faint sandy service trail toward the ridge.
-	for i in range(27):
-		var p = camp.lerp(tower,float(i)/26)
-		M.sphere(self,ground(p,-0.04),Vector3(3.2,0.14,3.2),Color("aa9e68"))
+	signal_station.visible=false
+	shipwreck=load("res://scripts/wilderness.gd").shipwreck(self)
+	buggy=M.buggy(self)
+	buggy.position=ground(ship_spot+Vector3(-5,0,-7))
+	buggy.rotation.y=-0.5
+	# A natural rock fishing ledge, no prebuilt pier or ranger outpost.
+	for i in range(3): M.sphere(self,ground(fish_spot+Vector3(3+i,0,2),-0.15),Vector3(2,0.7,2),Color("777b68"))
 
 func _build_foliage():
-	for i in range(105):
+	for i in range(230):
 		var p = Vector3(rng.randf_range(-66,66),0,rng.randf_range(-64,48))
 		if height_at(p.x,p.z)<1.8 or near_landmark(p,10):
 			continue
@@ -314,19 +350,22 @@ func _build_foliage():
 			M.sphere(self,ground(p,0.15),Vector3(1.1,0.55,0.85),Color("496637").lightened(rng.randf()*0.1))
 
 func near_landmark(p: Vector3, distance: float) -> bool:
-	for target in [camp,fish_spot,salvage,tower,Vector3(24,0,3),wood_spot,Vector3(-29,0,35),Vector3(-40,0,37)]:
+	# Larger wreck footprints need clear approaches and room for their wings / hull.
+	if Vector2(p.x+40,p.z-37).length()<17: return true
+	if Vector2(p.x-ship_spot.x-7,p.z-ship_spot.z).length()<13: return true
+	for target in [camp,fish_spot,salvage,tower,ship_spot,ship_spot+Vector3(-5,0,-7),wood_spot,Vector3(-29,0,35),Vector3(-40,0,37)]:
 		if Vector2(p.x-target.x,p.z-target.z).length()<distance:
 			return true
-	var escape_path=Geometry2D.get_closest_point_to_segment(Vector2(p.x,p.z),Vector2(-29,35),Vector2(-8,24))
+	var escape_path=Geometry2D.get_closest_point_to_segment(Vector2(p.x,p.z),Vector2(-29,35),Vector2(camp.x,camp.z+4))
 	if escape_path.distance_to(Vector2(p.x,p.z))<2.5: return true
 	# Keep the central cooperation corridor clear.
-	return absf(p.x)<8 and p.z>-30 and p.z<28
+	return absf(p.x)<3 and p.z>-36 and p.z<54
 
 func set_crash_visible(value: bool):
 	wreck_root.visible=value
 	smoke.emitting=value
 	for p in pickups:
-		if p.kind=="Scrap" or p.id==60: p.node.visible=value and not p.taken
+		if p.get("source","")=="plane": p.node.visible=value and not p.taken
 
 func _build_grass():
 	# One mesh for thousands of blades keeps the extra vegetation inexpensive.
@@ -360,15 +399,31 @@ func _build_grass():
 
 func _build_pickups():
 	for i in range(12):
-		add_pickup("Wood",camp+Vector3(-9-i%4*2,0,-8-i/4*2),i)
+		add_pickup("Wood",camp+Vector3(-9-i%4*2,0,-10-i/4*2),i)
 	for i in range(12):
 		add_pickup("Stone",camp+Vector3(5+i%4*2,0,6+i/4*2),i+20)
 	for i in range(9):
-		add_pickup("Scrap",salvage+Vector3(4+i%3*1.5,0,-3-i/3*1.5),i+40)
-	add_pickup("Ration",salvage+Vector3(3,0,3),60)
-	add_pickup("Ration",camp+Vector3(4,0,3),61)
+		add_pickup("Scrap",salvage+Vector3(4+i%3*1.5,0,-3-i/3*1.5),i+40,"plane")
+	add_pickup("Ration",salvage+Vector3(3,0,3),60,"plane")
+	add_pickup("Ration",salvage+Vector3(6,0,3),61,"plane")
+	for i in range(4):
+		add_pickup("Cloth",salvage+Vector3(7+i%2*1.8,0,1+i/2*2),70+i,"plane")
+		add_pickup("Rope",ship_spot+Vector3(-3+i%2*2,0,2+i/2*2),80+i,"ship")
+		add_pickup("Wood",ship_spot+Vector3(-5+i%2*2,0,6+i/2*2),90+i,"ship")
+		add_pickup("Scrap",ship_spot+Vector3(-3+i%2*2,0,-4+i/2*2),100+i,"ship")
+	for i in range(12): add_pickup("Wood",camp+Vector3(-12-i%4*2,0,-17-i/4*2),110+i,"forest")
+	add_pickup("Ration",ship_spot+Vector3(-4,0,0),125,"ship")
 
-func add_pickup(kind: String, p: Vector3, id: int):
+func add_pickup(kind: String, p: Vector3, id: int, source: String="wild"):
+	if id<1000: p+=Vector3(rng.randf_range(-0.65,0.65),0,rng.randf_range(-0.65,0.65))
+	# Place supplies on traversable ground rather than inside a trunk or hull.
+	if not walkable(p,0.65):
+		for radius in range(1,9):
+			var found=false
+			for angle in range(12):
+				var candidate=p+Vector3(cos(angle*TAU/12),0,sin(angle*TAU/12))*radius
+				if walkable(candidate,0.65): p=candidate; found=true; break
+			if found: break
 	var node = Node3D.new()
 	add_child(node)
 	node.position = ground(p,0.18)
@@ -376,10 +431,18 @@ func add_pickup(kind: String, p: Vector3, id: int):
 		"Wood":
 			var log_mesh = M.cylinder(node,Vector3.ZERO,0.13,1.2,Color("795337"))
 			log_mesh.rotation.z = PI/2
+			log_mesh.rotation.y=rng.randf()*TAU
 		"Stone": M.sphere(node,Vector3.ZERO,Vector3(0.6,0.37,0.5),Color("b9b7a0"))
 		"Scrap": M.box(node,Vector3.ZERO,Vector3(0.65,0.24,0.45),Color("acb9b3"))
+		"Cloth":
+			for j in range(3): M.box(node,Vector3(0,j*0.09,0),Vector3(0.85,0.09,0.65),Color("c38548").lightened(j*0.07))
+		"Rope":
+			var coil=TorusMesh.new()
+			coil.inner_radius=0.16
+			coil.outer_radius=0.35
+			M.mesh(node,coil,Vector3.ZERO,Color("c6ad72"))
 		_: M.box(node,Vector3.ZERO,Vector3(0.42,0.26,0.32),Color("d6a14a"))
-	pickups.append({"id":id,"kind":kind,"node":node,"taken":false})
+	pickups.append({"id":id,"kind":kind,"node":node,"taken":false,"source":source})
 
 func walkable(p: Vector3, margin: float = 0.45) -> bool:
 	if height_at(p.x,p.z)<0.25:
@@ -388,14 +451,15 @@ func walkable(p: Vector3, margin: float = 0.45) -> bool:
 		if Vector2(p.x-o.x,p.z-o.y).length()<o.z+margin:
 			return false
 	for solid in solid_rects:
+		if not solid_active(solid): continue
 		if solid.rect.grow(margin).has_point(Vector2(p.x,p.z)): return false
 	return true
 
-func add_solid(center: Vector3, size: Vector2, height: float):
-	solid_rects.append({"rect":Rect2(Vector2(center.x,center.z)-size*0.5,size),"base":height_at(center.x,center.z),"height":height})
+func add_solid(center: Vector3, size: Vector2, height: float, group: String=""):
+	solid_rects.append({"rect":Rect2(Vector2(center.x,center.z)-size*0.5,size),"base":height_at(center.x,center.z),"height":height,"group":group})
 
 func in_tent(p: Vector3) -> bool:
-	return absf(p.x-tent_center.x)<0.8 and p.z>tent_center.z-1.6 and p.z<tent_center.z+1.7
+	return shelter_stage>=2 and absf(p.x-tent_center.x)<0.8 and p.z>tent_center.z-1.6 and p.z<tent_center.z+1.7
 
 func move_character(start: Vector3, displacement: Vector3, margin: float=0.45) -> Vector3:
 	# Substeps prevent high speed or a slow frame from skipping a thin wall.
@@ -425,6 +489,7 @@ func camera_position(focus: Vector3, desired: Vector3) -> Vector3:
 	for i in range(1,steps+1):
 		var p=focus.lerp(desired,float(i)/steps)
 		for solid in solid_rects:
+			if not solid_active(solid): continue
 			if p.y>solid.base and p.y<solid.base+solid.height+0.15 and solid.rect.grow(0.15).has_point(Vector2(p.x,p.z)):
 				return last
 		last=p
