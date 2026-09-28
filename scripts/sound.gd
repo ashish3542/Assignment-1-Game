@@ -3,6 +3,7 @@ extends Node
 var clips: Dictionary = {}
 var music: AudioStreamPlayer
 var ambience: AudioStreamPlayer
+var night_ambience: AudioStreamPlayer
 var muted = false
 var music_on = true
 var voice_on = true
@@ -19,6 +20,9 @@ var recent_lines: Dictionary={}
 func _process(delta):
 	var game=get_parent()
 	var paused=game.mode in ["pause","help"]
+	if ambience and night_ambience:
+		ambience.volume_db=linear_to_db(maxf(0.001,game.day_cycle.daylight)*0.112)
+		night_ambience.volume_db=linear_to_db(maxf(0.001,1.0-game.day_cycle.daylight)*0.112)
 	speech.stream_paused=paused
 	if not paused: advance_conversation(delta)
 	if music and speech:
@@ -39,6 +43,11 @@ func _ready():
 	ambience.stream = make_clip("sea",8.0,true)
 	ambience.volume_db = -19
 	ambience.play()
+	night_ambience=AudioStreamPlayer.new()
+	add_child(night_ambience)
+	night_ambience.stream=make_clip("night",8.0,true)
+	night_ambience.volume_db=-80
+	night_ambience.play()
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.stream = make_clip("music",16.0,true)
@@ -64,6 +73,10 @@ func make_clip(kind: String, duration: float, looped: bool = false) -> AudioStre
 				var bird=fmod(t,3.1)
 				if bird<0.22: sample+=sin(t*TAU*(1500+sin(bird*30)*500))*sin(bird/0.22*PI)*0.07
 			"campfire": sample=low*2.2+random.randf_range(-0.2,0.2)*(1.0 if random.randf()>0.993 else 0.0)
+			"night":
+				sample=low*3*(0.55+0.25*sin(t*TAU/8))+sin(t*TAU*55)*0.02
+				var chirp=fmod(t,1.3)
+				if chirp<0.4: sample+=sin(t*TAU*3400)*pow(maxf(0,sin(chirp*TAU*16)),6)*0.035
 			"music":
 				var chords=[[130.813,164.814,196.0],[110.0,130.813,164.814],[87.307,110.0,130.813],[97.999,123.471,146.832]]
 				var chord=chords[int(t/4)%4]

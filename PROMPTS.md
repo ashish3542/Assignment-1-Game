@@ -213,3 +213,9 @@ Continued from the saved implementation and recordings. Reviewed the crouch and 
 > make the animation little bit smoother for sleeping it looks like its like dying laying make it more natural
 
 Replaced the rigid backward rotation with a 3.8-second sequence centered on the hips: crouch, bring the legs forward, sit, support the recline with the arms, and settle with relaxed hands and subtle breathing. Getting up reverses the same poses over 3.2 seconds. Interrupting partway returns from the current pose. Added sole clearance during the leg transition; healing starts only after settling. Tests and a staged ground/tent recording are documented in VALIDATION.md. This remains original procedural animation, not human motion capture.
+
+## 28. Sleep through changing times of day
+
+> so for the sleep if the player sleeps in morning it has to be afternoon or maybe night and if night maybe morning like that and not just sleep for a second and wake up immdetaily take time and scene plays of the being from night to day vice versa
+
+Added a persistent island clock and day/night lighting. Sleep commits to eight island hours, with a fourteen-second time-passage scene between the existing settling and waking animations. Full health and movement no longer end committed sleep early. Added clock/day display, sunset/dawn colors, moonlight, night ambience, pause/resume and saved remaining sleep. Ordinary NPC work continues at normal speed during the compressed scene. Tests and the staged recording are documented in VALIDATION.md; no manual student playtest is claimed.

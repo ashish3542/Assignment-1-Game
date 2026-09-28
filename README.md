@@ -14,11 +14,12 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 - An empty beach at the start: no tent, furniture, campfire, pier or ranger outpost. Dense palms and broadleaf forest cover the inland areas.
 - A shared first-shelter task: 6 wood, 2 aircraft cloth and 2 shipwreck rope. Maya, Finn and Rowan recover and carry materials, then at least two people raise the frame and tarp. The player can collect supplies and press B near the entrance to help.
 - A 65% larger aircraft and an older Tidebreak shipwreck, each with recoverable supplies. The ship also has salvage timber, scrap, rations.
+- A saved day/night clock with changing sun, sky, fog, moonlight and day/night ambience. The sleep scene shows the hours passing across the island before returning to the player.
 - Third-person movement, mouse camera, sprint and jump on a compact freely explorable island.
 - Solid tent sides/rear and camp furniture; an accessible tent entrance. Player and NPC routes share obstacle rules. Movement substeps prevent running through thin obstacles; the camera retracts at camp walls.
 - Original procedural terrain, wind-swayed grass, palms, instanced broadleaf canopies, shoreline foam, soft smoke, wrecks and a camp that appears as the survivors build it.
 - Collect wood, stone, scrap and rations; build fire; catch, cook and eat fish.
-- Health and hunger with a forgiving health floor. Meals restore 15 health and rations 8. H rests on a leaf mat on clear ground (+0.8 health/second), or sleeps inside a finished tent (+2/second). H, E or movement wakes you; rest needs some food remaining.
+- Health and hunger with a forgiving health floor. Meals restore 15 health and rations 8. H sleeps for eight island hours on a leaf mat (up to +24 health) or inside a finished tent (up to +48 health). Sleep uses 12 food, needs some food remaining to heal, and includes a roughly 21-second settling / time-passage / waking sequence.
 - Player and NPC pickups crouch at the knees, reach, collect at hand contact, then stand. Moving cancels a player pickup; reservations prevent duplicates.
 - Three NPCs with approach greetings, dialogue, articulated walking/working/gesturing animations and visible tools. Their first priority is shelter: Maya recovers cloth, Finn recovers rope, and Rowan gathers wood. After construction, Maya assembles the radio, Finn retrieves parts and catches fish, and Rowan gathers firewood and cooks.
 - Follow/wait commands pause that survivor's duties. **Resume your own duties** restores autonomy. Other NPCs respect held commands.
@@ -33,7 +34,7 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 
 This is a prototype chapter, not a GTA-scale game. Characters and props are simplified procedural models, not photorealistic assets. Construction is a fixed shared shelter site with staged procedural animation, not unrestricted base building, tree chopping or detailed hand-to-tool simulation. Wreck supplies are recovered on foot around the hulls; there is no explorable ship interior. No hostile enemies, spear combat, swimming, other passengers, multiplayer or live AI NPC calls are implemented. NPC dialogue and decisions work offline. The opening uses an exterior flight sequence and impact cut to black, followed by animated survivors; the crash itself is not physically simulated. Speech is still synthetic, not performed by voice actors.
 
-Save/load preserves paid building materials, partial/completed shelter progress, chapter progress and carried/delivered supplies; active NPC tasks restart at camp. Old version-1 saves retain a completed shelter; start a new story to see the empty-island progression. Loose player-thrown stones are not separately persisted.
+Save/load preserves paid building materials, partial/completed shelter progress, chapter progress and carried/delivered supplies; active NPC tasks restart at camp. The clock and remaining committed sleep scene also persist. Old version-1 saves retain a completed shelter; start a new story to see the empty-island progression. Loose player-thrown stones are not separately persisted.
 
 ## Learn and submit
 
@@ -62,4 +63,6 @@ The [optional voice-generation tool](tools/voices/README.md) documents how the n
 
 `--comfort-demo` stages a short review of player/NPC collection, ground rest, food and tent recovery. Low health and a completed tent are explicitly labeled test fixtures. `scripts/comfort_tests.gd` checks contact timing, cancellation, recovery rates and saves.
 
-Rest now uses a gradual crouch → sit → supported recline, with relaxed arms and subtle breathing. Getting up reverses these poses; interrupting halfway returns from the current position. `scripts/rest_pose.gd` contains the procedural poses. `--sleep-demo` records the ground/tent transitions and an interrupted lie-down with explicitly staged health and shelter.
+Rest now uses a gradual crouch → sit → supported recline, with relaxed arms and subtle breathing. Getting up reverses these poses; canceling before the character falls asleep returns from the current position. Once asleep, all eight hours play out even at full health. `scripts/rest_pose.gd` contains the procedural poses. `--sleep-demo` records the ground/tent transitions and an interrupted lie-down with explicitly staged health and shelter.
+
+`--day-cycle-demo` records staged morning, evening and late-night starts using real full-length sleep sequences. `scripts/day_cycle_tests.gd` checks time progression, day rollover, pause, save/resume, lighting and old-save migration.

@@ -38,9 +38,7 @@ func run():
 	game.demo_caption="STAGED HEALTH 40 / H makes a leaf mat before a tent exists"
 	shot(p.position+Vector3(0,0.55,0.7),Vector3(3.4,2.8,3.3))
 	game.actions.toggle_rest()
-	await wait(9)
-	game.actions.wake()
-	await wait(game.actions.WAKE_DURATION+0.2)
+	while game.actions.busy(): await wait(0.1)
 	game.inventory.Ration=1
 	game.inventory.Meal=0
 	game.eat()
@@ -52,10 +50,8 @@ func run():
 	game.demo_caption="STAGED FINISHED TENT / H sleeps inside; faster health recovery"
 	game.actions.toggle_rest()
 	shot(w.tent_center+Vector3(0,0.6,0),Vector3(0,0.6,5))
-	await wait(9)
-	game.actions.wake()
-	await wait(game.actions.WAKE_DURATION+0.2)
-	game.demo_caption="H or movement wakes you / the island has no buggy"
+	while game.actions.busy(): await wait(0.1)
+	game.demo_caption="Eight hours later / the island has no buggy"
 	await wait(2)
 	game.sound.stop_all()
 	await wait(0.2)

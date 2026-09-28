@@ -4,6 +4,8 @@ const PICKUP_DURATION=1.65
 const CONTACT_TIME=0.85
 const REST_DURATION=3.8
 const WAKE_DURATION=3.2
+const SLEEP_SECONDS=14.0
+const SLEEP_HOURS=8.0
 var game
 var pickup: Dictionary={}
 var pickup_time=0.0
@@ -15,6 +17,9 @@ var resting=false
 var rest_kind=""
 var rest_time=0.0
 var waking=0.0
+var asleep=false
+var sleep_elapsed=0.0
+var sleep_start=8.0
 
 func _init(g): game=g
 func picking() -> bool: return not pickup.is_empty()
@@ -80,24 +85,31 @@ func toggle_rest():
 		p.body.rotation.y=p.yaw
 	resting=true
 	rest_time=0
+	asleep=false
+	sleep_elapsed=0
 	p.velocity=Vector3.ZERO
 	p.moving=false
 	p.jump_y=0
 	p.jump_speed=0
 	game.shelter.player_help=0
 	game.sound.clear_speech()
-	game.report("Resting in the tent. H or movement gets you up." if rest_kind=="tent" else "Lying on a leaf mat. Shelter gives faster recovery. H or movement gets you up.")
+	game.report("Settling down for eight hours. H can cancel before you fall asleep.")
 
-func wake():
+func wake(finished: bool=false):
 	if not resting: return
+	if asleep and not finished: return
+	asleep=false
 	resting=false
 	waking=WAKE_DURATION*clampf(rest_time/REST_DURATION,0,1)
-	game.report("Getting up. Food and rest both help restore your health.")
+	game.player.camera.current=true
+	game.report("Waking up / "+game.day_cycle.label()+" / "+game.day_cycle.period() if finished else "Getting up before falling asleep.")
 
 func reset():
 	cancel_pickup()
 	if is_instance_valid(game.world.rest_mat): game.world.rest_mat.visible=false
 	resting=false
+	asleep=false
+	sleep_elapsed=0
 	rest_time=0
 	waking=0
 	game.player.body.rotation.x=0
@@ -113,11 +125,19 @@ func update(delta: float):
 	if resting:
 		var previous_rest=rest_time
 		rest_time+=delta
-		if game.hunger<=5: wake(); return
-		if rest_time>REST_DURATION:
-			var healing_time=maxf(0,rest_time-maxf(REST_DURATION,previous_rest))
-			game.health=minf(100,game.health+healing_time*(2.0 if rest_kind=="tent" else 0.8))
-			if game.health>=100: wake()
+		if rest_time>=REST_DURATION:
+			if not asleep:
+				asleep=true
+				sleep_start=game.day_cycle.hours
+				game.sound.clear_speech()
+			var elapsed=minf(SLEEP_SECONDS-sleep_elapsed,maxf(0,rest_time-maxf(REST_DURATION,previous_rest)))
+			sleep_elapsed+=elapsed
+			game.day_cycle.set_hours(sleep_start+SLEEP_HOURS*sleep_elapsed/SLEEP_SECONDS)
+			var nourished_time=minf(elapsed,maxf(0,(game.hunger-5)/(12.0/SLEEP_SECONDS)))
+			game.health=minf(100,game.health+nourished_time/SLEEP_SECONDS*(48 if rest_kind=="tent" else 24))
+			game.hunger=maxf(0,game.hunger-12.0*elapsed/SLEEP_SECONDS)
+			game.day_cycle.sleep_camera(sleep_elapsed)
+			if sleep_elapsed>=SLEEP_SECONDS: wake(true)
 		return
 	if not picking(): return
 	var p=game.player
@@ -150,3 +170,22 @@ func update(delta: float):
 		game.sound.play("pickup")
 		game.report("Collected "+pickup.kind.to_lower()+". Added to shared camp supplies.")
 	if pickup_time>=PICKUP_DURATION: cancel_pickup()
+
+func sleep_snapshot() -> Dictionary:
+	if not asleep: return {}
+	return {"kind":rest_kind,"elapsed":sleep_elapsed,"start":sleep_start,"yaw":game.player.body.rotation.y}
+
+func restore_sleep(data: Dictionary):
+	if data.is_empty(): return
+	rest_kind=str(data.get("kind","ground"))
+	if rest_kind=="tent" and (not game.shelter.complete() or not game.world.in_tent(game.player.position)): return
+	sleep_elapsed=clampf(float(data.get("elapsed",0)),0,SLEEP_SECONDS)
+	sleep_start=maxf(0,float(data.get("start",game.day_cycle.hours)))
+	game.player.yaw=float(data.get("yaw",0))
+	game.player.body.rotation.y=game.player.yaw
+	if rest_kind!="tent": game.world.place_rest_mat(game.player.position+Vector3(0,0,0.8).rotated(Vector3.UP,game.player.yaw),game.player.yaw)
+	rest_time=REST_DURATION+sleep_elapsed
+	resting=true
+	asleep=true
+	game.player.animate_action(1)
+	game.day_cycle.sleep_camera(sleep_elapsed)

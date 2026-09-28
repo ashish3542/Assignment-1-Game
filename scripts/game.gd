@@ -16,6 +16,7 @@ var flight: Node3D
 var cinematic
 var shelter
 var actions
+var day_cycle
 var intro_fade=0.0
 var intro_phase=""
 var autonomy_enabled=true
@@ -58,6 +59,7 @@ var fire_audio: AudioStreamPlayer3D
 func _ready():
 	world = Island.new()
 	add_child(world)
+	day_cycle=load("res://scripts/day_cycle.gd").new(self)
 	shelter=load("res://scripts/shelter.gd").new(self)
 	sound = Sound.new()
 	add_child(sound)
@@ -123,12 +125,16 @@ func _ready():
 			var demo=load("res://scripts/sleep_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--day-cycle-demo":
+			var demo=load("res://scripts/day_cycle_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
 	if mode=="play": nearby_voice_cooldown=maxf(0,nearby_voice_cooldown-delta)
 	for npc in npcs:
-		npc.tag.visible=mode=="play" and npc.position.distance_to(player.position)<12 and npc.position.distance_to(player.camera.position)>2.5
+		npc.tag.visible=mode=="play" and not actions.asleep and npc.position.distance_to(player.position)<12 and npc.position.distance_to(player.camera.position)>2.5
 		if mode!="play": npc.chat.visible=false
 	toast_time=maxf(0,toast_time-delta)
 	if mode=="menu":
@@ -137,6 +143,7 @@ func _process(delta):
 		cine_camera.look_at(world.camp+Vector3(2,1,-8))
 	elif mode=="intro": update_intro(delta)
 	elif mode=="play":
+		day_cycle.update(delta)
 		shelter.update(delta)
 		actions.update(delta)
 		if demo_active and actions.busy(): player.animate_action(delta)
@@ -222,6 +229,7 @@ func resume_game():
 	ui.clear_buttons()
 	mode="play"
 	player.camera.current=true
+	if actions.asleep: day_cycle.sleep_camera(actions.sleep_elapsed)
 	Input.mouse_mode=Input.MOUSE_MODE_CAPTURED
 
 func pause_game():
@@ -243,6 +251,7 @@ func report(line: String, speaker: String="", priority: int=1) -> bool:
 	events.append(line)
 	if events.size()>60: events.pop_front()
 	if line.begins_with("Maya:") or line.begins_with("Finn:") or line.begins_with("Rowan:") or line.begins_with("COAST GUARD:"):
+		if actions.asleep: return false
 		# Crew speech stays local. Distant job progress is still recorded in the journal.
 		if not speaker.is_empty() and priority<=1:
 			for npc in npcs:
@@ -264,7 +273,7 @@ func find_interaction():
 	interaction={}
 	prompt=""
 	if actions.resting:
-		prompt="H / E / Move  ·  Wake up · "+("Tent +2 health/s" if actions.rest_kind=="tent" else "Leaf mat +0.8 health/s")
+		prompt="Sleeping for eight hours..." if actions.asleep else "Settling down / H or movement cancels before sleep"
 		return
 	if actions.picking():
 		prompt="Collecting "+actions.pickup.kind.to_lower()+" · Move to cancel"
@@ -462,6 +471,8 @@ func save_game():
 	var data={"version":1,"inventory":saved_inventory,"health":health,"hunger":hunger,"fire":fire_lit,"meal":ate_meal,"repaired":repaired,"module":module_installed,"won":won,"spear":spear,"team_events":team_events,"taken":taken,"player":[player.position.x,player.position.z]}
 	data.version=2
 	data.shelter=shelter.snapshot()
+	data.time_hours=day_cycle.hours
+	data.sleep=actions.sleep_snapshot()
 	# Save delivered supplies only; reset active tasks on load to avoid ghost reservations.
 	var file=FileAccess.open(save_path,FileAccess.WRITE)
 	if not file:
@@ -480,6 +491,7 @@ func load_game():
 		return
 	var data: Dictionary=parsed
 	actions.reset()
+	day_cycle.set_hours(float(data.get("time_hours",8.0)))
 	sound.clear_speech()
 	player.velocity=Vector3.ZERO
 	player.jump_y=0
@@ -528,6 +540,7 @@ func load_game():
 	fishing=0
 	player.update_camera(1)
 	resume_game()
+	actions.restore_sleep(data.get("sleep",{}))
 	report("Journey restored. The crew will resume their duties from camp.")
 
 func capture(filename: String):

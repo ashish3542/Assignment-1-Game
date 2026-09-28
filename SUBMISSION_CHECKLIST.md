@@ -16,6 +16,7 @@
 - [x] Record empty-beach survival, both wrecks and real cooperative shelter construction (Lost-Signal-Survival-Preview.mp4, 3:32). This is an automated construction preview; the earlier full-chapter video contains the older map and camp.
 - [x] Record player/NPC crouched pickups, leaf-mat rest, food healing and tent sleep (Lost-Signal-Comfort-Preview.mp4, about 34 seconds). Health and completed shelter are explicitly staged fixtures.
 - [x] Record refined sleeping and waking, including an interrupted lie-down (Lost-Signal-Sleep-Preview.mp4, about 28 seconds). This is a staged animation review; the older Comfort preview uses the earlier sleep motion.
+- [x] Record morning-to-afternoon, evening-to-night and late-night-to-dawn sleep scenes (Lost-Signal-Day-Night-Preview.mp4, about 73 seconds). Starting clocks are staged; each sleep runs the real eight-hour sequence at full health.
 - [ ] Review the supplied demo, add your own explanation if needed, and upload your chosen video.
 - [ ] Manually play the game and write your own learning reflection.
 

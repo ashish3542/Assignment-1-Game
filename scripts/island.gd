@@ -29,6 +29,11 @@ var tower = Vector3(15,0,-35)
 var wood_spot = Vector3(-29,0,2)
 var pickups: Array[Dictionary] = []
 var nav = AStarGrid2D.new()
+var environment: Environment
+var sky_mat: ProceduralSkyMaterial
+var sun: DirectionalLight3D
+var moon: DirectionalLight3D
+var moon_mesh: MeshInstance3D
 
 func height_at(x: float, z: float) -> float:
 	var radius = Vector2(x/1.12,z).length()
@@ -67,8 +72,9 @@ func _ready():
 func _build_environment():
 	var we = WorldEnvironment.new()
 	var env = Environment.new()
+	environment=env
 	var sky = Sky.new()
-	var sky_mat = ProceduralSkyMaterial.new()
+	sky_mat = ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color("28648c")
 	sky_mat.sky_horizon_color = Color("e8d8ae")
 	sky_mat.ground_bottom_color = Color("244d53")
@@ -86,13 +92,22 @@ func _build_environment():
 	env.fog_density = 0.0017
 	we.environment = env
 	add_child(we)
-	var sun = DirectionalLight3D.new()
+	sun = DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-27,-38,0)
 	sun.light_color = Color("ffe2b8")
 	sun.light_energy = 1.02
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 120
 	add_child(sun)
+	moon=DirectionalLight3D.new()
+	moon.rotation_degrees=Vector3(-42,135,0)
+	moon.light_color=Color("94b9ed")
+	moon.light_energy=0
+	moon.sky_mode=DirectionalLight3D.SKY_MODE_LIGHT_ONLY
+	add_child(moon)
+	moon_mesh=M.sphere(self,Vector3(-180,140,-200),Vector3(11,11,11),Color("d4e3f0"))
+	moon_mesh.material_override.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	moon_mesh.visible=false
 	var sea = MeshInstance3D.new()
 	var plane_mesh = PlaneMesh.new()
 	plane_mesh.size = Vector2(1500,1500)

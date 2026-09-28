@@ -29,6 +29,7 @@ func setup(w, g):
 
 func _input(event):
 	if game.mode != "play": return
+	if game.actions.asleep: return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		yaw -= event.relative.x*0.003
 		pitch = clampf(pitch+event.relative.y*0.002,0.02,0.95)

@@ -17,11 +17,11 @@ On the original development PC, double-click `PLAY.cmd` to launch the copy of Go
 
 | Key | Action |
 | --- | --- |
-| WASD / arrows | Move; wake from rest or cancel collection |
+| WASD / arrows | Move; cancel collection or settling before sleep |
 | Mouse | Look around |
 | Shift / Space | Run / jump |
-| E | Talk, collect, use, fish; wake from rest |
-| H | Rest on clear ground, sleep inside the finished tent, or get up |
+| E | Talk, collect, use, fish; cancel settling before sleep |
+| H | Sleep eight island hours on ground / inside the tent; cancel only before falling asleep |
 | B | Help build for six seconds while near the shelter entrance; press again to continue |
 | 1 | Eat meal, or ration if no meal is available |
 | R | Craft visible spear: 2 wood + 1 scrap |
@@ -55,7 +55,13 @@ Talk with E for story and job choices. **Help gather supplies and build our shel
 
 Press **1** to eat: a cooked meal gives **15 health / 45 food**, or a ration gives **8 health / 25 food**. Health does not regenerate merely from standing with a full food bar.
 
-Press **H** on flat, clear land to lay out a reusable leaf mat and lie down. The character crouches, sits and gradually reclines over **3.8 seconds**, then restores **0.8 health per second**. This works before the tent exists. Keep away from trees, wrecks, water and the shelter construction site. After construction, enter the tent through its open front and press **H** to sleep on its bedding at **2 health per second**. **H, E, movement or Space** starts getting up; a full wake takes **3.2 seconds**, while interrupting halfway down reverses only the completed portion. Recovery ends at full health. Food slowly decreases while resting, and you cannot heal by sleeping with 5 or less food. The crew keep working while you rest.
+Press **H** on flat, clear ground to lie on a leaf mat, or enter the completed tent through its open front and press H to use its bedding. Keep away from water, trees, wrecks and the unfinished building site.
+
+Sleep lasts **eight island hours**: 08:00 → 16:00, 16:00 → midnight, or 22:00 → 06:00 the next day. The character settles for 3.8 seconds, stays asleep through a **14-second scene** showing the island's changing light and clock, then gets up over 3.2 seconds. Full health does not end sleep early. H, E, movement or Space cancels only while settling; once asleep, wait for the scene. **Escape pauses** it and Resume continues at the same point.
+
+A full sleep uses **12 food**, plus ordinary hunger during the whole sequence. It can restore up to **24 health on the ground** or **48 in the tent**, capped at 100. You need more than 5 food to begin; recovery stops if food drops to 5, but the time-passage scene still finishes. Eat first for the full benefit. NPCs keep working at their normal simulation speed during the scene; eight hours of off-screen work is not simulated.
+
+The HUD shows day and time. During ordinary play, one island hour takes 90 real seconds (36 minutes per full day). The clock pauses in menus, dialogue and the journal, and stays fixed while settling/getting up. Sunrise, sunset, moonlight and ambience follow that same saved clock.
 
 Collection is animated: E approaches the item, crouches and reaches before adding it to shared supplies. Movement cancels the action. Before hand contact the item stays available; after contact it remains yours even if you interrupt standing up.
 
@@ -67,7 +73,7 @@ Craft a visible spear with R after gathering extra supplies. There are no combat
 
 ## Save behavior
 
-F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp and independent duties resume, while carried supplies are restored to shared inventory. Version-2 saves also preserve paid materials and partial shelter progress, so loading does not charge the building cost again. Version-1 saves are supported and keep a completed shelter; begin a new story to see construction. Held/follow commands and loose thrown stones are not separately saved. Saving cancels an unfinished player pickup without losing or duplicating it. Rest poses and leaf mats are temporary; loading preserves health and food and puts the player back on their feet. Old vehicle fields are ignored: the buggy has been removed. Restart/Title starts a new run without deleting an existing save.
+F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp and independent duties resume, while carried supplies are restored to shared inventory. Version-2 saves also preserve paid materials and partial shelter progress, so loading does not charge the building cost again. Version-1 saves are supported and keep a completed shelter; begin a new story to see construction. Held/follow commands and loose thrown stones are not separately saved. Saving cancels an unfinished player pickup without losing or duplicating it. Saves preserve the island clock. Saving during committed sleep also preserves the remaining scene, mat/bedding and already-earned health/food changes; loading resumes from that point. Saving while only settling or getting up returns the player to their feet on load. Older saves without a clock begin at Day 1, 08:00. Old vehicle fields are ignored: the buggy has been removed. Restart/Title starts a new run without deleting an existing save.
 
 ## Troubleshooting
 

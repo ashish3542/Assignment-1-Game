@@ -114,12 +114,13 @@ canceling before contact releases the item; canceling afterward must not duplica
 
 Rest is a separate state, not a menu that instantly refills health. On clear ground
 it creates a temporary leaf mat. A finished tent permits faster recovery. Both
-need food, stop at full health, and freeze while paused. Save/load restores health
-and supplies, but clears temporary actions and puts the player back on their feet.
+need food to heal and freeze while paused. Sleep now finishes all eight island
+hours even at full health. Save/load restores the clock and remaining committed
+sleep scene; unfinished collection or settling is cleared.
 
 Try interrupting a pickup before and after the hand reaches it, then inspect the
-shared count. After hunger has lowered health, compare ten seconds of ground rest
-with ten seconds inside the tent. Explain why different recovery rates make
+shared count. After hunger has lowered health, compare one eight-hour sleep on the ground
+with one inside the tent. Explain why different recovery rates make
 building shelter useful. Record your own results; these are experiments to try.
 
 The next sleep refinement moves the body's pivot from the feet to the hips while
@@ -129,3 +130,18 @@ forward or backward. Try H, wait until seated, then press H again. The character
 should return from that position, not jump to the fully lying pose first. Watch
 the health bar: recovery starts only after settling. These observations connect
 animation timing, interruption handling and the actual health rule.
+
+## One clock drives both the scene and the game
+
+`day_cycle.gd` stores total island hours, including the day count. Ordinary play
+adds a little time each frame. Committed sleep smoothly advances that same value
+by eight hours over fourteen real seconds. Sun angle, sky, fog, moonlight, ambience
+and the HUD all read that value. The scene never changes only the clock label while
+leaving the island at noon.
+
+`player_actions.gd` separates settling, committed sleep and getting up. Reaching
+100 health no longer cancels the middle phase. Saving records elapsed sleep and
+its starting clock, so loading continues the remainder without applying the same
+healing or food cost again. Try pausing halfway through, then saving/loading there:
+the scene and displayed time should resume from that point. Describe what you see
+in your own words; the supplied recording is an automated test, not your playtest.

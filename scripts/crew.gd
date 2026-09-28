@@ -191,6 +191,7 @@ func gather(kind: String):
 	go(approach,"gathering","Collecting "+kind.to_lower())
 
 func greet(delta):
+	if game.actions.asleep: return
 	greeting_cooldown=maxf(0,greeting_cooldown-delta)
 	var distance=position.distance_to(game.player.position)
 	if distance>6: player_was_near=false

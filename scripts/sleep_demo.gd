@@ -23,10 +23,8 @@ func run():
 	game.demo_caption="STAGED REVIEW / lower hips, sit, support with hands, settle"
 	await wait(1)
 	game.actions.toggle_rest()
-	await wait(7)
-	game.demo_caption="WAKE / sit up, bring the feet under the body, stand"
-	game.actions.wake()
-	await wait(4)
+	while game.actions.busy(): await wait(0.1)
+	await wait(1)
 	game.demo_caption="INTERRUPTION / change your mind halfway down"
 	game.actions.toggle_rest()
 	await wait(1.8)
@@ -37,9 +35,7 @@ func run():
 	game.demo_caption="STAGED TENT / the same gradual movement onto raised bedding"
 	game.actions.toggle_rest()
 	shot(w.tent_center+Vector3(0,0.65,0),Vector3(0.4,0.5,4.7))
-	await wait(7)
-	game.actions.wake()
-	await wait(4)
+	while game.actions.busy(): await wait(0.1)
 	game.sound.stop_all()
 	await wait(0.2)
 	get_tree().quit()

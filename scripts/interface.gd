@@ -94,6 +94,9 @@ func show_end():
 
 func _draw():
 	if not game: return
+	if game.mode=="play" and game.actions.asleep:
+		draw_sleep()
+		return
 	match game.mode:
 		"menu": draw_title()
 		"intro": draw_intro()
@@ -157,6 +160,7 @@ func draw_hud():
 	panel(Rect2(28,26,332,86),0.83)
 	text(Vector2(48,52),"LOST SIGNAL",13,gold)
 	text(Vector2(48,83),game.location_name(),25,cream,true)
+	text(Vector2(48,104),game.day_cycle.label()+" / "+game.day_cycle.period(),12,gold)
 	panel(Rect2(28,130,332,191),0.84)
 	text(Vector2(48,157),"01 / SURVIVE. THEN SIGNAL.",13,gold)
 	var goals = [[game.shelter.complete(),"Build shelter together"],[game.fire_lit,"Build fire · 4 wood + 3 stone"],[game.ate_meal,"Cook and eat a fish"],[game.repaired,"Assemble the ridge radio"],[game.won,"Send the rescue signal"]]
@@ -242,10 +246,24 @@ func draw_help():
 	draw_rect(Rect2(0,0,1280,720),Color(0.025,0.07,0.08,0.96))
 	text(Vector2(88,82),"FIELD JOURNAL",14,gold)
 	text(Vector2(84,137),"A second chance starts here.",42,cream,true)
-	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "First roof: 6 wood, 2 cloth from plane X, 2 rope from shipwreck S. The crew gather these.", "Two people raise the frame and tarp together. B near the entrance lets you help too.", "Then build fire: 4 wood + 3 stone. Finn catches fish, Rowan cooks, and 1 eats a meal.", "To fish yourself: E at cove F, then E when BITE appears. Cook with E at the fire.", "Maya and Finn assemble the ridge radio. Signal at R after shelter, fire and food.", "H: rest on a leaf mat or inside the finished tent."]
+	var lines = ["WASD / arrows Move   Mouse Look   Shift Run   Space Jump   E Talk / collect / use", "1 Eat   R Craft spear   G Throw stone   F6 Save   F9 Load   M Mute   N Voice on/off", "First roof: 6 wood, 2 cloth from plane X, 2 rope from shipwreck S. The crew gather these.", "Two people raise the frame and tarp together. B near the entrance lets you help too.", "Then build fire: 4 wood + 3 stone. Finn catches fish, Rowan cooks, and 1 eats a meal.", "To fish yourself: E at cove F, then E when BITE appears. Cook with E at the fire.", "Maya and Finn assemble the ridge radio. Signal at R after shelter, fire and food.", "H: sleep eight hours on a leaf mat or in the tent. Esc pauses the time-passage scene."]
 	for i in range(lines.size()): text(Vector2(88,190+i*29),lines[i],18,muted if lines[i].is_empty() else cream)
 	text(Vector2(88,465),"RECENT CREW LOG / MOST RECENT FIRST",12,gold)
 	for i in range(mini(6,game.events.size())):
 		text(Vector2(88,500+i*27),str(game.events[game.events.size()-1-i]).left(122),15,muted)
 	text(Vector2(88,687),"TAB / ESC — BACK TO ISLAND",13,gold)
+
+func draw_sleep():
+	var a=game.actions
+	draw_rect(Rect2(0,0,1280,76),Color("07121e"))
+	draw_rect(Rect2(0,594,1280,126),Color("07121e"))
+	text(Vector2(48,46),"RESTING / EIGHT HOURS PASS",16,gold)
+	text(Vector2(1100,46),"ESC / PAUSE",13,muted)
+	text(Vector2(430,628),game.day_cycle.label()+" / "+game.day_cycle.period(),24,cream,true)
+	text(Vector2(400,657),game.day_cycle.label(a.sleep_start)+"  →  "+game.day_cycle.label(a.sleep_start+a.SLEEP_HOURS),15,muted)
+	draw_rect(Rect2(400,679,480,4),Color("304957"))
+	draw_rect(Rect2(400,679,480*a.sleep_elapsed/a.SLEEP_SECONDS,4),gold)
+	if game.demo_active: text(Vector2(420,46),"AUTOMATED STAGED REVIEW",13,gold)
+	var fade=game.day_cycle.sleep_fade(a.sleep_elapsed)
+	if fade>0: draw_rect(Rect2(0,0,1280,720),Color(0.02,0.03,0.04,fade))
 
