@@ -1,6 +1,7 @@
 extends Node
 ## Deterministic, labeled walkthrough of actual gameplay. Never used in normal play.
 var game
+var failed=false
 
 func _ready(): call_deferred("run")
 
@@ -9,9 +10,17 @@ func wait(seconds: float): await get_tree().create_timer(seconds).timeout
 func walk(destination: Vector3):
 	game.demo_focus=null
 	var path=game.world.path_to(game.player.position,destination)
+	if path.is_empty() and game.player.position.distance_to(destination)>1:
+		fail("No route to walkthrough destination")
+		return
+	var travel_time=0.0
 	for point in path:
 		while game.player.position.distance_to(point)>0.3:
 			var delta=get_physics_process_delta_time()
+			travel_time+=delta
+			if travel_time>120:
+				fail("Walkthrough movement timed out")
+				return
 			var diff=point-game.player.position
 			diff.y=0
 			game.player.position=game.world.ground(game.player.position+diff.normalized()*minf(diff.length(),6*delta))
@@ -21,6 +30,12 @@ func walk(destination: Vector3):
 			game.M.animate_human(game.player.body,Time.get_ticks_msec()/1000.0,true)
 			await get_tree().physics_frame
 	game.player.moving=false
+
+func fail(message: String):
+	failed=true
+	push_error(message)
+	game.sound.stop_all()
+	get_tree().quit(1)
 
 func run():
 	game.autonomy_enabled=false
@@ -62,6 +77,7 @@ func run():
 		await wait(0.4)
 	await walk(game.world.camp+Vector3(0,0,2))
 	game.use_fire()
+	if not game.fire_lit: fail("Walkthrough did not build campfire"); return
 	game.demo_caption="02 / Build a fire, catch a fish, cook and eat"
 	await wait(2)
 	await walk(game.world.fish_spot)
@@ -73,6 +89,7 @@ func run():
 	await walk(game.world.camp+Vector3(0,0,2))
 	game.use_fire()
 	game.eat()
+	if not game.ate_meal: fail("Walkthrough did not cook and eat a fish"); return
 	await wait(2)
 	game.demo_caption="03 / Talk to Maya and direct her to repair the radio"
 	await walk(game.npcs[0].position+Vector3(0,0,2))
@@ -99,8 +116,14 @@ func run():
 		await wait(0.2)
 		elapsed+=0.2
 	await wait(3)
-	game.demo_caption="10 / With camp secure, send the rescue signal"
+	if not game.repaired or not game.module_installed: fail("Walkthrough did not complete NPC radio handoff and repairs"); return
+	game.demo_caption="08 / With camp secure, send the rescue signal"
 	await walk(game.world.tower+Vector3(0,0,3))
 	game.activate_beacon()
+	if not game.won or failed: fail("Walkthrough failed to reach rescue ending"); return
 	await wait(9)
+	print("SUBMISSION WALKTHROUGH PASSED: shelter, fire, fishing, eating, dialogue, direction, NPC module handoff, repairs and rescue")
+	game.sound.stop_all()
+	game.fire_audio.stop()
+	await wait(0.2)
 	get_tree().quit()

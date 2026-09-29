@@ -39,7 +39,12 @@ func height_at(x: float, z: float) -> float:
 	var radius = Vector2(x/1.12,z).length()
 	var edge = 1.0-smoothstep(56.0,87.0,radius)
 	var hill = exp(-((x-6)*(x-6)+(z+35)*(z+35))/950.0)*8.0
-	return -2.5 + edge*(4.0+hill+sin(x*0.06)*cos(z*0.07)*1.0)
+	var original=-2.5 + edge*(4.0+hill+sin(x*0.06)*cos(z*0.07)*1.0)
+	var north_radius=Vector2(x/145.0,(z+130)/130.0).length()
+	var north_edge=1.0-smoothstep(0.68,1.0,north_radius)
+	var ridge=exp(-((x-65)*(x-65)+(z+165)*(z+165))/1800.0)*15.0
+	var north=-2.5+north_edge*(7.0+ridge+sin(x*0.04)*cos(z*0.04)*1.5)
+	return maxf(original,north)
 
 func ground(p: Vector3, extra: float = 0.0) -> Vector3:
 	return Vector3(p.x,height_at(p.x,p.z)+extra,p.z)
@@ -60,14 +65,8 @@ func _ready():
 	load("res://scripts/wilderness.gd").grow(self)
 	_build_grass()
 	_build_pickups()
-	nav.region = Rect2i(-100,-100,201,201)
-	nav.cell_size = Vector2(1,1)
-	nav.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
-	nav.update()
-	for x in range(-100,101):
-		for z in range(-100,101):
-			if not walkable(Vector3(x,0,z),0.45):
-				nav.set_point_solid(Vector2i(x,z))
+	load("res://scripts/northern_wilderness.gd").build(self)
+	load("res://scripts/northern_wilderness.gd").navigation(self)
 
 func _build_environment():
 	var we = WorldEnvironment.new()
@@ -127,8 +126,8 @@ func _build_environment():
 func _build_terrain():
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for x in range(-104,104,2):
-		for z in range(-104,104,2):
+	for x in range(-180,180,2):
+		for z in range(-280,104,2):
 			var points = [Vector2(x,z),Vector2(x+2,z),Vector2(x,z+2),Vector2(x+2,z+2)]
 			for k in [0,1,2,1,3,2]:
 				var q: Vector2 = points[k]

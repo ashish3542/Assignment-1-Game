@@ -14,6 +14,10 @@ void fragment() {
 	float edge=1.0-smoothstep(56.0,87.0,radius);
 	float hill=exp(-((world_pos.x-6.0)*(world_pos.x-6.0)+(world_pos.z+35.0)*(world_pos.z+35.0))/950.0)*8.0;
 	float height=-2.5+edge*(4.0+hill+sin(world_pos.x*0.06)*cos(world_pos.z*0.07));
+	float north_radius=length(vec2(world_pos.x/145.0,(world_pos.z+130.0)/130.0));
+	float north_edge=1.0-smoothstep(0.68,1.0,north_radius);
+	float ridge=exp(-((world_pos.x-65.0)*(world_pos.x-65.0)+(world_pos.z+165.0)*(world_pos.z+165.0))/1800.0)*15.0;
+	height=max(height,-2.5+north_edge*(7.0+ridge+sin(world_pos.x*0.04)*cos(world_pos.z*0.04)*1.5));
 	float shore=smoothstep(-1.1,-0.1,height);
 	float foam=shore*pow(max(0.0,sin(radius*2.0-TIME*1.6+wave*0.3)),6.0);
 	ALBEDO=mix(ALBEDO,vec3(0.74,0.87,0.77),foam*0.8);

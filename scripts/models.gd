@@ -151,7 +151,12 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 		leg.get_node("Knee").rotation.x=maxf(0,-stride*side)*0.9
 		arm.rotation=Vector3(0.6 if carry else -stride*side,0,side*0.07)
 		arm.get_node("Elbow").rotation=Vector3(0.9 if carry else -0.14-maxf(0,stride*side)*0.35,0,0)
-	if pose=="gather":
+	if body.has_node("Spear"): body.get_node("Spear").position.z=-sin(clampf(t/0.75,0,1)*PI)*0.4 if pose=="hunt" else 0.0
+	if pose=="hunt":
+		var thrust=sin(clampf(t/0.75,0,1)*PI)
+		body.get_node("Arm1").rotation.x=lerpf(0.6,1.3,thrust)
+		body.get_node("Arm1/Elbow").rotation.x=lerpf(0.9,0.15,thrust)
+	elif pose=="gather":
 		# Knees fold beneath the hips; the root stays upright rather than bowing from the feet.
 		var crouch=smoothstep(0.0,0.5,t)*(1.0-smoothstep(1.0,1.65,t))
 		body.rotation.x=0

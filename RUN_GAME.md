@@ -13,6 +13,8 @@ Tested on Windows with **Godot 4.7.2 standard edition**, using the Compatibility
 
 On the original development PC, double-click `PLAY.cmd` to launch the copy of Godot downloaded in Downloads. If it cannot find Godot, use the Import steps. This launcher is not a standalone exported game executable.
 
+From **VS Code**, open this project folder, choose **Terminal → New Terminal**, and run `./PLAY.cmd` in the Windows terminal. Edit/save the GDScript files in VS Code, close the running game, and launch again to load changes. Alternatively, keep the project open in Godot and use Godot's F5. VS Code's own F5 is not configured as a Godot debugger in this project.
+
 ## Controls
 
 | Key | Action |
@@ -23,9 +25,10 @@ On the original development PC, double-click `PLAY.cmd` to launch the copy of Go
 | E | Talk, collect, use, fish; cancel settling before sleep |
 | H | Sleep eight island hours on ground / inside the tent; cancel only before falling asleep |
 | B | Help build for six seconds while near the shelter entrance; press again to continue |
-| 1 | Eat meal, or ration if no meal is available |
-| R | Craft visible spear: 2 wood + 1 scrap |
-| G | Throw one stone; collect it after landing |
+| 1 | Eat fish meal, then roast, then ration (first available) |
+| R | Craft hunting spear: 2 wood + 1 scrap |
+| F / left mouse click | Thrust spear at an animal in front of you |
+| G | Throw one stone; it can hurt wildlife and can be recovered after landing |
 | Tab | Open/close journal and walkthrough |
 | Esc | Pause, close dialogue, or skip intro |
 | M / N | Toggle all audio / spoken dialogue |
@@ -53,7 +56,7 @@ Talk with E for story and job choices. **Help gather supplies and build our shel
 
 ### Restore health and rest
 
-Press **1** to eat: a cooked meal gives **15 health / 45 food**, or a ration gives **8 health / 25 food**. Health does not regenerate merely from standing with a full food bar.
+Press **1** to eat: a cooked fish meal gives **15 health / 45 food**, roast gives **12 health / 40 food**, or a ration gives **8 health / 25 food**. Raw meat cannot be eaten directly. Health does not regenerate merely from standing with a full food bar.
 
 Press **H** on flat, clear ground to lie on a leaf mat, or enter the completed tent through its open front and press H to use its bedding. Keep away from water, trees, wrecks and the unfinished building site.
 
@@ -69,11 +72,23 @@ Collection is animated: E approaches the item, crouches and reaches before addin
 
 The aircraft offers cloth, scrap, rations and the quest radio module. The Tidebreak shipwreck offers rope, timber, scrap and a ration; recover them from the accessible landward side. The hulls are scenery with obstacle footprints, not walk-through interiors. Extra fallen wood is scattered at the forest edge. Trees cannot be chopped down in this version.
 
-Craft a visible spear with R after gathering extra supplies. There are no combat enemies. Keep materials for shelter and fire before optional crafting.
+### Northern wilderness and hunting
+
+Head north past Signal Ridge into the Northern Meadows. The expanded land includes northern woodland, Highland Ridge to the northeast and Reed Marsh to the northwest. The map marks nearby living animals in orange. There are **42 animals, six of each species**: deer, boar, goat, rabbit, junglefowl, monitor lizard and crocodile.
+
+1. Gather extra materials and press **R** to craft a spear (2 wood + 1 scrap). Keep supplies for shelter and fire as well.
+2. Aim toward a nearby animal and press **F or left-click**. The thrust reaches about 2.9 meters in front, deals 40 damage at contact, and takes 0.75 seconds before another thrust. Large animals need several hits. **G** throws a stone for 15 damage if it hits.
+3. Approach the downed animal and press **E**. The crouch-and-reach action collects its raw meat once: rabbit/junglefowl 1, goat/monitor 2, deer/boar 3, crocodile 4.
+4. Return to a built fire and press **E**: one raw Meat becomes one Roast. Fish takes priority if both are available. Rowan also cooks fish or meat automatically after shelter construction, or when asked.
+5. Press **1** to eat. Roast heals and feeds you, but the original rescue objective still requires eating a cooked fish.
+
+Passive animals flee; boars, monitors and crocodiles can defend themselves when approached closely or hit. Back away to escape. Camp's 22-meter area and committed player actions such as gathering/sleeping prevent animal attacks. Health has the existing forgiving floor of 10; this is not a lethal combat system.
+
+Animals are finite and do not respawn in a saved journey. Distant animals stop simulating beyond 95 meters and hide beyond 140 meters. They have simplified land movement and animated shapes, not realistic skeletal animation, swimming, flight, breeding or a predator food chain. The marsh pool is blocked scenery.
 
 ## Save behavior
 
-F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp and independent duties resume, while carried supplies are restored to shared inventory. Version-2 saves also preserve paid materials and partial shelter progress, so loading does not charge the building cost again. Version-1 saves are supported and keep a completed shelter; begin a new story to see construction. Held/follow commands and loose thrown stones are not separately saved. Saving cancels an unfinished player pickup without losing or duplicating it. Saves preserve the island clock. Saving during committed sleep also preserves the remaining scene, mat/bedding and already-earned health/food changes; loading resumes from that point. Saving while only settling or getting up returns the player to their feet on load. Older saves without a clock begin at Day 1, 08:00. Old vehicle fields are ignored: the buggy has been removed. Restart/Title starts a new run without deleting an existing save.
+F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows this is normally under `%APPDATA%\Godot\app_userdata\Lost Signal • Kestrel Island\`. F9 restores it. Jobs reset to camp and independent duties resume, while carried supplies are restored to shared inventory. Version-2 saves also preserve paid materials and partial shelter progress, so loading does not charge the building cost again. Version-1 saves are supported and keep a completed shelter; begin a new story to see construction. Held/follow commands and loose thrown stones are not separately saved. Saving cancels an unfinished player pickup without losing or duplicating it. Saves preserve animal health, positions and harvested status so meat cannot be collected repeatedly by reloading. Older saves without wildlife start with the new population. Saves preserve the island clock. Saving during committed sleep also preserves the remaining scene, mat/bedding and already-earned health/food changes; loading resumes from that point. Saving while only settling or getting up returns the player to their feet on load. Older saves without a clock begin at Day 1, 08:00. Old vehicle fields are ignored: the buggy has been removed. Restart/Title starts a new run without deleting an existing save.
 
 ## Troubleshooting
 
@@ -90,4 +105,8 @@ F6 writes `kestrel_save.json` to Godot's local user-data directory. On Windows t
 
 ## Demonstration
 
+Use **Lost-Signal-Assignment-Demo.mp4** in the `Assignment-Submission` folder alongside this project for the current combined demonstration: 8 minutes 7 seconds, about 133 MB. It shows the current opening, actual shelter/resource progression, dialogue, task assignment, NPC radio-module cooperation and rescue, followed by the labeled staged wildlife tour. It contains audio and is an automated walkthrough, not a recording of the student's manual playtest.
+
 Show the opening, empty beach, plane/ship salvage, cooperative shelter construction, player movement, conversation, an assigned job, NPC-to-NPC delivery, survival interaction and ending. The survival preview covers construction; the newer Comfort preview is a staged check of collection and recovery; older videos show earlier layouts and progression. Explain a real refinement and what you learned. A supplied automated walkthrough must be identified as automated, not presented as your own manual playtest.
+
+The Wildlife preview is a 33-second automated habitat tour plus a staged hunt, harvest, cooking and eating sequence. It supplements the chapter demonstrations; it is not a student manual playtest.

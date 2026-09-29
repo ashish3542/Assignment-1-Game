@@ -17,13 +17,14 @@ var cinematic
 var shelter
 var actions
 var day_cycle
+var wildlife
 var intro_fade=0.0
 var intro_phase=""
 var autonomy_enabled=true
 var nearby_voice_cooldown=0.0
 var mode = "menu"
 var previous_mode = "play"
-var inventory = {"Wood":0,"Stone":0,"Scrap":0,"Fish":0,"Meal":0,"Ration":1,"Cloth":0,"Rope":0}
+var inventory = {"Wood":0,"Stone":0,"Scrap":0,"Fish":0,"Meal":0,"Ration":1,"Cloth":0,"Rope":0,"Meat":0,"Roast":0}
 var health = 100.0
 var hunger = 85.0
 var fire_lit = false
@@ -74,6 +75,7 @@ func _ready():
 	add_child(player)
 	actions=load("res://scripts/player_actions.gd").new(self)
 	player.setup(world,self)
+	wildlife=load("res://scripts/wildlife.gd").new(self)
 	var names = ["Maya","Finn","Rowan"]
 	var jobs = ["Engineer","Scout","Medic"]
 	var colors = [Color("c2734b"),Color("467b78"),Color("b6ba99")]
@@ -129,6 +131,10 @@ func _ready():
 			var demo=load("res://scripts/day_cycle_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--wildlife-demo":
+			var demo=load("res://scripts/wildlife_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
@@ -146,6 +152,7 @@ func _process(delta):
 		day_cycle.update(delta)
 		shelter.update(delta)
 		actions.update(delta)
+		wildlife.update(delta)
 		if demo_active and actions.busy(): player.animate_action(delta)
 		if demo_active and is_instance_valid(demo_focus):
 			player.camera.position=player.camera.position.lerp(demo_focus.position+Vector3(7,4,7),minf(delta*3,1))
@@ -156,11 +163,14 @@ func _process(delta):
 			fishing+=delta
 			if fishing>5:
 				fishing=0
-				report("The fish escaped. Press E at the pier to try again.")
+				report("The fish escaped. Press E at the cove to try again.")
 		find_interaction()
 		update_projectiles(delta)
 
 func _unhandled_input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and mode=="play" and not demo_active:
+		wildlife.attack()
+		return
 	if not event is InputEventKey or not event.pressed or event.echo: return
 	var key = event.physical_keycode
 	if demo_active:
@@ -194,6 +204,7 @@ func _unhandled_input(event):
 		KEY_1: eat()
 		KEY_R: craft_spear()
 		KEY_G: throw_stone()
+		KEY_F: wildlife.attack()
 		KEY_F6: save_game()
 		KEY_F9: load_game()
 
@@ -262,6 +273,10 @@ func report(line: String, speaker: String="", priority: int=1) -> bool:
 	return false
 
 func location_name() -> String:
+	if player.position.z < -70:
+		if player.position.x < -55: return "Reed Marsh"
+		if player.position.x > 35: return "Highland Ridge"
+		return "Northern Meadows"
 	if player.position.distance_to(world.ship_spot)<19: return "Tidebreak Shipwreck"
 	if player.position.distance_to(world.tower)<17: return "Signal Ridge"
 	if player.position.distance_to(world.salvage)<17: return "Crash Beach"
@@ -305,13 +320,16 @@ func find_interaction():
 		if shelter.complete(): prompt="E  /  Check completed shelter"
 	elif player.position.distance_to(world.camp)<3:
 		interaction={"type":"fire"}
-		prompt="E  /  Cook fish" if fire_lit else "E  /  Build fire · 4 wood + 3 stone"
+		prompt="E  /  Cook fish or meat" if fire_lit else "E  /  Build fire · 4 wood + 3 stone"
 	elif player.position.distance_to(world.fish_spot)<4:
 		interaction={"type":"fish"}
 		prompt="E  /  Cast the salvaged fishing line"
 	elif player.position.distance_to(world.tower+Vector3(0,0,3))<4:
 		interaction={"type":"beacon"}
 		prompt="E  /  Send rescue signal" if repaired else "E  /  Inspect transmitter"
+	if prompt.is_empty():
+		var animal=wildlife.target_in_reach()
+		if animal: prompt=animal.species+" / F or left-click: spear thrust"
 
 func interact():
 	if actions.resting: actions.wake(); return
@@ -354,7 +372,11 @@ func use_fire():
 		inventory.Meal+=1
 		sound.play("fire")
 		report("Fish cooked. Press 1 to eat your meal.")
-	else: report("No raw fish. Fish at the pier or ask Finn to catch one.")
+	elif inventory.Meat>0:
+		inventory.Meat-=1; inventory.Roast+=1
+		sound.play("fire")
+		report("Meat roasted. Press 1 to eat; fish meals are eaten first.")
+	else: report("No raw fish or meat. Fish at the cove or hunt in the northern wilderness.")
 
 func eat():
 	if actions.busy(): return
@@ -365,17 +387,21 @@ func eat():
 		health=minf(100,health+15)
 		sound.play("pickup")
 		report("A warm meal. Ask Maya to repair the transmitter when you're ready.")
+	elif inventory.Roast>0:
+		inventory.Roast-=1
+		hunger=minf(100,hunger+40); health=minf(100,health+12)
+		sound.play("pickup"); report("Roast eaten: +40 food and +12 health. The rescue camp still needs a cooked fish meal.")
 	elif inventory.Ration>0:
 		inventory.Ration-=1
 		hunger=minf(100,hunger+25)
 		health=minf(100,health+8)
 		report("A salvaged ration helps. A cooked fish is still needed for the camp objective.")
-	else: report("No meals or rations. Cook a fish at camp.")
+	else: report("No cooked food or rations. Cook fish or raw meat at the campfire.")
 
 func craft_spear():
 	if actions.busy(): return
 	if spear:
-		report("Your spear is ready. It is a survival tool; wildlife combat is not in this chapter.")
+		report("Your hunting spear is ready. Face an animal and press F or left-click.")
 		return
 	if inventory.Wood<2 or inventory.Scrap<1:
 		report("Crafting a spear needs 2 wood and 1 scrap.")
@@ -384,12 +410,15 @@ func craft_spear():
 	inventory.Scrap-=1
 	spear=true
 	add_spear_model()
-	report("Spear crafted and equipped. Fishing still uses your salvaged line.")
+	report("Hunting spear crafted. F or left-click thrusts; G throws a stone. Keep clear of boars and crocodiles.")
 
 func add_spear_model():
 	if player.body.has_node("Spear"): return
-	var tool=M.beam(player.body,Vector3(0.48,0.2,-0.2),Vector3(0.48,2.4,-0.2),0.035,Color("8e7150"))
+	var tool=Node3D.new()
 	tool.name="Spear"
+	player.body.add_child(tool)
+	M.beam(tool,Vector3(0.36,0.95,-0.15),Vector3(0.36,0.95,-1.85),0.028,Color("8e7150"))
+	M.beam(tool,Vector3(0.36,0.95,-1.85),Vector3(0.36,0.95,-2.1),0.045,Color("b7c8c1"))
 
 func throw_stone():
 	if actions.busy(): return
@@ -406,7 +435,12 @@ func update_projectiles(delta):
 	for i in range(projectiles.size()-1,-1,-1):
 		var p=projectiles[i]
 		p.velocity.y-=18*delta
+		var previous=p.node.position
 		p.node.position+=p.velocity*delta
+		if wildlife.projectile_hit(previous,p.node.position):
+			world.add_pickup("Stone",p.node.position,1000+world.pickups.size())
+			p.node.queue_free(); projectiles.remove_at(i)
+			continue
 		p.life+=delta
 		if p.node.position.y<world.height_at(p.node.position.x,p.node.position.z) or p.life>4:
 			world.add_pickup("Stone",p.node.position,1000+world.pickups.size())
@@ -471,6 +505,7 @@ func save_game():
 	var data={"version":1,"inventory":saved_inventory,"health":health,"hunger":hunger,"fire":fire_lit,"meal":ate_meal,"repaired":repaired,"module":module_installed,"won":won,"spear":spear,"team_events":team_events,"taken":taken,"player":[player.position.x,player.position.z]}
 	data.version=2
 	data.shelter=shelter.snapshot()
+	data.wildlife=wildlife.snapshot()
 	data.time_hours=day_cycle.hours
 	data.sleep=actions.sleep_snapshot()
 	# Save delivered supplies only; reset active tasks on load to avoid ghost reservations.
@@ -491,6 +526,9 @@ func load_game():
 		return
 	var data: Dictionary=parsed
 	actions.reset()
+	# In-flight stones belong to the abandoned timeline, not the loaded journey.
+	for projectile in projectiles: projectile.node.queue_free()
+	projectiles.clear()
 	day_cycle.set_hours(float(data.get("time_hours",8.0)))
 	sound.clear_speech()
 	player.velocity=Vector3.ZERO
@@ -540,6 +578,7 @@ func load_game():
 	fishing=0
 	player.update_camera(1)
 	resume_game()
+	wildlife.restore(data.get("wildlife",[]))
 	actions.restore_sleep(data.get("sleep",{}))
 	report("Journey restored. The crew will resume their duties from camp.")
 
@@ -571,6 +610,7 @@ func capture(filename: String):
 	get_tree().quit()
 
 func run_tests():
+	wildlife.enabled=false
 	var failures=[]
 	autonomy_enabled=false
 	mode="play"
@@ -649,6 +689,7 @@ func run_tests():
 	await run_revision_tests(failures)
 	load("res://scripts/polish_tests.gd").new().run(self,failures)
 	load("res://scripts/comfort_tests.gd").new().run(self,failures)
+	load("res://scripts/wildlife_tests.gd").new().run(self,failures)
 	# Free queued menu controls before the runner exits.
 	mode="pause"
 	sound.stop_all()

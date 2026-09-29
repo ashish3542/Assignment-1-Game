@@ -71,7 +71,10 @@ func _physics_process(delta):
 	var pose="escape" if world.in_tent(position) else "idle"
 	body.get_node("Head").rotation.y=lerp_angle(body.get_node("Head").rotation.y,0,minf(1,delta*8))
 	if game.shelter.player_help>0 and not moving: pose="repair"
-	M.animate_human(body,Time.get_ticks_msec()/1000.0,moving,false,pose,false,delta,clampf(velocity.length()/3.5,0.6,1.65))
+	if game.wildlife.attack_time>0:
+		pose="hunt"
+		body.rotation.y=yaw
+	M.animate_human(body,game.wildlife.attack_time if pose=="hunt" else Time.get_ticks_msec()/1000.0,moving,false,pose,false,delta,clampf(velocity.length()/3.5,0.6,1.65))
 	update_camera(delta)
 
 func move_horizontal(direction: Vector3, speed: float, delta: float):

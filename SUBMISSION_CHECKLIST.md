@@ -1,5 +1,7 @@
 # Assignment submission checklist
 
+Use `Assignment-Submission/SUBMIT_HERE.md` alongside the project for the four final upload items. See [ASSIGNMENT_REVIEW.md](ASSIGNMENT_REVIEW.md) for the requirement audit and remaining PDF/access checks.
+
 - [x] Build the playable first chapter and pass integrated gameplay tests.
 - [x] Demonstrate talking to NPCs in the automated walkthrough.
 - [x] Demonstrate directing NPCs in the automated walkthrough.
@@ -17,7 +19,9 @@
 - [x] Record player/NPC crouched pickups, leaf-mat rest, food healing and tent sleep (Lost-Signal-Comfort-Preview.mp4, about 34 seconds). Health and completed shelter are explicitly staged fixtures.
 - [x] Record refined sleeping and waking, including an interrupted lie-down (Lost-Signal-Sleep-Preview.mp4, about 28 seconds). This is a staged animation review; the older Comfort preview uses the earlier sleep motion.
 - [x] Record morning-to-afternoon, evening-to-night and late-night-to-dawn sleep scenes (Lost-Signal-Day-Night-Preview.mp4, about 73 seconds). Starting clocks are staged; each sleep runs the real eight-hour sequence at full health.
+- [x] Record the expanded island, seven wildlife habitats and staged hunting/harvest/cooking (Lost-Signal-Wildlife-Preview.mp4, about 33 seconds). Starting supplies, health and encounter positions are labeled fixtures.
 - [ ] Review the supplied demo, add your own explanation if needed, and upload your chosen video.
+- [x] Record a current full-chapter walkthrough through rescue with actual gathering, dialogue, a directed task and NPC module handoff. The final Assignment demo adds the labeled wildlife tour; earlier previews remain historical.
 - [ ] Manually play the game and write your own learning reflection.
 
 ## Suggested video sequence

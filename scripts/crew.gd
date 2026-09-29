@@ -159,7 +159,7 @@ func choose_routine():
 				routine_step+=1
 				go(world.camp+Vector3(6 if routine_step%2==0 else -6,0,6),"rest","Keeping watch along the shore")
 		"Rowan":
-			if game.fire_lit and game.inventory.Fish>0: command("cook",false)
+			if game.fire_lit and (game.inventory.Fish>0 or game.inventory.Meat>0): command("cook",false)
 			elif game.inventory.Wood<4: gather("Wood")
 			else: go(world.tent_center+Vector3(0,0,2.8),"rest","Checking the shelter and first-aid kit")
 
@@ -294,14 +294,16 @@ func _process(delta):
 			task="idle"
 			state="Needs a campfire"
 			say("Build the fire first: four wood and three stones.")
-		elif game.inventory.Fish<=0:
+		elif game.inventory.Fish<=0 and game.inventory.Meat<=0:
 			task="idle"
 			state="Waiting for fish"
 			say("Finn, can you catch something for dinner?")
 			if game.npcs[1].available(): game.npcs[1].command("fish",false)
 		elif timer>4:
-			game.inventory.Fish-=1
-			game.inventory.Meal+=1
+			if game.inventory.Fish>0:
+				game.inventory.Fish-=1; game.inventory.Meal+=1
+			else:
+				game.inventory.Meat-=1; game.inventory.Roast+=1
 			task="idle"
 			state="Meal ready"
 			say("Dinner is ready. Press 1 to eat from our shared supplies.")

@@ -14,6 +14,9 @@ Run a feature first, then read the small function that produced what you saw.
 | `scripts/sound.gd` | Sounds, music, voice playback | `play()` and `speak()` |
 | `scripts/models.gd` | Original procedural objects | `human()` |
 | `scripts/demo.gd` | Labeled automated walkthrough | `run()` |
+| `scripts/animal.gd` | Animal behavior, health and carcasses | `update()`, `damage()` |
+| `scripts/wildlife.gd` | Hunting timing and animal saves | `attack()`, `restore()` |
+| `scripts/day_cycle.gd` | Island clock, light and sleep scene | `update()` |
 
 ## Example: a state-dependent interaction
 
@@ -32,6 +35,8 @@ Maya enters `waiting_parts` at the transmitter. If Finn is idle and available fo
 5. Live Windows speech initialization stalled a restricted launch. The game now plays pre-generated speech clips without initializing live TTS.
 6. The original opening showed the already-placed wreck behind the flying aircraft. Wreckage now belongs to one group whose visibility is controlled by the cinematic timeline, including debris and salvage pickups.
 7. The first revised camera timings were shorter than several speech clips. Measuring the WAV durations exposed the problem. The `CUES` table now gives each line enough time to finish.
+8. An animal spawn overlapped the new marsh obstacle. The wildlife check found it; spawning now searches for nearby clear ground.
+9. An already-thrown stone could continue moving after loading another journey. Loading now clears projectiles from the abandoned state. An unfinished spear thrust also cancels when collection or rest starts, keeping damage aligned with the visible action.
 
 ## Observe the revised behavior
 
@@ -145,3 +150,27 @@ its starting clock, so loading continues the remainder without applying the same
 healing or food cost again. Try pausing halfway through, then saving/loading there:
 the scene and displayed time should resume from that point. Describe what you see
 in your own words; the supplied recording is an automated test, not your playtest.
+
+## Wildlife: behavior, resources and a larger world
+
+`animal.gd` gives each animal a small state machine: graze, roam, flee, defend,
+then become a collectible carcass if its health reaches zero. Species change
+health, speed, meat yield and whether they defend themselves. These decisions
+are programmed rules, not an AI model answering live during play.
+
+`wildlife.gd` separates pressing attack from the moment the spear makes contact.
+That keeps damage aligned with the animation. The existing collection action
+transfers meat only when the hand reaches the carcass. Saves preserve both the
+animal's death and whether that meat was already taken, preventing duplicate loot.
+`crew.gd` lets Rowan use the same shared food supply.
+
+`northern_wilderness.gd` builds the added terrain's scenery and navigation grid.
+It marks small areas around obstacles instead of checking every tree against
+every grid cell. Nearby animals update about twelve times per second; distant
+animals stop moving. These choices reduce work as the island grows.
+
+Try approaching a deer, then a boar. Describe how their decisions differ. Hunt
+one animal, save before collecting it, collect its meat, save again and reload.
+Check that each save restores the correct state and cannot duplicate meat.
+Finally, bring raw meat home and ask Rowan to cook it. Record your actual results
+and any rough animation or movement you find; this is an experiment, not a supplied reflection.

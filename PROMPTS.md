@@ -219,3 +219,21 @@ Replaced the rigid backward rotation with a 3.8-second sequence centered on the 
 > so for the sleep if the player sleeps in morning it has to be afternoon or maybe night and if night maybe morning like that and not just sleep for a second and wake up immdetaily take time and scene plays of the being from night to day vice versa
 
 Added a persistent island clock and day/night lighting. Sleep commits to eight island hours, with a fourteen-second time-passage scene between the existing settling and waking animations. Full health and movement no longer end committed sleep early. Added clock/day display, sunset/dawn colors, moonlight, night ambience, pause/resume and saved remaining sleep. Ordinary NPC work continues at normal speed during the compressed scene. Tests and the staged recording are documented in VALIDATION.md; no manual student playtest is claimed.
+
+## 29. Expand the island and add huntable wildlife
+
+> make the island bigger and there be many animals as well and you can eat them as well all kind of animals like a far cry games
+
+Expanded the island north with woodland, meadow, highland ridge and marsh. Added 42 animals across seven species, procedural animal models and gait, roaming/grazing/fleeing/defensive behavior, timed spear attacks, stone hits, animated meat collection, cooking and eating roast, Rowan cooking shared meat, map markers and saved animal state. This implements a small survival hunting loop inspired by the requested genre, with original assets rather than copied Far Cry content. Tests and an explicitly staged feature recording are documented in VALIDATION.md; no student playtest or reflection is claimed.
+
+## 30. Resume the wildlife update
+
+> resume the work
+
+Resumed on 2026-09-29 from the implemented and tested wildlife update. Confirmed the final recording completed, encoded the preview, inspected final hunting/cooking frames, and finished validation notes and publication. No work was restarted from scratch.
+
+## 31. Review and prepare the whole assignment
+
+> resume the work and wrap up everything from assigmnet requirment and everything according to pdf and fix bugs and anything that needs improvment
+
+Reviewed the available pasted assignment and submission requirements, checked the current source and test results, and prepared a current full-chapter demonstration and submission package. The Canvas PDF URL was inaccessible and no matching downloaded copy was found; extra PDF requirements remain unverified. Recorded actual review results in ASSIGNMENT_REVIEW.md and VALIDATION.md. Student reflections, instructor access and Canvas upload status are not invented.

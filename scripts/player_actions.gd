@@ -163,7 +163,7 @@ func update(delta: float):
 		if pickup.taken or game.reserved.get(pickup.id,"")!="Player": cancel_pickup(); return
 		pickup.taken=true
 		pickup.node.visible=false
-		game.inventory[pickup.kind]+=1
+		game.inventory[pickup.kind]+=int(pickup.get("quantity",1))
 		game.reserved.erase(pickup.id)
 		claimed=true
 		p.pickup_prop.visible=true
