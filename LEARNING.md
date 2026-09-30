@@ -174,3 +174,15 @@ one animal, save before collecting it, collect its meat, save again and reload.
 Check that each save restores the correct state and cannot duplicate meat.
 Finally, bring raw meat home and ask Rowan to cook it. Record your actual results
 and any rough animation or movement you find; this is an experiment, not a supplied reflection.
+
+## Fishing: make the reward match the action
+
+`player_fishing.gd` separates casting/waiting from reeling. Pressing E during
+the bite window hooks the fish but does not immediately add it to inventory.
+Only completion of the three-second landing grants one fish. The shared
+`fishing_rig.gd` draws the rod, line, float, ripples and fish for both the player
+and Finn. Pausing freezes the sequence; saving an unfinished attempt cancels it.
+
+Try pressing E too early, then try a successful catch. Watch the Fish count
+through the reel-in and press E repeatedly: the count should increase just once,
+after landing. This connects visual feedback with resource accounting.

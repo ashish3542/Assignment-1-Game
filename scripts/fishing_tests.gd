@@ -1,0 +1,38 @@
+extends RefCounted
+func run(g, failures: Array):
+	g.mode="play"; g.actions.reset(); g.fishing_action.cancel()
+	g.player.position=g.world.ground(g.world.fish_spot)
+	var action=g.fishing_action
+	var before=g.inventory.Fish
+	action.start(); action.update(0.4)
+	if not action.rig.visible or action.rig.fish.visible: failures.append("Fishing cast props / premature fish")
+	if g.world.height_at(action.rig.water.x,action.rig.water.z)>=0: failures.append("Fishing float lands on dry ground")
+	action.update(2.8); g.interact(); g.interact()
+	action.update(1.2)
+	if not action.rig.fish.visible or g.inventory.Fish!=before: failures.append("Catch must be visible before entering inventory")
+	var time=action.reel_time; var point=action.rig.fish.position
+	g.mode="pause"; action.update(10)
+	if action.reel_time!=time or action.rig.fish.position!=point: failures.append("Reeling continues while paused")
+	g.mode="play"; action.update(2)
+	action.update(5)
+	if g.inventory.Fish!=before+1 or g.fishing!=0 or action.rig.visible: failures.append("Fish landing must credit exactly once and clear props")
+	action.start(); action.update(0.4); g.interact(); action.update(1)
+	if g.inventory.Fish!=before+1: failures.append("Early retrieval granted fish")
+	action.start(); action.update(5.1); action.update(1)
+	if g.inventory.Fish!=before+1 or g.fishing!=0: failures.append("Missed bite did not retrieve empty line")
+	action.start(); action.update(3.2); g.interact(); action.update(1)
+	g.save_game(); g.load_game()
+	if g.fishing!=0 or action.rig.visible or g.inventory.Fish!=before+1: failures.append("Saving unfinished catch creates phantom fish")
+	var finn=g.npcs[1]
+	finn.cancel(); finn.position=g.world.ground(g.world.fish_spot)
+	finn.task="fish"; finn.timer=10.4; finn._process(0.1)
+	if not finn.carry_kind.is_empty() or not finn.fishing_rod.fish.visible: failures.append("Finn packs fish before visible landing")
+	g.mode="dialogue"; g.active_npc=finn; finn._process(0.1)
+	if finn.fishing_rod.visible: failures.append("Finn's rod floats during direct conversation")
+	g.mode="play"; finn._process(0.1)
+	if not finn.fishing_rod.visible: failures.append("Finn's fishing props fail to resume")
+	finn._process(2.6)
+	if finn.carry_kind!="Fish" or finn.fishing_rod.visible: failures.append("Finn failed to land and carry fish")
+	finn.cancel()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(g.save_path))
+	print("FISHING: cast props, water target, visible delayed catch, duplicate input, pause, early/missed bites, save cancellation and Finn landing checked")

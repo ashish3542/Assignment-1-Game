@@ -66,10 +66,11 @@ func setup(g, who: String, job: String, color: Color, p: Vector3):
 	cargo.visible=false
 	pickup_prop=M.box(body.get_node("Arm1/Elbow"),Vector3(0,-0.32,0),Vector3(0.18,0.16,0.22),Color("b6a47d"))
 	pickup_prop.visible=false
-	fishing_rod=Node3D.new()
-	body.add_child(fishing_rod)
-	M.beam(fishing_rod,Vector3(0.15,1.05,-0.35),Vector3(0.1,2.7,-2.5),0.018,Color("b09561"))
-	M.beam(fishing_rod,Vector3(0.1,2.7,-2.5),Vector3(0.1,0.02,-3.5),0.004,Color("cbd0b6"))
+	fishing_rod=load("res://scripts/fishing_rig.gd").new()
+	add_child(fishing_rod)
+	fishing_rod.top_level=true
+	fishing_rod.global_transform=Transform3D.IDENTITY
+	fishing_rod.setup(game,body)
 	fishing_rod.visible=false
 	tool=Node3D.new()
 	body.get_node("Arm1/Elbow").add_child(tool)
@@ -93,6 +94,7 @@ func go(destination: Vector3, after: String, description: String):
 		idle_time=-5
 
 func cancel():
+	fishing_rod.visible=false
 	if person=="Finn" and ((task=="walk" and next_task=="deliver_module") or task=="handoff_module"):
 		game.module_carried=false
 	if reserved_id>=0: game.reserved.erase(reserved_id)
@@ -208,6 +210,7 @@ func _process(delta):
 	if not game: return
 	if game.mode=="dialogue":
 		if game.active_npc==self:
+			fishing_rod.visible=false
 			pose_clock+=delta
 			face_point(game.player.position,delta)
 			M.animate_human(body,pose_clock,false,cargo.visible,"idle",game.sound.is_speaking(person),delta)
@@ -282,7 +285,7 @@ func _process(delta):
 		timer+=delta
 		face_point(world.fish_spot+Vector3(0,0,15),delta)
 		state="Fishing for the camp"
-		if timer>=10:
+		if timer>=13:
 			carry_kind="Fish"
 			cargo.visible=true
 			say("Got one! Rowan, I'll bring dinner.")
@@ -311,12 +314,16 @@ func _process(delta):
 	tool.visible=task in ["repairing","building"]
 	var pose="idle"
 	if task=="gathering": pose="gather"
-	elif task=="fish": pose="fish"
+	elif task=="fish": pose="fish_reel" if timer>=10 else ("fish_cast" if timer<1 else "fish_wait")
 	elif task=="cook": pose="cook"
 	elif task in ["repairing","building"]: pose="repair"
 	elif wave_time>0 and not moving and not cargo.visible: pose="wave"; face_point(game.player.position,delta)
 	if world.in_tent(position): pose="escape"
-	M.animate_human(body,timer if pose=="gather" else pose_clock,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
+	var pose_time=timer if pose=="gather" or task=="fish" else pose_clock
+	if task=="fish" and timer>=10: pose_time=timer-10
+	M.animate_human(body,pose_time,moving,cargo.visible,pose,game.sound.is_speaking(person),delta)
+	if task=="fish":
+		fishing_rod.sample(timer,timer>=10,clampf((timer-10)/3,0,1),true,8)
 	var look=game.player.position-position
 	var head=body.get_node("Head")
 	var desired=clampf(wrapf(atan2(-look.x,-look.z)-body.rotation.y,-PI,PI),-0.55,0.55) if wave_time>0 else 0.0

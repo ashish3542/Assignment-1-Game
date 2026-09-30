@@ -15,7 +15,7 @@ Reviewed on 2026-09-29 against the assignment overview and Canvas submission fie
 | GitHub repository link | https://github.com/ashish3542/Assignment-1-Game | Source and documentation versioned in Git; instructor access must be checked separately |
 | Prompt record in Markdown or TXT | PROMPTS.md | Provided; older grouped/backfilled entries and omitted private tokens are explicitly labeled |
 | Instructions in Markdown or TXT | RUN_GAME.md | Provided; game and integrated tests checked from a fresh source copy |
-| Video demonstration | Lost-Signal-Assignment-Demo.mp4 in the submission folder alongside this repository | Automated walkthrough with audio, supplemented by the current wildlife tour; explicitly labeled, not a manual student playtest |
+| Video demonstration | Lost-Signal-Assignment-Demo.mp4 in the submission folder alongside this repository | Automated walkthrough with audio, followed by wildlife and updated fishing reviews; the chapter portion predates the fishing refinement. Explicitly labeled, not a manual student playtest |
 
 ## What to submit
 

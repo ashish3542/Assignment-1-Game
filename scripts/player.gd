@@ -47,6 +47,10 @@ func _physics_process(delta):
 		animate_action(delta)
 		update_camera(delta)
 		return
+	if game.fishing>0:
+		velocity=Vector3.ZERO; moving=false
+		update_camera(delta)
+		return
 	input = input.normalized()
 	var dir = Vector3(input.x,0,input.y).rotated(Vector3.UP,yaw)
 	var speed = 5.0

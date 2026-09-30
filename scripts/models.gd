@@ -143,7 +143,7 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	body.get_node("Chest").scale.y=0.66
 	body.get_node("Head/Mouth").scale.y=1.0+absf(sin(t*12))*1.8 if talking else 1.0
 	body.get_node("Backpack").visible=not (pose=="sleep" and t>0.35)
-	if body.has_node("Spear"): body.get_node("Spear").visible=not (pose=="sleep" and t>0.35)
+	if body.has_node("Spear"): body.get_node("Spear").visible=not ((pose=="sleep" and t>0.35) or pose.begins_with("fish"))
 	for side in [-1,1]:
 		var leg=body.get_node("Leg"+str(side))
 		var arm=body.get_node("Arm"+str(side))
@@ -179,7 +179,15 @@ static func animate_human(body: Node3D, t: float, moving: bool, carry: bool = fa
 	elif pose=="wave":
 		body.get_node("Arm1").rotation=Vector3(-0.6,0,-1.0)
 		body.get_node("Arm1/Elbow").rotation=Vector3(-2.1,0,sin(t*8)*0.22)
-	elif pose in ["repair","cook","fish"]:
+	elif pose.begins_with("fish"):
+		var cast_lift=sin(clampf(t,0,1)*PI) if pose=="fish_cast" else 0.0
+		body.rotation.x=-0.08*cast_lift
+		body.get_node("Arm1").rotation=Vector3(1.0+cast_lift*1.4,0,-0.08)
+		body.get_node("Arm1/Elbow").rotation.x=0.25+cast_lift*0.5
+		body.get_node("Arm-1").rotation=Vector3(1.05,0,0.3)
+		body.get_node("Arm-1/Elbow").rotation=Vector3(0.55+(sin(t*12)*0.25 if pose=="fish_reel" else 0),0,0)
+		body.get_node("Head").rotation.x=0.08
+	elif pose in ["repair","cook"]:
 		body.rotation.x=0.12
 		for side in [-1,1]:
 			body.get_node("Arm"+str(side)).rotation.x=-0.55+sin(t*3+side)*0.13

@@ -237,3 +237,9 @@ Resumed on 2026-09-29 from the implemented and tested wildlife update. Confirmed
 > resume the work and wrap up everything from assigmnet requirment and everything according to pdf and fix bugs and anything that needs improvment
 
 Reviewed the available pasted assignment and submission requirements, checked the current source and test results, and prepared a current full-chapter demonstration and submission package. The Canvas PDF URL was inaccessible and no matching downloaded copy was found; extra PDF requirements remain unverified. Recorded actual review results in ASSIGNMENT_REVIEW.md and VALIDATION.md. Student reflections, instructor access and Canvas upload status are not invented.
+
+## 32. Show actual fishing instead of an instant food reward
+
+> so for the fishing at least have an animation of like actually fishing rather then just food apperaing out of no where
+
+Added shared player/Finn fishing props and phases: casting rod and line, a floating bobber and ripples, bite indication, reeling and a visible fish landing before inventory credit. Early/missed bites retrieve an empty line. Added pause, repeated-input and unfinished-catch save checks. Verification and the new feature recording are documented in VALIDATION.md.

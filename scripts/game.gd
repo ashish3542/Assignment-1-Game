@@ -45,6 +45,7 @@ var active_npc
 var dialogue_line = ""
 var interaction: Dictionary = {}
 var fishing = 0.0
+var fishing_action
 var intro_time = 0.0
 var intro_caption = ""
 var crash_played = false
@@ -75,6 +76,7 @@ func _ready():
 	add_child(player)
 	actions=load("res://scripts/player_actions.gd").new(self)
 	player.setup(world,self)
+	fishing_action=load("res://scripts/player_fishing.gd").new(self)
 	wildlife=load("res://scripts/wildlife.gd").new(self)
 	var names = ["Maya","Finn","Rowan"]
 	var jobs = ["Engineer","Scout","Medic"]
@@ -135,6 +137,10 @@ func _ready():
 			var demo=load("res://scripts/wildlife_demo.gd").new()
 			demo.game=self
 			add_child(demo)
+		if arg=="--fishing-demo":
+			var demo=load("res://scripts/fishing_demo.gd").new()
+			demo.game=self
+			add_child(demo)
 
 func _process(delta):
 	run_time+=delta
@@ -159,11 +165,7 @@ func _process(delta):
 			player.camera.look_at(demo_focus.position+Vector3(0,1,0))
 		hunger=maxf(0,hunger-delta*0.055)
 		if hunger<1: health=maxf(10,health-delta*0.22)
-		if fishing>0:
-			fishing+=delta
-			if fishing>5:
-				fishing=0
-				report("The fish escaped. Press E at the cove to try again.")
+		fishing_action.update(delta)
 		find_interaction()
 		update_projectiles(delta)
 
@@ -192,6 +194,7 @@ func _unhandled_input(event):
 		else: resume_game()
 		return
 	if mode!="play": return
+	if fishing>0 and key not in [KEY_E,KEY_F6,KEY_F9]: return
 	if key==KEY_H:
 		actions.toggle_rest()
 		return
@@ -297,7 +300,7 @@ func find_interaction():
 		prompt="Getting up..."
 		return
 	if fishing>0:
-		prompt="E  /  Reel in!" if fishing>=3 else "Wait for the bite..."
+		prompt=fishing_action.label()
 		return
 	var closest=3.0
 	for npc in npcs:
@@ -335,12 +338,7 @@ func interact():
 	if actions.resting: actions.wake(); return
 	if actions.busy(): return
 	if fishing>0:
-		if fishing>=3 and fishing<=5:
-			inventory.Fish+=1
-			sound.play("catch")
-			report("Caught a fish. Cook it at the campfire, then press 1 to eat.")
-		else: report("Too soon. Wait until the fishing indicator says BITE.")
-		fishing=0
+		fishing_action.reel()
 		return
 	if interaction.is_empty(): return
 	match interaction.type:
@@ -349,8 +347,7 @@ func interact():
 		"pickup": actions.start_pickup(interaction.item)
 		"fire": use_fire()
 		"fish":
-			fishing=0.01
-			report("Line cast. Wait for BITE, then press E.")
+			fishing_action.start()
 		"beacon": activate_beacon()
 
 func use_fire():
@@ -495,6 +492,7 @@ func activate_beacon():
 	report("COAST GUARD: Kestrel station, we read you. Hold your position. Help is coming.")
 
 func save_game():
+	fishing_action.cancel()
 	actions.cancel_pickup()
 	var saved_inventory=inventory.duplicate()
 	for npc in npcs:
@@ -525,6 +523,7 @@ func load_game():
 		report("Save file is not a supported journey.")
 		return
 	var data: Dictionary=parsed
+	fishing_action.cancel()
 	actions.reset()
 	# In-flight stones belong to the abandoned timeline, not the loaded journey.
 	for projectile in projectiles: projectile.node.queue_free()
@@ -655,9 +654,12 @@ func run_tests():
 	if inventory.Stone!=before+1: failures.append("Duplicate pickup")
 	fishing=1
 	interact()
+	fishing_action.update(1)
 	if inventory.Fish!=0: failures.append("Early fishing accepted")
 	fishing=3.5
 	interact()
+	if inventory.Fish!=0: failures.append("Fish credited before landing")
+	fishing_action.update(3.1)
 	if inventory.Fish!=1: failures.append("Player fishing timing")
 	# An interrupted module delivery must become retrievable again.
 	module_installed=false
@@ -690,6 +692,7 @@ func run_tests():
 	load("res://scripts/polish_tests.gd").new().run(self,failures)
 	load("res://scripts/comfort_tests.gd").new().run(self,failures)
 	load("res://scripts/wildlife_tests.gd").new().run(self,failures)
+	load("res://scripts/fishing_tests.gd").new().run(self,failures)
 	# Free queued menu controls before the runner exits.
 	mode="pause"
 	sound.stop_all()

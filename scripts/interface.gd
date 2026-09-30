@@ -196,7 +196,7 @@ func draw_hud():
 	text(Vector2(376,707),"WASD Move   Mouse Look   E Use   H Rest   Tab Journal   Esc Pause",13,cream)
 	if game.fishing>0:
 		panel(Rect2(415,435,450,92),0.95)
-		text(Vector2(442,469),"FISHING / "+("BITE! PRESS E NOW" if game.fishing>=3 else "Wait for a bite..."),20,gold)
+		text(Vector2(442,469),"FISHING / "+game.fishing_action.label(),20,gold)
 		draw_rect(Rect2(442,490,390,8),Color("315356"))
 		draw_rect(Rect2(442,490,390*minf(game.fishing/5,1),8),gold)
 	# Recent crew history stays in the journal; only the current speaker is subtitled.

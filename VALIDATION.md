@@ -2,6 +2,14 @@
 
 Environment: Windows, Godot 4.7.2 stable, Compatibility renderer. Graphics runs identified an NVIDIA GeForce RTX 4050 Laptop GPU.
 
+## Visible fishing and delayed catch rewards — 2026-09-29
+
+Replaced the player's instant fishing reward with casting, waiting/bite and three-second reeling phases. A shared procedural rig shows the rod, line, floating bobber, ripples and a fish traveling from the water to the character's hand. Fish enters inventory only after landing. Early input or timeout retrieves an empty line. Finn now spends the last three seconds of his fishing job landing a visible catch before carrying it to Rowan. Direct conversation hides Finn's paused rig and restores it on resuming. Fishing remains an original procedural animation, not a motion-capture asset or physical fishing simulation.
+
+The integrated runner passed in the project and a fresh source copy. New checks verify visible cast/catch props, water placement, delayed single inventory credit, repeated input, pause, early/missed bites, save/load canceling unfinished catches, and Finn landing before delivery. Existing NPC cooking/cooperation, hunting, sleep, collision, audio and chapter checks passed too. No script errors appeared; the known environment certificate-store warning remains. The full walkthrough script now waits for the landing rather than assuming an instant reward.
+
+Recorded the 26.42-second `Lost-Signal-Fishing-Preview.mp4` and inspected rendered cast/float, player landing and Finn landing frames. Camera and actor positions are explicitly staged; rewards and timings use real gameplay. Appended this feature review to the submission video, now approximately 8:33 and 135 MB. The preceding chapter recording predates this fishing refinement; the final segment demonstrates the revised behavior. Other earlier recordings remain historical. The source ZIP, prompt record, run instructions and submission copies were refreshed with this revision.
+
 ## Final assignment review — 2026-09-29
 
 Reviewed the project against the student's pasted assignment and four submission fields. `ASSIGNMENT_REVIEW.md` maps each requirement to implementation and verification. The Canvas getting-started PDF could not be retrieved, and no matching download was found; additional PDF-only requirements remain unverified. Canvas uploads and instructor access have not been performed or assumed.

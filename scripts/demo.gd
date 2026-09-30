@@ -85,7 +85,7 @@ func run():
 	game.interact()
 	await wait(3.5)
 	game.interact()
-	await wait(1)
+	while game.fishing>0: await wait(0.1)
 	await walk(game.world.camp+Vector3(0,0,2))
 	game.use_fire()
 	game.eat()

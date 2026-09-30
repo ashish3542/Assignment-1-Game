@@ -22,6 +22,7 @@ Use `Assignment-Submission/SUBMIT_HERE.md` alongside the project for the four fi
 - [x] Record the expanded island, seven wildlife habitats and staged hunting/harvest/cooking (Lost-Signal-Wildlife-Preview.mp4, about 33 seconds). Starting supplies, health and encounter positions are labeled fixtures.
 - [ ] Review the supplied demo, add your own explanation if needed, and upload your chosen video.
 - [x] Record a current full-chapter walkthrough through rescue with actual gathering, dialogue, a directed task and NPC module handoff. The final Assignment demo adds the labeled wildlife tour; earlier previews remain historical.
+- [x] Append the 26-second updated fishing review to the Assignment demo (now about 8:33). It shows actual casting, delayed fish landing, an empty line and Finn's catch; the earlier chapter portion predates this refinement.
 - [ ] Manually play the game and write your own learning reflection.
 
 ## Suggested video sequence

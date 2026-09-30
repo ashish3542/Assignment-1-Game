@@ -18,7 +18,7 @@ Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**.
 - Third-person movement, mouse camera, sprint and jump on an expanded freely explorable island, including northern meadows, forest, highland ridge and a reed marsh.
 - Solid tent sides/rear and camp furniture; an accessible tent entrance. Player and NPC routes share obstacle rules. Movement substeps prevent running through thin obstacles; the camera retracts at camp walls.
 - Original procedural terrain, wind-swayed grass, palms, instanced broadleaf canopies, shoreline foam, soft smoke, wrecks and a camp that appears as the survivors build it.
-- Collect wood, stone, scrap and rations; build fire; catch, cook and eat fish.
+- Collect wood, stone, scrap and rations; build fire; catch, cook and eat fish. Player and Finn visibly cast a rod and line, watch a bobber, reel and land a fish before it enters supplies.
 - Health and hunger with a forgiving health floor. Fish meals restore 15 health, roast restores 12, and rations restore 8. H sleeps for eight island hours on a leaf mat (up to +24 health) or inside a finished tent (up to +48 health). Sleep uses 12 food, needs some food remaining to heal, and includes a roughly 21-second settling / time-passage / waking sequence.
 - Player and NPC pickups crouch at the knees, reach, collect at hand contact, then stand. Moving cancels a player pickup; reservations prevent duplicates.
 - Three NPCs with approach greetings, dialogue, articulated walking/working/gesturing animations and visible tools. Their first priority is shelter: Maya recovers cloth, Finn recovers rope, and Rowan gathers wood. After construction, Maya assembles the radio, Finn retrieves parts and catches fish, and Rowan gathers firewood and cooks.
@@ -69,3 +69,5 @@ Rest now uses a gradual crouch → sit → supported recline, with relaxed arms 
 `--day-cycle-demo` records staged morning, evening and late-night starts using real full-length sleep sequences. `scripts/day_cycle_tests.gd` checks time progression, day rollover, pause, save/resume, lighting and old-save migration.
 
 `--wildlife-demo` records an automated northern habitat tour and a staged spear/harvest/cook/eat sequence. Starting supplies, positions and health are fixtures. `scripts/wildlife_tests.gd` checks species, safe spawns, northern navigation, attacks, pause, harvesting, saves, behavior and both cooking paths.
+
+`--fishing-demo` records the player casting, reeling a visible fish, retrieving an empty line and Finn catching a fish before delivery. Camera and actor positions are staged; inventory and timing use the real fishing system.
