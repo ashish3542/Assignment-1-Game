@@ -238,3 +238,9 @@ Resumed on 2026-09-29 from the implemented and tested wildlife update. Confirmed
 > so for the fishing at least have an animation of like actually fishing rather then just food apperaing out of no where
 
 Added shared player/Finn fishing props and phases: casting rod and line, a floating bobber and ripples, bite indication, reeling and a visible fish landing before inventory credit. Early/missed bites retrieve an empty line. Added pause, repeated-input and unfinished-catch save checks. Verification and the new feature recording are documented in VALIDATION.md.
+
+## 33. Put the actual launch instructions in the README
+
+> so update the readme file with actual way to run the game
+
+Expanded the README with the Windows VS Code terminal command, the launcher's actual Godot-location limitation, Godot import/F5 steps for another computer, restarting after edits, basic controls and the full run-guide link. Checked the instructions against PLAY.cmd and confirmed the configured Godot executable exists on the development PC. This was a documentation change; gameplay tests were not rerun.

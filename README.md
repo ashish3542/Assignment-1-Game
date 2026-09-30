@@ -4,9 +4,57 @@ A playable first chapter of a single-player 3D island survival adventure, made w
 
 Flight 408 crashes on a remote island. Four survivors establish a camp, build a shelter, find food, and assemble a salvaged transmitter. Talk to Maya, Finn and Rowan; assign jobs; and watch the crew request help, carry supplies and hand items to one another.
 
-## Play
+## How to run the game
 
-Import `project.godot` into Godot 4.7.2 **standard edition**, then press **F5**. On the development PC, `PLAY.cmd` can launch the downloaded Godot directly. See [RUN_GAME.md](RUN_GAME.md).
+**Requirements:** Godot **4.7.2 standard edition** (the version tested), with the Compatibility renderer. Windows is the verified platform. The game runs offline and does not require .NET, Python, Node, an API key or an AI subscription to play. Godot itself is not included in this repository.
+
+### From VS Code on the development PC
+
+1. Open VS Code and choose **File → Open Folder**.
+2. Open the **Assignment-1-Game** folder containing `project.godot`, `PLAY.cmd`, `scripts`, `scenes` and `audio`.
+3. Choose **Terminal → New Terminal**. Make sure the terminal is in that same folder.
+4. Run this command in the Windows PowerShell terminal:
+
+   ```powershell
+   .\PLAY.cmd
+   ```
+
+5. In the game window, click **BEGIN THE STORY** to start a new game, or **CONTINUE SAVED JOURNEY** if you have saved before. Press **Enter** to skip the opening if desired.
+
+You can also double-click `PLAY.cmd` in File Explorer. This launcher looks for Godot 4.7.2 in the original **Downloads** location. It does not install Godot or contain a standalone game executable. If it says Godot was not found, use the Godot instructions below.
+
+### From Godot, including on another computer
+
+1. Download and extract Godot **standard edition** from [godotengine.org](https://godotengine.org/download/windows/). This project was tested with 4.7.2; other versions are not verified.
+2. Download this repository using **Code → Download ZIP**, then extract the ZIP. An account with repository access is required while it is private. You can skip this step if you already have the project folder.
+3. Launch the Godot executable. In its Project Manager, click **Import**.
+4. Browse to the extracted project folder and select **`project.godot`**. Keep the accompanying `scripts`, `scenes`, `shaders` and `audio` folders together.
+5. Import and open the project, and wait for Godot's initial import to finish.
+6. Press **F5 inside Godot**, or click its **Run Project ▶** button.
+7. Click **BEGIN THE STORY** in the game window.
+
+### After changing code
+
+Save your files in VS Code, close the running game, then run `.\PLAY.cmd` again. If using the Godot editor, stop the running project and press F5 again. **VS Code's own F5 is not configured to launch Godot** in this repository. No npm install or separate build command is needed.
+
+### Basic controls
+
+| Control | Action |
+| --- | --- |
+| WASD / arrows, mouse | Move and look |
+| Shift / Space | Run / jump |
+| E | Talk, collect, use the fire, or fish |
+| B | Help build the shelter while near its entrance |
+| 1 / H | Eat / sleep |
+| R | Craft a spear with 2 wood and 1 scrap |
+| F / left-click, G | Thrust the spear / throw a stone |
+| F6 / F9 | Save / load |
+| Tab / Esc | Journal / pause and release the mouse |
+| M / N | Toggle all audio / spoken dialogue |
+
+At the start, the crew gather materials for shelter automatically. Approach a survivor and press E to talk or assign a job. At the fishing cove, press E to cast, press E when **BITE** appears, and wait for the fish to be reeled in before it enters supplies.
+
+For the full chapter walkthrough, save details and troubleshooting, see [RUN_GAME.md](RUN_GAME.md).
 
 ## Features
 
