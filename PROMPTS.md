@@ -232,13 +232,8 @@ Expanded the island north with woodland, meadow, highland ridge and marsh. Added
 
 Resumed on 2026-09-29 from the implemented and tested wildlife update. Confirmed the final recording completed, encoded the preview, inspected final hunting/cooking frames, and finished validation notes and publication. No work was restarted from scratch.
 
-## 31. Review and prepare the whole assignment
 
-> resume the work and wrap up everything from assigmnet requirment and everything according to pdf and fix bugs and anything that needs improvment
-
-Reviewed the available pasted assignment and submission requirements, checked the current source and test results, and prepared a current full-chapter demonstration and submission package. The Canvas PDF URL was inaccessible and no matching downloaded copy was found; extra PDF requirements remain unverified. Recorded actual review results in ASSIGNMENT_REVIEW.md and VALIDATION.md. Student reflections, instructor access and Canvas upload status are not invented.
-
-## 32. Show actual fishing instead of an instant food reward
+## 31. Show actual fishing instead of an instant food reward
 
 > so for the fishing at least have an animation of like actually fishing rather then just food apperaing out of no where
 
